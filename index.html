@@ -221,7 +221,7 @@ button { cursor: pointer; }
   font-family: var(--ui); font-size: .78rem; letter-spacing: .14em;
   color: var(--green); margin-bottom: .3rem;
 }
-.loadout-desc { font-size: .9rem; color: var(--dim); line-height: 1.5; margin-bottom: .6rem; }
+.loadout-desc { font-size: .9rem; color: var(--text); line-height: 1.5; margin-bottom: .6rem; }
 .qty-row { display: flex; align-items: center; gap: .45rem; }
 .qty-btn {
   background: var(--border); border: none; color: var(--bright);
@@ -237,8 +237,11 @@ button { cursor: pointer; }
 .qty-cost { font-size: .85rem; color: var(--dim); margin-left: auto; }
 .budget-bar {
   font-family: var(--ui); font-size: .85rem; letter-spacing: .18em;
-  color: var(--warn); text-align: right;
-  padding: .6rem 0; border-top: 1px solid var(--border); margin-bottom: .9rem;
+  color: var(--warn); text-align: center;
+  padding: .65rem 1rem; margin: 0 0 1.25rem 0;
+  background: rgba(255,204,0,.08);
+  border: 1px solid rgba(255,204,0,.35);
+  position: sticky; top: 0; z-index: 5;
 }
 
 /* ─── DIFFICULTY ─────────────────────────────────────── */
@@ -274,14 +277,21 @@ button { cursor: pointer; }
   font-family: var(--display); font-size: 1.1rem; color: var(--bright);
 }
 
-.res-bar-row {
-  display: flex; gap: .4rem; padding: .5rem .75rem;
-  background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
+.res-bar-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; background: var(--panel);
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
-.res-item { display: flex; align-items: center; gap: .3rem; flex: 1; min-width: 0; }
+.res-item {
+  display: flex; align-items: center; gap: .4rem;
+  padding: .45rem .75rem; border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.res-item:nth-child(2n) { border-right: none; }
+.res-item:nth-child(3), .res-item:nth-child(4) { border-bottom: none; }
 .res-icon { font-size: 1rem; flex-shrink: 0; }
 .res-lbl {
-  font-family: var(--ui); font-size: .65rem; letter-spacing: .08em;
+  font-family: var(--ui); font-size: .68rem; letter-spacing: .06em;
   color: var(--text); white-space: nowrap; font-weight: bold;
 }
 .res-track { flex: 1; height: 7px; background: rgba(255,255,255,.07); border: 1px solid var(--border); overflow: hidden; }
@@ -299,10 +309,11 @@ button { cursor: pointer; }
   border-right: 1px solid var(--border); overflow: hidden;
 }
 .game-scene-box {
-  flex: 1; background: var(--panel2);
+  flex: 0 0 50%; background: var(--panel2);
   display: flex; align-items: center; justify-content: center;
   flex-direction: column; color: var(--dim); font-size: .78rem;
   text-align: center; gap: .25rem; position: relative; overflow: hidden;
+  border-bottom: 1px solid var(--border);
 }
 .game-scene-box img {
   position: absolute; inset: 0; width: 100%; height: 100%;
@@ -310,10 +321,31 @@ button { cursor: pointer; }
 }
 .game-scene-box img.loaded { display: block; }
 .terrain-note {
-  padding: .45rem .7rem; background: var(--panel);
-  font-size: .75rem; color: var(--dim); font-style: italic;
+  padding: .35rem .7rem; background: var(--panel);
+  font-size: .72rem; color: var(--dim); font-style: italic;
   border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
+/* Inline mission log below scene image */
+.inline-log-col {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--panel);
+}
+.inline-log-header {
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .22em;
+  color: var(--accent); padding: .35rem .75rem;
+  background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.inline-log-scroll {
+  flex: 1; overflow-y: auto; padding: .5rem .75rem;
+  font-size: .88rem; line-height: 1.65; color: var(--text);
+}
+.inline-log-entry {
+  padding: .3rem 0; border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.inline-log-entry:last-child { border-bottom: none; }
+.inline-log-entry.good   { color: var(--green); }
+.inline-log-entry.alert  { color: var(--warn); }
+.inline-log-entry.bad    { color: var(--danger); }
 
 .info-col {
   width: 260px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden;
@@ -367,6 +399,44 @@ button { cursor: pointer; }
 .act-btn:last-child { border-right: none; }
 .act-btn:hover, .act-btn:active { background: rgba(0,200,255,.08); color: var(--accent); }
 .act-btn.red:hover, .act-btn.red:active { background: rgba(255,51,68,.1); color: var(--danger); }
+
+/* ─── CREW DRAWER (mobile slide-in) ─────────────────── */
+.crew-drawer-overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,.6);
+}
+.crew-drawer-overlay.open { display: block; }
+.crew-drawer {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: min(300px, 85vw);
+  background: var(--panel); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform .25s ease;
+}
+.crew-drawer-overlay.open .crew-drawer { transform: translateX(0); }
+.crew-drawer-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .75rem 1rem; border-bottom: 1px solid var(--border);
+  font-family: var(--ui); font-size: .7rem; letter-spacing: .2em; color: var(--accent);
+}
+.crew-drawer-close {
+  background: none; border: none; color: var(--text); font-size: 1.3rem;
+  padding: .2rem .5rem; cursor: pointer;
+}
+.crew-drawer-body { flex: 1; overflow-y: auto; padding: .5rem; }
+.drawer-section-title {
+  font-family: var(--ui); font-size: .58rem; letter-spacing: .2em;
+  color: var(--dim); padding: .4rem .5rem .2rem; text-transform: uppercase;
+}
+.drawer-inv-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .2rem;
+  padding: .25rem .25rem .75rem;
+}
+.drawer-inv-item {
+  font-size: .9rem; color: var(--text); padding: .25rem .4rem;
+  background: var(--panel2); border: 1px solid var(--border);
+  display: flex; align-items: center; gap: .3rem;
+}
 
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
@@ -486,7 +556,7 @@ button { cursor: pointer; }
 
 /* ─── RESPONSIVE / MOBILE ────────────────────────────── */
 @media (max-width: 600px) {
-  /* Hide sidebar on phones — log and crew shown via status action */
+  /* Hide sidebar on phones — crew available via drawer button */
   .info-col { display: none; }
   .scene-col { flex: 1; border-right: none; }
 
@@ -495,10 +565,14 @@ button { cursor: pointer; }
   .hud-lbl { font-size: .52rem; letter-spacing: .1em; }
   .hud-val { font-size: .9rem; }
 
-  /* Resource bar — stack label above bar */
-  .res-bar-row { padding: .4rem .5rem; gap: .3rem; }
-  .res-lbl { font-size: .58rem; }
+  /* 2x2 resource grid stays but tighter padding */
+  .res-bar-grid { }
+  .res-item { padding: .38rem .5rem; }
+  .res-lbl { font-size: .6rem; }
   .res-pct { font-size: .9rem; }
+
+  /* Scene image takes less vertical space on phone so log is visible */
+  .game-scene-box { flex: 0 0 40%; }
 
   /* Panels fill the screen with comfortable padding */
   .panel, .event-wrap, .end-wrap {
@@ -522,12 +596,12 @@ button { cursor: pointer; }
   /* Scene boxes shorter on phone */
   .scene-box { aspect-ratio: 16/8; }
 
-  /* Action bar — 3 buttons per row using wrap */
+  /* Action bar — wraps naturally at 6 buttons */
   .action-bar { flex-wrap: wrap; }
   .act-btn {
-    flex: 1 1 30%;
-    font-size: .62rem;
-    padding: .65rem .2rem;
+    flex: 1 1 28%;
+    font-size: .6rem;
+    padding: .65rem .15rem;
     border-bottom: 1px solid var(--border);
   }
 
@@ -543,8 +617,7 @@ button { cursor: pointer; }
 @media (max-width: 380px) {
   .game-title { font-size: 4.5rem; }
   .hud-val { font-size: .8rem; }
-  .res-lbl { display: none; }
-  .act-btn { font-size: .55rem; }
+  .act-btn { font-size: .52rem; }
 }
 </style>
 </head>
@@ -671,6 +744,7 @@ button { cursor: pointer; }
   <div class="scanlines"></div>
   <div class="panel">
     <div class="panel-title">MISSION LOADOUT</div>
+    <div class="budget-bar">⚡ CREDITS REMAINING: <span id="budget-remaining">$2,400</span></div>
     <p class="panel-sub">You have <strong id="budget-total" style="color:var(--warn)">$2,400</strong> in mission credits. Spend wisely — any unspent credits carry over to waypoint shops.</p>
     <div class="loadout-grid">
 
@@ -735,7 +809,6 @@ button { cursor: pointer; }
       </div>
 
     </div>
-    <div class="budget-bar">CREDITS REMAINING: <span id="budget-remaining">$2,400</span></div>
     <div class="btn-row">
       <button class="btn btn-secondary" id="btn-loadout-back">← BACK</button>
       <button class="btn btn-primary" id="btn-loadout-next">NEXT: DIFFICULTY →</button>
@@ -802,8 +875,8 @@ button { cursor: pointer; }
     </div>
   </div>
 
-  <!-- Resource bars -->
-  <div class="res-bar-row">
+  <!-- Resource bars - 2x2 grid -->
+  <div class="res-bar-grid">
     <div class="res-item">
       <span class="res-icon">⚡</span>
       <span class="res-lbl">POWER</span>
@@ -839,6 +912,11 @@ button { cursor: pointer; }
         <span id="game-scene-path" style="position:relative;z-index:1;font-size:.6rem;color:var(--dim);opacity:.6">images/scenes/traveling.png</span>
       </div>
       <div class="terrain-note" id="terrain-note">Flat basaltic plains. Good driving conditions.</div>
+      <!-- Inline mission log - shows latest action text -->
+      <div class="inline-log-col">
+        <div class="inline-log-header">📋 MISSION LOG</div>
+        <div class="inline-log-scroll" id="inline-log"></div>
+      </div>
     </div>
 
     <div class="info-col">
@@ -871,7 +949,31 @@ button { cursor: pointer; }
     <button class="act-btn" id="act-rations">🍱 RATIONS (F)</button>
     <button class="act-btn" id="act-rest">💤 REST (R)</button>
     <button class="act-btn" id="act-status">📊 STATUS (S)</button>
+    <button class="act-btn" id="act-crew">👥 CREW</button>
     <button class="act-btn red" id="act-abort">⚠️ ABORT</button>
+  </div>
+
+  <!-- Crew drawer overlay (slides in from right) -->
+  <div class="crew-drawer-overlay" id="crew-drawer-overlay">
+    <div class="crew-drawer">
+      <div class="crew-drawer-header">
+        <span>👥 CREW &amp; INVENTORY</span>
+        <button class="crew-drawer-close" id="crew-drawer-close">✕</button>
+      </div>
+      <div class="crew-drawer-body">
+        <div class="drawer-section-title">CREW STATUS</div>
+        <div id="drawer-crew-list"></div>
+        <div class="drawer-section-title" style="margin-top:.5rem">INVENTORY</div>
+        <div class="drawer-inv-grid">
+          <div class="drawer-inv-item">⚡ <span id="dinv-pc">0</span> cells</div>
+          <div class="drawer-inv-item">🫁 <span id="dinv-o2">0</span> O₂</div>
+          <div class="drawer-inv-item">🍱 <span id="dinv-food">0</span> food</div>
+          <div class="drawer-inv-item">🔩 <span id="dinv-rk">0</span> kits</div>
+          <div class="drawer-inv-item">💉 <span id="dinv-mk">0</span> med</div>
+          <div class="drawer-inv-item">💳 $<span id="dinv-cr">0</span></div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1445,26 +1547,41 @@ function setBar(res, val) {
 }
 
 function renderCrew() {
-  const list = $('crew-list');
-  list.innerHTML = '';
-  S.crew.forEach(m => {
-    const div = document.createElement('div');
-    div.className = 'crew-entry';
+  // Render into both the desktop sidebar list and the mobile drawer
+  ['crew-list', 'drawer-crew-list'].forEach(listId => {
+    const list = $(listId);
+    if (!list) return;
+    list.innerHTML = '';
+    S.crew.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'crew-entry';
 
-    const dot = document.createElement('div');
-    dot.className = 'status-dot dot-' + (m.alive ? m.status : 'dead');
+      const dot = document.createElement('div');
+      dot.className = 'status-dot dot-' + (m.alive ? m.status : 'dead');
 
-    const nm = document.createElement('span');
-    nm.className = 'crew-nm' + (m.alive ? '' : ' dead');
-    nm.textContent = m.icon + ' ' + m.name;
+      const nm = document.createElement('span');
+      nm.className = 'crew-nm' + (m.alive ? '' : ' dead');
+      nm.textContent = m.icon + ' ' + m.name;
 
-    const cond = document.createElement('span');
-    cond.className = 'crew-cond';
-    cond.textContent = m.alive ? m.condition : 'KIA';
+      const cond = document.createElement('span');
+      cond.className = 'crew-cond';
+      cond.textContent = m.alive ? m.condition : 'KIA';
 
-    div.appendChild(dot); div.appendChild(nm); div.appendChild(cond);
-    list.appendChild(div);
+      div.appendChild(dot); div.appendChild(nm); div.appendChild(cond);
+      list.appendChild(div);
+    });
   });
+}
+
+function openCrewDrawer() {
+  // Sync drawer inventory before opening
+  const d = { pc: S.powerCells, o2: S.oxygenCanisters, food: S.foodBoxes, rk: S.repairKits, mk: S.medKits, cr: S.credits };
+  Object.entries(d).forEach(([k, v]) => { const el = $('dinv-' + k); if (el) el.textContent = v; });
+  $('crew-drawer-overlay').classList.add('open');
+}
+
+function closeCrewDrawer() {
+  $('crew-drawer-overlay').classList.remove('open');
 }
 
 function setGameScene(src, label) {
@@ -1479,24 +1596,47 @@ function setGameScene(src, label) {
   pth.textContent = src;
 }
 
+// Batch of log lines for the current action (cleared per action)
+let currentLogBatch = [];
+
+function clearInlineLog() {
+  currentLogBatch = [];
+  const il = $('inline-log');
+  if (il) il.innerHTML = '';
+}
+
 function addLog(msg, tone) {
+  // Sidebar log (hidden on mobile but kept for desktop)
   const log = $('log');
-  const d = document.createElement('div');
-  d.className = 'log-line' + (tone ? ' ' + tone : '');
-  d.textContent = '[D' + S.day + '] ' + msg;
-  log.appendChild(d);
-  log.scrollTop = log.scrollHeight;
+  if (log) {
+    const d = document.createElement('div');
+    d.className = 'log-line' + (tone ? ' ' + tone : '');
+    d.textContent = '[D' + S.day + '] ' + msg;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+  }
+  // Inline log in scene column — shows current action's messages
+  const il = $('inline-log');
+  if (il) {
+    const d = document.createElement('div');
+    d.className = 'inline-log-entry' + (tone ? ' ' + tone : '');
+    d.textContent = '[D' + S.day + '] ' + msg;
+    il.appendChild(d);
+    il.scrollTop = il.scrollHeight;
+  }
 }
 
 // ── ACTION HANDLERS ───────────────────────────────────────
 function actDrive() {
   if (!S.active) return;
+  clearInlineLog();
   const days = 5 + Math.floor(Math.random() * 3);
   advanceTime(days);
 }
 
 function actCharge() {
   if (!S.active) return;
+  clearInlineLog();
   if (S.inNight) { addLog("Cannot charge during lunar night — no sunlight.", 'alert'); return; }
   const gain = S.chargeReduced ? 30 : 45;
   S.power = Math.min(100, S.power + gain);
@@ -1509,6 +1649,7 @@ function actCharge() {
 
 function actRations() {
   if (!S.active) return;
+  clearInlineLog();
   const order = ['meager','standard','filling'];
   const idx   = order.indexOf(S.rationMode);
   S.rationMode = order[(idx + 1) % order.length];
@@ -1517,6 +1658,7 @@ function actRations() {
 
 function actRest() {
   if (!S.active) return;
+  clearInlineLog();
   S.morale = Math.min(100, S.morale + 15);
   S.power  = Math.max(0, S.power - 8);
   S.food   = Math.max(0, S.food - 8);
@@ -1529,6 +1671,7 @@ function actRest() {
 
 function actStatus() {
   if (!S.active) return;
+  clearInlineLog();
   addLog(`Day ${S.day} | ${S.kmTraveled}km traveled, ${S.kmLeft}km to go.`, '');
   addLog(`Power:${Math.round(S.power)}% O₂:${Math.round(S.oxygen)}% Food:${Math.round(S.food)}% Morale:${Math.round(S.morale)}%`, '');
   addLog(`Cells:${S.powerCells} O₂cans:${S.oxygenCanisters} Food:${S.foodBoxes} Repair:${S.repairKits} Med:${S.medKits}`, '');
@@ -1649,7 +1792,7 @@ function renderWaypointShop() {
     card.innerHTML = `
       <div class="shop-card-left">
         <div class="shop-name">${ITEM_NAMES[key]}</div>
-        <div class="shop-desc">$${info.p} each · ${info.available} available</div>
+        <div class="shop-desc">$${info.p} each &middot; ${info.available} available &middot; <span style="color:var(--accent)">You have: ${S[key] || 0}</span></div>
       </div>
       <div class="shop-card-right">
         <div class="shop-qty-row">
@@ -1956,7 +2099,15 @@ $('act-charge').addEventListener('click',  actCharge);
 $('act-rations').addEventListener('click', actRations);
 $('act-rest').addEventListener('click',    actRest);
 $('act-status').addEventListener('click',  actStatus);
+$('act-crew').addEventListener('click',  openCrewDrawer);
 $('act-abort').addEventListener('click',   actAbort);
+
+// Crew drawer close
+$('crew-drawer-close').addEventListener('click', closeCrewDrawer);
+// Tap overlay background to close
+$('crew-drawer-overlay').addEventListener('click', e => {
+  if (e.target === $('crew-drawer-overlay')) closeCrewDrawer();
+});
 
 // Result continue
 $('btn-result-continue').addEventListener('click', continueFromResult);
