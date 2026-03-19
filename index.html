@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lunar Trail</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+/* ─── VARIABLES ─────────────────────────────────────── */
+:root {
+  --bg:       #020408;
+  --panel:    #030d1a;
+  --panel2:   #061222;
+  --border:   #0d4a7a;
+  --glow:     #1a8fcc;
+  --accent:   #00c8ff;
+  --green:    #00ff9d;
+  --orange:   #ff6b35;
+  --warn:     #ffcc00;
+  --danger:   #ff3344;
+  --text:     #c8e8ff;
+  --dim:      #4a7a9b;
+  --bright:   #ffffff;
+  --mono:     'Share Tech Mono', monospace;
+  --display:  'VT323', monospace;
+  --ui:       'Orbitron', sans-serif;
+}
+
+/* ─── RESET ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px;
+  overflow: hidden;
+}
+
+/* ─── STAR BACKGROUND ───────────────────────────────── */
+.stars {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    radial-gradient(1px 1px at 8%  15%, rgba(255,255,255,.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 72%, rgba(255,255,255,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 8%,  rgba(255,255,255,.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 67% 55%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 81% 28%, rgba(255,255,255,.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 93% 82%, rgba(255,255,255,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 33% 45%, rgba(200,220,255,.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 88%, rgba(255,255,255,.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 14% 60%, rgba(255,255,255,.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 12%, rgba(200,220,255,.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 30%, rgba(255,255,255,.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 50%, rgba(255,255,255,.9) 0%, transparent 100%);
+  background-size: 600px 400px, 400px 500px, 700px 350px, 450px 600px,
+                   300px 450px, 550px 300px, 500px 550px, 350px 400px,
+                   650px 300px, 400px 650px, 480px 420px, 320px 580px;
+}
+
+/* ─── SCANLINES ─────────────────────────────────────── */
+.scanlines {
+  position: absolute; inset: 0; z-index: 100; pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom, transparent 0px, transparent 3px,
+    rgba(0,0,0,.12) 3px, rgba(0,0,0,.12) 4px
+  );
+}
+
+/* ─── SCREENS ───────────────────────────────────────── */
+.screen {
+  position: fixed; inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  overflow-y: auto;
+  background: var(--bg);
+}
+.screen.active { display: flex; }
+
+/* ─── SCENE IMAGE AREA ──────────────────────────────── */
+.scene-box {
+  width: 100%; max-width: 640px;
+  aspect-ratio: 16/7;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: var(--dim); font-size: .8rem; text-align: center; gap: .3rem;
+  margin: .75rem 0;
+  overflow: hidden; position: relative;
+}
+.scene-box img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+  display: none;
+}
+.scene-box img.loaded { display: block; }
+.scene-box .placeholder { font-size: .75rem; color: var(--dim); }
+.scene-box .filepath { font-size: .6rem; color: var(--dim); opacity: .6; }
+
+/* ─── TITLE SCREEN ──────────────────────────────────── */
+#screen-title .content {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 1.25rem;
+  padding: 2rem; max-width: 600px; width: 100%;
+  text-align: center;
+}
+.eyebrow {
+  font-family: var(--ui); font-size: .5rem;
+  letter-spacing: .4em; color: var(--dim); text-transform: uppercase;
+}
+.game-title {
+  font-family: var(--display);
+  font-size: clamp(5rem, 14vw, 8rem);
+  line-height: .85; color: var(--accent);
+  text-shadow: 0 0 20px rgba(0,200,255,.8), 0 0 60px rgba(0,200,255,.4);
+  letter-spacing: .05em;
+}
+.title-sub {
+  font-family: var(--mono); font-size: .72rem;
+  color: var(--dim); letter-spacing: .18em;
+}
+.menu-col { display: flex; flex-direction: column; gap: .6rem; width: 100%; max-width: 260px; }
+.footer-note { font-size: .62rem; color: var(--dim); opacity: .6; }
+
+/* ─── BUTTONS ───────────────────────────────────────── */
+button { cursor: pointer; }
+.btn {
+  font-family: var(--ui); font-size: .65rem; letter-spacing: .18em;
+  padding: .7rem 1.5rem; border: none; text-transform: uppercase;
+  transition: all .12s ease; width: 100%;
+}
+.btn-primary { background: var(--accent); color: var(--bg); box-shadow: 0 0 18px rgba(0,200,255,.35); }
+.btn-primary:hover { background: #fff; box-shadow: 0 0 28px rgba(0,200,255,.7); transform: translateY(-1px); }
+.btn-secondary { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+.btn-secondary:hover { border-color: var(--accent); background: rgba(0,200,255,.05); }
+.btn-danger { background: transparent; color: var(--danger); border: 1px solid rgba(255,51,68,.4); }
+.btn-danger:hover { background: rgba(255,51,68,.08); border-color: var(--danger); }
+
+.btn-row { display: flex; gap: .75rem; margin-top: 1rem; }
+.btn-row .btn { flex: 1; }
+
+/* ─── PANEL SCREENS (instructions, about, setup) ────── */
+.panel {
+  position: relative; z-index: 10;
+  background: rgba(3,13,26,.97);
+  border: 1px solid var(--border);
+  box-shadow: 0 0 40px rgba(0,200,255,.08), inset 0 0 40px rgba(0,0,0,.4);
+  padding: 2rem 2.25rem;
+  max-width: 780px; width: calc(100% - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+.panel.narrow { max-width: 520px; }
+
+.panel-title {
+  font-family: var(--ui); font-size: .9rem; letter-spacing: .25em;
+  color: var(--accent); padding-bottom: .6rem;
+  border-bottom: 1px solid var(--border); margin-bottom: .5rem;
+}
+.panel-sub {
+  font-size: .82rem; color: var(--dim); line-height: 1.55; margin-bottom: 1.25rem;
+}
+.panel p { font-size: .82rem; line-height: 1.7; color: var(--text); margin-bottom: .9rem; }
+.panel em { color: var(--accent); font-style: normal; }
+.panel b  { color: var(--green); }
+
+/* ─── INSTRUCTIONS GRID ─────────────────────────────── */
+.info-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+  gap: 1rem; margin-bottom: 1.5rem;
+}
+.info-card {
+  background: var(--panel2); border: 1px solid var(--border); padding: .85rem;
+}
+.info-card .icon { font-size: 1.4rem; margin-bottom: .4rem; }
+.info-card h3 {
+  font-family: var(--ui); font-size: .58rem; letter-spacing: .18em;
+  color: var(--green); margin-bottom: .4rem;
+}
+.info-card p { font-size: .77rem; line-height: 1.55; color: var(--text); margin: 0; }
+
+/* ─── CREW NAME SETUP ───────────────────────────────── */
+.crew-rows { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.25rem; }
+.crew-row {
+  display: flex; align-items: center; gap: .85rem;
+  background: var(--panel2); border: 1px solid var(--border); padding: .65rem .9rem;
+}
+.crew-row.is-commander { border-color: var(--accent); background: rgba(0,200,255,.04); }
+.crew-role-label {
+  font-family: var(--ui); font-size: .56rem; letter-spacing: .13em;
+  color: var(--dim); min-width: 200px;
+}
+.crew-input {
+  flex: 1; background: transparent; border: none;
+  border-bottom: 1px solid var(--glow);
+  color: var(--bright); font-family: var(--mono); font-size: .95rem;
+  padding: .2rem .4rem; outline: none;
+}
+.crew-input:focus { border-bottom-color: var(--accent); }
+
+/* ─── LOADOUT ────────────────────────────────────────── */
+.loadout-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr));
+  gap: .85rem; margin-bottom: 1.25rem;
+}
+.loadout-card {
+  background: var(--panel2); border: 1px solid var(--border); padding: .85rem;
+}
+.loadout-icon { font-size: 1.3rem; margin-bottom: .35rem; }
+.loadout-name {
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .14em;
+  color: var(--green); margin-bottom: .3rem;
+}
+.loadout-desc { font-size: .73rem; color: var(--dim); line-height: 1.45; margin-bottom: .6rem; }
+.qty-row { display: flex; align-items: center; gap: .45rem; }
+.qty-btn {
+  background: var(--border); border: none; color: var(--bright);
+  width: 26px; height: 26px; font-size: .95rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s;
+}
+.qty-btn:hover { background: var(--accent); color: var(--bg); }
+.qty-num {
+  font-family: var(--display); font-size: 1.35rem; color: var(--bright);
+  min-width: 2ch; text-align: center;
+}
+.qty-cost { font-size: .68rem; color: var(--dim); margin-left: auto; }
+.budget-bar {
+  font-family: var(--ui); font-size: .7rem; letter-spacing: .18em;
+  color: var(--warn); text-align: right;
+  padding: .6rem 0; border-top: 1px solid var(--border); margin-bottom: .9rem;
+}
+
+/* ─── DIFFICULTY ─────────────────────────────────────── */
+.diff-list { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.5rem; }
+.diff-btn {
+  display: grid; grid-template-columns: 2.2rem 1fr;
+  grid-template-rows: auto auto; gap: 0 .8rem;
+  padding: .85rem; background: var(--panel2); border: 1px solid var(--border);
+  color: var(--text); text-align: left; transition: all .13s;
+}
+.diff-btn:hover, .diff-btn.selected { border-color: var(--accent); background: rgba(0,200,255,.05); }
+.diff-icon { font-size: 1.4rem; grid-row: 1/3; align-self: center; }
+.diff-name { font-family: var(--ui); font-size: .65rem; letter-spacing: .14em; color: var(--accent); }
+.diff-desc { font-size: .73rem; color: var(--dim); line-height: 1.4; }
+
+/* ─── GAME SCREEN ────────────────────────────────────── */
+#screen-game {
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.hud {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .45rem 1rem; background: var(--panel);
+  border-bottom: 1px solid var(--border); flex-shrink: 0; gap: .5rem;
+  flex-wrap: wrap;
+}
+.hud-block { display: flex; flex-direction: column; align-items: center; }
+.hud-lbl {
+  font-family: var(--ui); font-size: .45rem; letter-spacing: .22em; color: var(--dim);
+}
+.hud-val {
+  font-family: var(--display); font-size: 1rem; color: var(--bright);
+}
+
+.res-bar-row {
+  display: flex; gap: .5rem; padding: .45rem 1rem;
+  background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.res-item { display: flex; align-items: center; gap: .35rem; flex: 1; min-width: 0; }
+.res-icon { font-size: .75rem; flex-shrink: 0; }
+.res-lbl { font-family: var(--ui); font-size: .42rem; letter-spacing: .13em; color: var(--dim); white-space: nowrap; }
+.res-track { flex: 1; height: 5px; background: rgba(255,255,255,.07); border: 1px solid var(--border); overflow: hidden; }
+.res-fill { height: 100%; transition: width .4s ease; width: 100%; }
+.fill-power  { background: var(--warn); }
+.fill-oxygen { background: var(--accent); }
+.fill-food   { background: var(--green); }
+.fill-morale { background: #cc88ff; }
+.res-pct { font-family: var(--display); font-size: .82rem; color: var(--bright); min-width: 3ch; text-align: right; }
+
+.game-body { display: flex; flex: 1; overflow: hidden; }
+
+.scene-col {
+  flex: 2; display: flex; flex-direction: column;
+  border-right: 1px solid var(--border); overflow: hidden;
+}
+.game-scene-box {
+  flex: 1; background: var(--panel2);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; color: var(--dim); font-size: .78rem;
+  text-align: center; gap: .25rem; position: relative; overflow: hidden;
+}
+.game-scene-box img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; image-rendering: pixelated; display: none;
+}
+.game-scene-box img.loaded { display: block; }
+.terrain-note {
+  padding: .45rem .7rem; background: var(--panel);
+  font-size: .75rem; color: var(--dim); font-style: italic;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+
+.info-col {
+  width: 260px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden;
+}
+.col-header {
+  font-family: var(--ui); font-size: .5rem; letter-spacing: .22em;
+  color: var(--accent); padding: .35rem .65rem;
+  background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.crew-col { border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.crew-entry {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .28rem .5rem; font-size: .72rem;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.crew-entry:last-child { border-bottom: none; }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.dot-healthy  { background: var(--green); }
+.dot-injured  { background: var(--warn); }
+.dot-critical { background: var(--danger); animation: blink 1s infinite; }
+.dot-dead     { background: var(--dim); }
+.crew-nm { flex: 1; }
+.crew-nm.dead { color: var(--dim); text-decoration: line-through; }
+.crew-cond { font-size: .62rem; color: var(--dim); }
+
+.inv-col { border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.inv-grid { display: grid; grid-template-columns: 1fr 1fr; padding: .4rem .5rem; gap: .05rem; }
+.inv-item { font-size: .7rem; color: var(--dim); padding: .18rem .2rem; display: flex; align-items: center; gap: .28rem; }
+
+.log-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.log-scroll {
+  flex: 1; overflow-y: auto; padding: .4rem .5rem;
+  font-size: .7rem; line-height: 1.55; color: var(--dim);
+}
+.log-line { padding-left: .4rem; border-left: 2px solid var(--border); margin-bottom: .25rem; }
+.log-line.good   { color: var(--green); border-color: var(--green); }
+.log-line.alert  { color: var(--warn);  border-color: var(--warn); }
+.log-line.bad    { color: var(--danger); border-color: var(--danger); }
+
+.action-bar {
+  display: flex; border-top: 1px solid var(--border);
+  background: var(--panel); flex-shrink: 0;
+}
+.act-btn {
+  flex: 1; padding: .55rem .3rem;
+  background: transparent; border: none; border-right: 1px solid var(--border);
+  color: var(--text); font-family: var(--ui); font-size: .46rem;
+  letter-spacing: .08em; text-align: center; transition: all .1s;
+}
+.act-btn:last-child { border-right: none; }
+.act-btn:hover { background: rgba(0,200,255,.08); color: var(--accent); }
+.act-btn.red:hover { background: rgba(255,51,68,.1); color: var(--danger); }
+
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* ─── EVENT SCREEN ───────────────────────────────────── */
+.event-wrap {
+  position: relative; z-index: 10;
+  background: rgba(3,13,26,.97); border: 1px solid var(--border);
+  box-shadow: 0 0 50px rgba(0,200,255,.1);
+  padding: 1.75rem 2rem;
+  max-width: 620px; width: calc(100% - 2rem);
+  max-height: calc(100vh - 2rem); overflow-y: auto;
+}
+.ev-cat {
+  font-family: var(--ui); font-size: .52rem; letter-spacing: .28em;
+  color: var(--warn); margin-bottom: .35rem;
+}
+.ev-title {
+  font-family: var(--display); font-size: 1.9rem; color: var(--bright); line-height: 1.1;
+  margin-bottom: .75rem;
+}
+.ev-desc { font-size: .82rem; line-height: 1.68; color: var(--text); margin-bottom: 1rem; }
+.ev-choices { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
+.choice-btn {
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--mono); font-size: .78rem;
+  padding: .7rem .9rem; text-align: left; line-height: 1.4; transition: all .13s;
+}
+.choice-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,200,255,.06); color: var(--bright); }
+.choice-btn:disabled { opacity: .38; cursor: not-allowed; }
+
+/* ─── RESULT SCREEN ──────────────────────────────────── */
+.result-changes {
+  background: var(--panel2); border: 1px solid var(--border);
+  padding: .65rem .9rem; margin: .85rem 0; font-size: .78rem; line-height: 1.8;
+}
+.change { display: flex; align-items: center; gap: .4rem; }
+.change.pos { color: var(--green); }
+.change.neg { color: var(--danger); }
+.change.neu { color: var(--dim); }
+
+/* ─── WAYPOINT SCREEN ────────────────────────────────── */
+.shop-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+  gap: .7rem; margin: .9rem 0;
+}
+.shop-card {
+  background: var(--panel2); border: 1px solid var(--border); padding: .75rem;
+}
+.shop-name { font-family: var(--ui); font-size: .58rem; letter-spacing: .13em; color: var(--green); margin-bottom: .25rem; }
+.shop-desc { font-size: .7rem; color: var(--dim); line-height: 1.4; margin-bottom: .5rem; }
+.shop-row { display: flex; align-items: center; gap: .45rem; }
+.shop-price { font-size: .68rem; color: var(--warn); margin-left: auto; }
+.credits-line {
+  font-family: var(--ui); font-size: .7rem; letter-spacing: .18em;
+  color: var(--warn); text-align: right;
+  padding: .6rem 0; border-top: 1px solid var(--border); margin-bottom: .85rem;
+}
+
+/* ─── END SCREENS ────────────────────────────────────── */
+.end-wrap {
+  position: relative; z-index: 10;
+  background: rgba(3,13,26,.97); border: 1px solid var(--border);
+  padding: 2.25rem; max-width: 580px; width: calc(100% - 2rem);
+  max-height: calc(100vh - 2rem); overflow-y: auto; text-align: center;
+}
+.end-icon { font-size: 2.8rem; margin-bottom: .6rem; }
+.end-title { font-family: var(--display); font-size: 2.8rem; line-height: 1; margin-bottom: .5rem; }
+.end-title.fail    { color: var(--danger); }
+.end-title.success { color: var(--green); }
+.end-desc { font-size: .83rem; color: var(--dim); line-height: 1.6; margin: .75rem 0; }
+.epitaph {
+  font-family: var(--display); font-size: 1.1rem; color: var(--dim);
+  border: 1px solid var(--border); padding: .65rem .9rem; margin: .85rem 0;
+}
+.stats-box {
+  background: var(--panel2); border: 1px solid var(--border);
+  padding: .85rem; font-size: .78rem; line-height: 1.85; color: var(--dim);
+  text-align: left; margin: .85rem 0;
+}
+.victory-score { font-family: var(--display); font-size: 1.8rem; color: var(--warn); margin: .75rem 0; }
+
+/* ─── SCROLLBAR ─────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--panel2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width: 560px) {
+  .info-col { display: none; }
+  .scene-col { flex: 1; }
+  .hud { gap: .25rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 1: TITLE
+═══════════════════════════════════════════════════════ -->
+<div id="screen-title" class="screen active">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="content">
+    <div class="eyebrow">TRANQUILITY BASE MISSION CONTROL — 2031</div>
+    <h1 class="game-title">LUNAR<br>TRAIL</h1>
+    <div class="title-sub">An overland rover simulation across the lunar surface</div>
+
+    <div class="scene-box" style="max-width:500px">
+      <img id="img-title" src="images/scenes/title_screen.png" alt="">
+      <span class="placeholder">[ TITLE SCENE IMAGE ]</span>
+      <span class="filepath">images/scenes/title_screen.png</span>
+    </div>
+
+    <div class="menu-col">
+      <button class="btn btn-primary" id="btn-begin">▶ BEGIN MISSION</button>
+      <button class="btn btn-secondary" id="btn-howto">HOW TO PLAY</button>
+      <button class="btn btn-secondary" id="btn-about">ABOUT</button>
+    </div>
+    <div class="footer-note">Mouse or keyboard (D=Drive C=Charge R=Rest S=Status)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 2: HOW TO PLAY
+═══════════════════════════════════════════════════════ -->
+<div id="screen-howto" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="panel">
+    <div class="panel-title">MISSION BRIEFING</div>
+    <p class="panel-sub">Drive your lunar rover 2,400 km from Tranquility Base to Shackleton Station at the lunar south pole. A 90-Earth-day journey across one of the most hostile environments ever attempted.</p>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="icon">🌑</div>
+        <h3>OBJECTIVE</h3>
+        <p>Reach Shackleton Station with at least one crew member alive. Your score depends on crew survived, resources remaining, and how fast you made the journey.</p>
+      </div>
+      <div class="info-card">
+        <div class="icon">⚡</div>
+        <h3>RESOURCES</h3>
+        <p>Manage four resources: <b>Power</b> (rover battery), <b>Oxygen</b> (life support), <b>Food</b> (crew nutrition), and <b>Morale</b> (the hardest one to fix).</p>
+      </div>
+      <div class="info-card">
+        <div class="icon">🚨</div>
+        <h3>EVENTS</h3>
+        <p>Crises will test you: micrometeorite strikes, dust storms, CO₂ scrubber failures, crew conflicts, solar flares, and the 14-day Lunar Night.</p>
+      </div>
+      <div class="info-card">
+        <div class="icon">🏁</div>
+        <h3>CHOICES</h3>
+        <p>Every crisis gives you 2–3 options. Some require supplies you may not have. There's rarely a perfect answer — only less bad ones.</p>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-howto-back">← BACK</button>
+      <button class="btn btn-primary" id="btn-howto-play">BEGIN MISSION →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 3: ABOUT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-about" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="panel narrow">
+    <div class="panel-title">ABOUT LUNAR TRAIL</div>
+    <p>Lunar Trail is a survival strategy game inspired by the 1971 classic <em>Oregon Trail</em>. Where pioneers once crossed 3,200 km of American wilderness, your crew crosses 2,400 km of airless lunar regolith.</p>
+    <p>The challenges are different — no rivers to ford, but solar panels to charge. No dysentery, but oxygen scrubber failures. No hostile weather, but lunar nights that last 14 Earth days and drop to -173°C.</p>
+    <p>Every decision matters. Ration your power. Watch your crew's morale. And whatever you do — don't miss a charging window.</p>
+    <button class="btn btn-secondary" id="btn-about-back" style="margin-top:.5rem">← BACK TO MENU</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 4: CREW NAMES
+═══════════════════════════════════════════════════════ -->
+<div id="screen-names" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="panel narrow">
+    <div class="panel-title">CREW REGISTRATION</div>
+    <p class="panel-sub">Name your crew of four. You are the Mission Commander.</p>
+    <div class="crew-rows">
+      <div class="crew-row is-commander">
+        <span class="crew-role-label">👨‍🚀 MISSION COMMANDER (You)</span>
+        <input class="crew-input" id="name-0" type="text" placeholder="Your name" maxlength="16">
+      </div>
+      <div class="crew-row">
+        <span class="crew-role-label">🔧 CHIEF ENGINEER</span>
+        <input class="crew-input" id="name-1" type="text" placeholder="Engineer's name" maxlength="16">
+      </div>
+      <div class="crew-row">
+        <span class="crew-role-label">🧪 SCIENCE OFFICER</span>
+        <input class="crew-input" id="name-2" type="text" placeholder="Scientist's name" maxlength="16">
+      </div>
+      <div class="crew-row">
+        <span class="crew-role-label">💊 MEDICAL OFFICER</span>
+        <input class="crew-input" id="name-3" type="text" placeholder="Medic's name" maxlength="16">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-names-back">← BACK</button>
+      <button class="btn btn-primary" id="btn-names-next">NEXT: SUPPLIES →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 5: LOADOUT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-loadout" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="panel">
+    <div class="panel-title">MISSION LOADOUT</div>
+    <p class="panel-sub">You have <strong id="budget-total" style="color:var(--warn)">$2,400</strong> in mission credits. Spend wisely — any unspent credits carry over to waypoint shops.</p>
+    <div class="loadout-grid">
+
+      <div class="loadout-card">
+        <div class="loadout-icon">⚡</div>
+        <div class="loadout-name">POWER CELLS</div>
+        <div class="loadout-desc">Emergency battery packs. Each auto-activates when rover power drops below 15%, adding 30% charge.</div>
+        <div class="qty-row">
+          <button class="qty-btn" data-item="powerCells" data-dir="-1">−</button>
+          <span class="qty-num" id="qty-powerCells">0</span>
+          <button class="qty-btn" data-item="powerCells" data-dir="1">+</button>
+          <span class="qty-cost">$200 each</span>
+        </div>
+      </div>
+
+      <div class="loadout-card">
+        <div class="loadout-icon">🫁</div>
+        <div class="loadout-name">OXYGEN CANISTERS</div>
+        <div class="loadout-desc">Backup O₂ supply. Auto-taps when cabin oxygen drops below 20%, restoring 40%.</div>
+        <div class="qty-row">
+          <button class="qty-btn" data-item="oxygenCanisters" data-dir="-1">−</button>
+          <span class="qty-num" id="qty-oxygenCanisters">0</span>
+          <button class="qty-btn" data-item="oxygenCanisters" data-dir="1">+</button>
+          <span class="qty-cost">$150 each</span>
+        </div>
+      </div>
+
+      <div class="loadout-card">
+        <div class="loadout-icon">🍱</div>
+        <div class="loadout-name">FOOD RATIONS</div>
+        <div class="loadout-desc">Compressed ration boxes. Auto-opens when food drops below 20%, restoring 30%.</div>
+        <div class="qty-row">
+          <button class="qty-btn" data-item="foodBoxes" data-dir="-1">−</button>
+          <span class="qty-num" id="qty-foodBoxes">0</span>
+          <button class="qty-btn" data-item="foodBoxes" data-dir="1">+</button>
+          <span class="qty-cost">$50 each</span>
+        </div>
+      </div>
+
+      <div class="loadout-card">
+        <div class="loadout-icon">🔩</div>
+        <div class="loadout-name">REPAIR KITS</div>
+        <div class="loadout-desc">Fix mechanical failures, patch hulls, seal power cells. Without these, breakdowns are permanent.</div>
+        <div class="qty-row">
+          <button class="qty-btn" data-item="repairKits" data-dir="-1">−</button>
+          <span class="qty-num" id="qty-repairKits">0</span>
+          <button class="qty-btn" data-item="repairKits" data-dir="1">+</button>
+          <span class="qty-cost">$300 each</span>
+        </div>
+      </div>
+
+      <div class="loadout-card">
+        <div class="loadout-icon">💉</div>
+        <div class="loadout-name">MEDICAL KITS</div>
+        <div class="loadout-desc">Treat injuries and radiation sickness. One kit per incident. Your medic is good, but not a miracle worker.</div>
+        <div class="qty-row">
+          <button class="qty-btn" data-item="medKits" data-dir="-1">−</button>
+          <span class="qty-num" id="qty-medKits">0</span>
+          <button class="qty-btn" data-item="medKits" data-dir="1">+</button>
+          <span class="qty-cost">$250 each</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="budget-bar">CREDITS REMAINING: <span id="budget-remaining">$2,400</span></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-loadout-back">← BACK</button>
+      <button class="btn btn-primary" id="btn-loadout-next">NEXT: DIFFICULTY →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 6: DIFFICULTY
+═══════════════════════════════════════════════════════ -->
+<div id="screen-difficulty" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="panel narrow">
+    <div class="panel-title">MISSION CLASSIFICATION</div>
+    <p class="panel-sub">Select your difficulty. This affects how often crises occur and how hard they hit.</p>
+    <div class="diff-list">
+      <button class="diff-btn" id="diff-tourist" data-diff="tourist">
+        <span class="diff-icon">🌕</span>
+        <span class="diff-name">TOURIST</span>
+        <span class="diff-desc">Fewer crises. Forgiving resource drain. Good for your first mission.</span>
+      </button>
+      <button class="diff-btn selected" id="diff-astronaut" data-diff="astronaut">
+        <span class="diff-icon">🚀</span>
+        <span class="diff-name">ASTRONAUT</span>
+        <span class="diff-desc">Standard profile. Balanced risk and reward. This is the intended experience.</span>
+      </button>
+      <button class="diff-btn" id="diff-commander" data-diff="commander">
+        <span class="diff-icon">⚠️</span>
+        <span class="diff-name">COMMANDER</span>
+        <span class="diff-desc">Frequent crises. Brutal resource drain. For experienced commanders only.</span>
+      </button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-diff-back">← BACK</button>
+      <button class="btn btn-primary" id="btn-launch">🚀 LAUNCH MISSION</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 7: MAIN GAME
+═══════════════════════════════════════════════════════ -->
+<div id="screen-game" class="screen">
+  <div class="scanlines"></div>
+
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-block">
+      <span class="hud-lbl">LOCATION</span>
+      <span class="hud-val" id="hud-location">Tranquility Base</span>
+    </div>
+    <div class="hud-block">
+      <span class="hud-lbl">KM REMAINING</span>
+      <span class="hud-val" id="hud-dist">2,400</span>
+    </div>
+    <div class="hud-block">
+      <span class="hud-lbl">MISSION DAY</span>
+      <span class="hud-val" id="hud-day">1</span>
+    </div>
+    <div class="hud-block">
+      <span class="hud-lbl">LUNAR PHASE</span>
+      <span class="hud-val" id="hud-phase">☀️ DAY</span>
+    </div>
+  </div>
+
+  <!-- Resource bars -->
+  <div class="res-bar-row">
+    <div class="res-item">
+      <span class="res-icon">⚡</span>
+      <span class="res-lbl">POWER</span>
+      <div class="res-track"><div class="res-fill fill-power" id="bar-power"></div></div>
+      <span class="res-pct" id="pct-power">85%</span>
+    </div>
+    <div class="res-item">
+      <span class="res-icon">🫁</span>
+      <span class="res-lbl">O₂</span>
+      <div class="res-track"><div class="res-fill fill-oxygen" id="bar-oxygen"></div></div>
+      <span class="res-pct" id="pct-oxygen">100%</span>
+    </div>
+    <div class="res-item">
+      <span class="res-icon">🍱</span>
+      <span class="res-lbl">FOOD</span>
+      <div class="res-track"><div class="res-fill fill-food" id="bar-food"></div></div>
+      <span class="res-pct" id="pct-food">100%</span>
+    </div>
+    <div class="res-item">
+      <span class="res-icon">😤</span>
+      <span class="res-lbl">MORALE</span>
+      <div class="res-track"><div class="res-fill fill-morale" id="bar-morale"></div></div>
+      <span class="res-pct" id="pct-morale">90%</span>
+    </div>
+  </div>
+
+  <!-- Body: scene + side panel -->
+  <div class="game-body">
+    <div class="scene-col">
+      <div class="game-scene-box" id="game-scene-box">
+        <img id="game-scene-img" src="" alt="">
+        <span id="game-scene-label" style="position:relative;z-index:1">[ TRAVELING ]</span>
+        <span id="game-scene-path" style="position:relative;z-index:1;font-size:.6rem;color:var(--dim);opacity:.6">images/scenes/traveling.png</span>
+      </div>
+      <div class="terrain-note" id="terrain-note">Flat basaltic plains. Good driving conditions.</div>
+    </div>
+
+    <div class="info-col">
+      <div class="crew-col">
+        <div class="col-header">CREW STATUS</div>
+        <div id="crew-list"></div>
+      </div>
+      <div class="inv-col">
+        <div class="col-header">INVENTORY</div>
+        <div class="inv-grid">
+          <div class="inv-item">⚡ <span id="inv-pc">0</span> cells</div>
+          <div class="inv-item">🫁 <span id="inv-o2">0</span> O₂</div>
+          <div class="inv-item">🍱 <span id="inv-food">0</span> food</div>
+          <div class="inv-item">🔩 <span id="inv-rk">0</span> kits</div>
+          <div class="inv-item">💉 <span id="inv-mk">0</span> med</div>
+          <div class="inv-item">💳 $<span id="inv-cr">0</span></div>
+        </div>
+      </div>
+      <div class="log-col">
+        <div class="col-header">MISSION LOG</div>
+        <div class="log-scroll" id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="action-bar">
+    <button class="act-btn" id="act-drive">🚗 DRIVE (D)</button>
+    <button class="act-btn" id="act-charge">⚡ CHARGE (C)</button>
+    <button class="act-btn" id="act-rations">🍱 RATIONS (F)</button>
+    <button class="act-btn" id="act-rest">💤 REST (R)</button>
+    <button class="act-btn" id="act-status">📊 STATUS (S)</button>
+    <button class="act-btn red" id="act-abort">⚠️ ABORT</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 8: EVENT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-event" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="event-wrap">
+    <div class="ev-cat" id="ev-cat">⚠️ ALERT</div>
+    <div class="ev-title" id="ev-title">Event Title</div>
+    <div class="scene-box">
+      <img id="ev-img" src="" alt="">
+      <span class="placeholder" id="ev-img-label">[ EVENT SCENE ]</span>
+      <span class="filepath" id="ev-img-path"></span>
+    </div>
+    <div class="ev-desc" id="ev-desc">Description goes here.</div>
+    <div class="ev-choices" id="ev-choices"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 9: EVENT RESULT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-result" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="event-wrap">
+    <div class="ev-cat">📋 OUTCOME</div>
+    <div class="ev-title" id="res-title">Result Title</div>
+    <div class="scene-box">
+      <img id="res-img" src="" alt="">
+      <span class="placeholder" id="res-img-label">[ RESULT SCENE ]</span>
+      <span class="filepath" id="res-img-path"></span>
+    </div>
+    <div class="ev-desc" id="res-desc">Result description.</div>
+    <div class="result-changes" id="res-changes"></div>
+    <button class="btn btn-primary" id="btn-result-continue" style="margin-top:.5rem">CONTINUE →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 10: WAYPOINT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-waypoint" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="panel">
+    <div class="panel-title" id="wp-title">WAYPOINT</div>
+    <p class="panel-sub" id="wp-flavor"></p>
+    <div class="scene-box">
+      <img id="wp-img" src="" alt="">
+      <span class="placeholder">[ WAYPOINT SCENE ]</span>
+      <span class="filepath" id="wp-img-path"></span>
+    </div>
+    <div class="shop-grid" id="wp-shop"></div>
+    <div class="credits-line">CREDITS: <span id="wp-credits">$0</span></div>
+    <button class="btn btn-primary" id="btn-wp-leave">DEPART WAYPOINT →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 11: GAME OVER
+═══════════════════════════════════════════════════════ -->
+<div id="screen-gameover" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="end-wrap">
+    <div class="end-icon">💀</div>
+    <div class="end-title fail">MISSION FAILED</div>
+    <div class="scene-box">
+      <img id="go-img" src="" alt="">
+      <span class="placeholder" id="go-img-label">[ GAME OVER ]</span>
+      <span class="filepath" id="go-img-path"></span>
+    </div>
+    <div class="end-desc" id="go-desc">Mission ended.</div>
+    <div class="epitaph" id="go-epitaph"></div>
+    <div class="stats-box" id="go-stats"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-go-retry">TRY AGAIN</button>
+      <button class="btn btn-secondary" id="btn-go-menu">MAIN MENU</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 12: VICTORY
+═══════════════════════════════════════════════════════ -->
+<div id="screen-victory" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="end-wrap">
+    <div class="end-icon">🏆</div>
+    <div class="end-title success">MISSION COMPLETE</div>
+    <div class="scene-box">
+      <img id="vic-img" src="images/scenes/victory.png" alt="">
+      <span class="placeholder">[ VICTORY SCENE ]</span>
+      <span class="filepath">images/scenes/victory.png</span>
+    </div>
+    <div class="end-desc" id="vic-desc">You have reached Shackleton Station.</div>
+    <div class="victory-score" id="vic-score"></div>
+    <div class="stats-box" id="vic-stats"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-vic-retry">PLAY AGAIN</button>
+      <button class="btn btn-secondary" id="btn-vic-menu">MAIN MENU</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   LUNAR TRAIL — All game logic in one self-contained script
+   ═══════════════════════════════════════════════════════ */
+
+// ── HELPERS ──────────────────────────────────────────────
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function setImg(imgEl, labelEl, pathEl, src, label) {
+  if (imgEl) {
+    imgEl.src = src;
+    imgEl.onload  = () => imgEl.classList.add('loaded');
+    imgEl.onerror = () => imgEl.classList.remove('loaded');
+    imgEl.classList.remove('loaded');
+  }
+  if (labelEl) labelEl.textContent = '[ ' + (label || src.split('/').pop().toUpperCase().replace('.PNG','').replace(/_/g,' ')) + ' ]';
+  if (pathEl)  pathEl.textContent  = src;
+}
+
+// ── CONSTANTS ─────────────────────────────────────────────
+const TOTAL_KM  = 2400;
+const BUDGET    = 2400;
+
+const PRICES = { powerCells:200, oxygenCanisters:150, foodBoxes:50, repairKits:300, medKits:250 };
+
+const DIFF = {
+  tourist:   { freq:.25, resMult:.7,  sevMult:.7  },
+  astronaut: { freq:.4,  resMult:1.0, sevMult:1.0 },
+  commander: { freq:.6,  resMult:1.4, sevMult:1.4 }
+};
+
+const ROLES = [
+  { role:'Mission Commander', icon:'👨‍🚀', def:'Commander' },
+  { role:'Chief Engineer',    icon:'🔧', def:'Engineer'  },
+  { role:'Science Officer',   icon:'🧪', def:'Scientist' },
+  { role:'Medical Officer',   icon:'💊', def:'Medic'     }
+];
+
+const RATIONS = {
+  meager:   { mult:.5,  moraleTick:-1.5, label:'Meager Rations'   },
+  standard: { mult:1.0, moraleTick:0,    label:'Standard Rations' },
+  filling:  { mult:1.5, moraleTick:1.0,  label:'Filling Rations'  }
+};
+
+const TERRAIN = [
+  "Flat basaltic plains. Good driving conditions.",
+  "Scattered regolith boulders — navigating carefully.",
+  "Ancient lava flows — firm surface, good traction.",
+  "Crater-pocked terrain. Slowing for obstacle avoidance.",
+  "Smooth highland plateau. Solar panels charging well.",
+  "Gentle slope descent. Gravity assist mode active.",
+  "Rough ejecta field from nearby impact crater.",
+  "Fine regolith powder — light dust kicked up by wheels.",
+  "Solid anorthosite bedrock. Maximum traction.",
+  "Ascending highland flank. Power draw increased."
+];
+
+const EPITAPHS = {
+  power:  ["The rover stopped. The silence of the moon filled everything.",
+           "In the end, it wasn't the mission that ran out — it was the battery.",
+           "They had 18% power left. They thought it would be enough."],
+  oxygen: ["The air recycler blinked red one last time.",
+           "Mission control heard nothing for 47 minutes before the signal cut.",
+           "They made it 1,847km on one breath."],
+  food:   ["Day 61. The last ration was shared equally, without complaint.",
+           "Hunger was the last thing they felt.",
+           "They had driven so far. Just not far enough."],
+  crew:   ["The mission ended when the last crew member couldn't continue.",
+           "Three flags were planted. Not at the destination.",
+           "They went together. All of them."],
+  morale: ["The rover was functional. The crew was not.",
+           "Nobody called it quits. It just... stopped.",
+           "When you break a person's spirit on the moon, there's nowhere to send them home."]
+};
+
+// ── WAYPOINTS ─────────────────────────────────────────────
+const WAYPOINTS = [
+  { name:"Mare Tranquillitatis Edge", km:400,
+    flavor:"You've crossed the Sea of Tranquility. Terrain gets rougher from here. A pre-positioned supply cache is available.",
+    scene:'images/scenes/waypoint_tranquillitatis.png', credits:400,
+    stock:{ powerCells:{p:180,q:3}, oxygenCanisters:{p:130,q:4}, foodBoxes:{p:45,q:8}, repairKits:{p:270,q:2}, medKits:{p:225,q:2} }
+  },
+  { name:"Malapert Ridge Station", km:1000,
+    flavor:"A semi-permanent habitat with a skeleton crew of two. Hot food. Real beds. Lunar gravity — still an upgrade.",
+    scene:'images/scenes/waypoint_malapert.png', credits:500,
+    stock:{ powerCells:{p:200,q:5}, oxygenCanisters:{p:150,q:6}, foodBoxes:{p:50,q:12}, repairKits:{p:300,q:3}, medKits:{p:250,q:3} }
+  },
+  { name:"Schrodinger Basin Cache", km:1700,
+    flavor:"An unmanned depot at the edge of the South Pole-Aitken Basin. The views are unbelievable. The supplies are whatever survived.",
+    scene:'images/scenes/waypoint_schrodinger.png', credits:300,
+    stock:{ powerCells:{p:220,q:2}, oxygenCanisters:{p:160,q:3}, foodBoxes:{p:55,q:6}, repairKits:{p:320,q:2}, medKits:{p:260,q:1} }
+  }
+];
+
+// ── EVENTS DATABASE ───────────────────────────────────────
+const EVENTS = [
+  {
+    id:'battery_drain', cat:'⚡ POWER ALERT', title:"Battery Drain Detected", minDay:1, weight:8,
+    desc:"Your rover's battery management system is throwing alerts. One of the power cells has developed a micro-fracture and is draining the reserve at twice the normal rate. If left unchecked, you could lose 30% of your power before the next charging window.",
+    scene:'images/scenes/event_battery_drain.png',
+    choices:[
+      { text:"🔩 Use a repair kit to seal the cell (costs 1 repair kit)", req:{repairKits:1},
+        out:{ title:"Cell Sealed", desc:"Your engineer patches the fracture with thermal sealant. Power drain stops immediately.", scene:'images/scenes/result_repair_success.png', fx:{repairKits:-1}, log:"Repaired cracked power cell.", tone:'good' }},
+      { text:"⚡ Swap to backup power cells (costs 2 power cells)", req:{powerCells:2},
+        out:{ title:"Power Cells Swapped", desc:"You pull two backup cells from storage and swap out the damaged one. Inefficient, but it works.", scene:'images/scenes/result_cells_swapped.png', fx:{powerCells:-2}, log:"Swapped damaged power cell.", tone:'alert' }},
+      { text:"🚗 Sprint to the next shaded crater before power gets critical", req:{},
+        out:{ title:"Desperate Sprint", desc:"You push to maximum speed. You reach shade, but the damaged cell loses 25% charge during the sprint.", scene:'images/scenes/result_sprint_shade.png', fx:{power:-25,food:-5,morale:-10}, log:"Emergency sprint to shade. Power critically low.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'forgot_charge', cat:'⚡ POWER FAILURE', title:"You Forgot to Charge", minDay:3, weight:5,
+    desc:"It was your watch. The solar charging cycle ran overnight — or it was supposed to. The panels didn't charge. You've been running on residual battery all day. Current power level: 18%. In this environment, that's not funny.",
+    scene:'images/scenes/event_forgot_charge.png',
+    choices:[
+      { text:"⚡ Emergency charge stop — deploy panels now, camp for 8 hours", req:{},
+        out:{ title:"Emergency Charging", desc:"You pull over immediately. Eight hours of anxious waiting. The crew is annoyed. The battery is not.", scene:'images/scenes/result_emergency_charge.png', fx:{power:45,morale:-15,food:-8}, log:"Emergency 8-hour charge stop. Lost a day.", tone:'alert' }},
+      { text:"🔩 Tap spare power cells to top up while driving slowly", req:{powerCells:3},
+        out:{ title:"Rolling Charge", desc:"You tap the reserves and creep forward at minimum speed. Inefficient but you don't lose the whole day.", scene:'images/scenes/result_rolling_charge.png', fx:{powerCells:-3,power:30}, log:"Burned backup cells to keep moving. Expensive lesson.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'solar_flare', cat:'☀️ SOLAR EVENT', title:"Solar Flare Incoming", minDay:5, weight:5,
+    desc:"Mission control is broadcasting a Class X solar flare warning. In 90 minutes, a wave of charged particles will bombard the lunar surface. Your solar panels will be fried if left deployed. But retracting them means no charging for 36 hours.",
+    scene:'images/scenes/event_solar_flare.png',
+    choices:[
+      { text:"🛡️ Retract panels and shelter the crew (36 hrs no charging)", req:{},
+        out:{ title:"Sheltering In Place", desc:"Smart call. The flare hits hard. The crew is fine. The panels are fine. You're just stuck for a day and a half.", scene:'images/scenes/result_shelter_flare.png', fx:{power:-20,morale:-5,food:-10}, log:"Sheltered through solar flare. 36 hrs lost.", tone:'alert' }},
+      { text:"⚡ Keep panels up until the last second for maximum charge", req:{},
+        out:{ title:"Cutting It Close", desc:"You wait too long. The flare catches the trailing edge of one panel. Damaged but functional. Charging efficiency drops.", scene:'images/scenes/result_flare_hit.png', fx:{power:20,morale:-5}, special:'chargeReduced', log:"Flare hit solar panel. Charging efficiency reduced.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'lunar_night', cat:'🌑 LUNAR NIGHT WARNING', title:"Lunar Night in 48 Hours", minDay:12, weight:10,
+    desc:"The terminator line is visible on the horizon — the advancing boundary between lunar day and night. In 48 hours, you'll lose all solar power for 14 Earth days. Temperatures drop to -173°C. How do you prepare?",
+    scene:'images/scenes/event_lunar_night.png',
+    choices:[
+      { text:"⚡ Full charge + deploy backup cells + park in crater wall shadow", req:{powerCells:2},
+        out:{ title:"Well-Prepared for Night", desc:"You find a crater wall for insulation. Panels charged, backup cells deployed. 14 days is a long time, but you're ready.", scene:'images/scenes/result_night_prepared.png', fx:{powerCells:-2,power:20,morale:-10,food:-20}, log:"Parked for lunar night. Well stocked.", tone:'good' }},
+      { text:"🚗 Floor it — try to outrun the terminator line", req:{},
+        out:{ title:"Racing the Terminator", desc:"You drive 18 straight hours. The night catches you in open terrain with almost no prep time.", scene:'images/scenes/result_night_caught.png', fx:{power:-30,food:-15,morale:-20}, log:"Caught by lunar night in open terrain.", tone:'bad' }},
+      { text:"💤 Pre-night rest cycle — crew sleeps 16 hours, then charge hard", req:{},
+        out:{ title:"Strategic Rest", desc:"Crew sleeps while panels charge. You enter the night well-rested and at decent power.", scene:'images/scenes/result_night_rested.png', fx:{power:15,food:-8,morale:15}, log:"Pre-night rest cycle complete. Crew ready.", tone:'good' }}
+    ]
+  },
+  {
+    id:'night_crisis', cat:'🌑 NIGHT CRISIS', title:"Day 7 of Lunar Night", minDay:15, weight:6,
+    desc:"A week into the darkness. -168°C outside. The heaters are consuming power faster than expected — an undercarriage insulation seal is failing. Three more days until dawn.",
+    scene:'images/scenes/event_night_crisis.png',
+    choices:[
+      { text:"🔩 Night EVA to patch the seal (needs repair kit)", req:{repairKits:1},
+        out:{ title:"Successful Night EVA", desc:"Your engineer steps into absolute darkness. Twenty nightmare minutes. But the seal gets patched and power drain drops.", scene:'images/scenes/result_night_eva.png', fx:{repairKits:-1,power:15,morale:-10}, log:"Night EVA successful. Seal repaired.", tone:'good' }},
+      { text:"🥶 Reduce cabin temp by 5°C to cut heater draw", req:{},
+        out:{ title:"Thermal Conservation Mode", desc:"The crew bundles up. Miserable but survivable. Power drain drops enough to reach dawn.", scene:'images/scenes/result_cold_cabin.png', fx:{power:10,morale:-25,food:5}, log:"Reduced cabin temp. Crew uncomfortable but alive.", tone:'alert' }},
+      { text:"⚡ Burn through reserves — keep everyone warm, deal with it at dawn", req:{},
+        out:{ title:"Burning Through Reserves", desc:"Everyone stays warm. Morale holds. But when dawn comes you're at 8% battery. That's a dangerous margin.", scene:'images/scenes/result_reserves_burned.png', fx:{power:-35,morale:10}, log:"Burned through reserves. Dawn at 8% power.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'micrometeorite', cat:'☄️ IMPACT EVENT', title:"Micrometeorite Strike", minDay:2, weight:7,
+    desc:"A sharp crack. Then another. A cluster of micrometeorites — rocks moving at 20 km/s — pepper the rover. The viewport is cracked but holding. The right rear wheel hub is damaged and grinding.",
+    scene:'images/scenes/event_micrometeorite.png',
+    choices:[
+      { text:"🔩 Stop and fully repair the wheel hub (1 repair kit, 6 hours)", req:{repairKits:1},
+        out:{ title:"Wheel Hub Repaired", desc:"Six hours of careful work. Your engineer emerges covered in regolith dust. Wheel hub solid, viewport patched with epoxy.", scene:'images/scenes/result_wheel_repaired.png', fx:{repairKits:-1,food:-8}, log:"Micrometeorite damage repaired. 6 hours lost.", tone:'good' }},
+      { text:"🚗 Apply field patch and keep moving — monitor the hub", req:{},
+        out:{ title:"Field Patch Applied", desc:"Quick fix with lunar tape. It'll hold — probably. The grinding is down to a hum. Every bump is a reminder this isn't fixed.", scene:'images/scenes/result_field_patch.png', fx:{morale:-10}, special:'roverDegraded', log:"Hub field-patched. Monitoring for damage.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'dust_storm', cat:'🌪️ DUST STORM', title:"Electrostatic Dust Storm", minDay:4, weight:7,
+    desc:"The surface ahead is alive with moving dust — an electrostatic storm kicked up by the terminator line temperature differential. Visibility is near zero. The dust is clogging filters and clinging to solar panels. This could last 2–4 days.",
+    scene:'images/scenes/event_dust_storm.png',
+    choices:[
+      { text:"🛑 Park and wait it out — run on minimum power", req:{},
+        out:{ title:"Waiting Out the Storm", desc:"Three days watching gray dust swirl past the viewport. Morale frays at the edges, but you emerge with clean panels and a working air system.", scene:'images/scenes/result_wait_storm.png', fx:{power:-15,food:-18,morale:-20}, log:"Waited out 3-day dust storm.", tone:'alert' }},
+      { text:"🚗 Drive through slowly — 20% speed, radar navigation", req:{},
+        out:{ title:"Driving Through", desc:"The rover crawls through at walking pace. Radar guides you around craters. Progress made, but filtration takes a beating.", scene:'images/scenes/result_drive_storm.png', fx:{power:-20,oxygen:-10,morale:-10}, log:"Drove through dust storm. Filters strained.", tone:'alert' }},
+      { text:"🔧 Engineer bypasses filtration — keeps filters clean (1 repair kit)", req:{repairKits:1},
+        out:{ title:"Filtration Bypass", desc:"Engineer rigs a bypass through a secondary membrane. Not rated for extended use, but it works. You drive through without filter damage.", scene:'images/scenes/result_filter_bypass.png', fx:{repairKits:-1,morale:5}, log:"Engineer bypassed filtration. Storm navigated cleanly.", tone:'good' }}
+    ]
+  },
+  {
+    id:'regolith_sink', cat:'⚠️ TERRAIN HAZARD', title:"Regolith Sink", minDay:2, weight:6,
+    desc:"The front wheels drop with a stomach-churning lurch. You've hit a regolith sink — a pocket of loose deep dust that wasn't visible on surface radar. Buried to the axle. Not going anywhere under its own power.",
+    scene:'images/scenes/event_regolith_sink.png',
+    choices:[
+      { text:"👷 EVA with traction boards — manually rock the rover free", req:{},
+        out:{ title:"Manual Extraction", desc:"All four suit up. Two hours placing boards, rocking the rover, slowly extracting it. Everyone is exhausted. But you're free.", scene:'images/scenes/result_rover_freed.png', fx:{power:-10,food:-10,morale:-20}, log:"Freed rover from regolith sink. Crew exhausted.", tone:'alert' }},
+      { text:"🔩 Use winch anchor kit — drive a spike and winch out (1 repair kit)", req:{repairKits:1},
+        out:{ title:"Winch Extraction", desc:"Engineer fires a spike anchor and runs the winch. Clean and efficient. Out in 30 minutes.", scene:'images/scenes/result_winch_success.png', fx:{repairKits:-1,food:-3,morale:5}, log:"Winch extraction. Quick recovery.", tone:'good' }}
+    ]
+  },
+  {
+    id:'scrubber_fail', cat:'🫁 LIFE SUPPORT ALERT', title:"CO₂ Scrubber Failure", minDay:3, weight:6,
+    desc:"The primary CO₂ scrubber has gone offline. Carbon dioxide levels are rising. You have about 4 hours before dangerous levels. The backup scrubber handles 60% of the load — enough to survive, but the crew will get headaches and cognitive impairment.",
+    scene:'images/scenes/event_scrubber_fail.png',
+    choices:[
+      { text:"🔩 Repair primary scrubber (1 repair kit, 3 hours stopped)", req:{repairKits:1},
+        out:{ title:"Scrubber Repaired", desc:"Your engineer replaces the failed lithium hydroxide assembly. Three tense hours later, the primary system is back online.", scene:'images/scenes/result_scrubber_fixed.png', fx:{repairKits:-1,oxygen:10,food:-5}, log:"Primary CO2 scrubber repaired. Air clear.", tone:'good' }},
+      { text:"🫁 Crack an emergency O₂ canister — flush CO₂ out (1 O₂ canister)", req:{oxygenCanisters:1},
+        out:{ title:"Emergency O₂ Flush", desc:"You crack a reserve canister and flush the cabin. Wasteful but effective. The crew breathes easily again.", scene:'images/scenes/result_o2_flush.png', fx:{oxygenCanisters:-1,oxygen:20}, log:"O2 flush performed. Air stable.", tone:'alert' }},
+      { text:"😮 Reduce activity, run on backup — push to next waypoint", req:{},
+        out:{ title:"Running on Backup", desc:"Everyone slows down. Splitting headaches. You push 90km to the next waypoint. Everyone is worse for wear.", scene:'images/scenes/result_scrubber_limp.png', fx:{oxygen:-20,morale:-25,food:5}, special:'crewHealth', log:"Operating on backup scrubber. Crew health degraded.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'crew_conflict', cat:'😤 CREW CONFLICT', title:"Cabin Fever Breaks", minDay:8, weight:7,
+    desc:"Weeks cooped up in a pressurized rover. Two crew members have stopped speaking. Today it escalated — a food pack thrown across the cabin, harsh words exchanged. The tension is affecting everyone's focus.",
+    scene:'images/scenes/event_crew_conflict.png',
+    choices:[
+      { text:"🎙️ Hold a formal crew meeting — air grievances, new protocols", req:{},
+        out:{ title:"Tension Cleared", desc:"It's uncomfortable. Things are said. Eventually something shifts. They're professionals again. A weight lifts from the cabin.", scene:'images/scenes/result_crew_talk.png', fx:{morale:20,food:-5}, log:"Crew meeting held. Conflict addressed.", tone:'good' }},
+      { text:"🎮 Deploy morale pack — games, extra rations, music from the data drive", req:{},
+        out:{ title:"Morale Pack Deployed", desc:"NASA packed a comfort kit for exactly this scenario. Board games. A curated playlist. Double rations for one night. Works better than therapy.", scene:'images/scenes/result_morale_pack.png', fx:{morale:30,food:-10}, log:"Morale pack deployed. Crew bonding.", tone:'good' }},
+      { text:"😑 Ignore it — they'll sort themselves out", req:{},
+        out:{ title:"Conflict Festers", desc:"Bad call. By end of week, the friction has spread. Small mistakes start happening. Morale in free fall.", scene:'images/scenes/result_conflict_ignored.png', fx:{morale:-30,food:-5}, log:"Conflict ignored. Spreading through crew.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'crew_injury', cat:'💊 MEDICAL ALERT', title:"EVA Injury", minDay:5, weight:6,
+    desc:"During external inspection, your medical officer took a tumble on the regolith. A jagged fragment punctured the outer suit layer before the inner seal held. They're inside and physically fine, but their suit needs repair and their shoulder is badly wrenched.",
+    scene:'images/scenes/event_crew_injury.png',
+    choices:[
+      { text:"💉 Full treatment + suit repair (1 med kit + 1 repair kit)", req:{medKits:1,repairKits:1},
+        out:{ title:"Full Recovery", desc:"Treated, rested, back in rotation within 24 hours. Suit patched. No long-term impact.", scene:'images/scenes/result_injury_treated.png', fx:{medKits:-1,repairKits:-1,morale:10}, log:"Crew injury treated. Full recovery.", tone:'good' }},
+      { text:"💉 Treat the shoulder — restrict EVA for 3 days (1 med kit)", req:{medKits:1},
+        out:{ title:"Light Duty Recovery", desc:"Medic treated and moved to light duty. Shoulder heals. Short-handed for EVAs a few days.", scene:'images/scenes/result_light_duty.png', fx:{medKits:-1,morale:-5}, log:"Crew on light duty. EVA capability reduced.", tone:'alert' }},
+      { text:"😬 Basic first aid — tough it out (no kit spent)", req:{},
+        out:{ title:"Roughing It", desc:"Bandaged, ibuprofen, stoic acceptance. Slow healing over two weeks. Constant low-grade pain. Morale suffers.", scene:'images/scenes/result_tough_it_out.png', fx:{morale:-20}, special:'crewHealth', log:"Crew injury untreated. Operating in pain.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'radiation', cat:'☢️ RADIATION ALERT', title:"Elevated Radiation Reading", minDay:7, weight:5,
+    desc:"Your dosimeter is blinking. You've been crossing a region of heightened cosmic ray flux near the lunar highlands. Crew exposure has crossed the yellow threshold. Not immediately dangerous, but prolonged exposure increases cancer risk and causes cognitive fatigue.",
+    scene:'images/scenes/event_radiation.png',
+    choices:[
+      { text:"💉 Administer radiation meds — protect crew for 10 days (1 med kit)", req:{medKits:1},
+        out:{ title:"Radiation Meds Given", desc:"The medical officer administers potassium iodide and radioprotective compounds. The crew continues with confidence.", scene:'images/scenes/result_rad_meds.png', fx:{medKits:-1,morale:10}, log:"Radiation meds administered. Crew protected.", tone:'good' }},
+      { text:"🛡️ Reroute through lower terrain — longer but shielded by crater walls", req:{},
+        out:{ title:"Shielded Route", desc:"You detour into deep craters. Crater walls block cosmic ray flux. You lose time but gain protection.", scene:'images/scenes/result_shielded_route.png', fx:{power:-15,food:-12,morale:-5}, special:'distancePenalty', log:"Rerouted through shielded terrain. Detour taken.", tone:'alert' }},
+      { text:"🚗 Push through — within acceptable parameters (barely)", req:{},
+        out:{ title:"Accepting Exposure", desc:"Two crew members develop persistent headaches and fatigue. Mission-critical but not mission-ending.", scene:'images/scenes/result_rad_exposure.png', fx:{morale:-20}, special:'crewHealth', log:"Crew radiation above threshold. Fatigue increasing.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'crater', cat:'🗺️ NAVIGATION', title:"Unmapped Crater", minDay:6, weight:6,
+    desc:"The orbital map shows flat terrain ahead. What's actually ahead is a 2km-wide, 400m-deep crater that formed after the maps were made. Go around adds 180km. Go through means steep descent on loose regolith.",
+    scene:'images/scenes/event_crater.png',
+    choices:[
+      { text:"🔄 Go around — adds ~180km to the journey", req:{},
+        out:{ title:"Taking the Long Way", desc:"You add 180km to the journey. Terrain is flat and boring. The crew is frustrated. But the rover is fine.", scene:'images/scenes/result_go_around.png', fx:{power:-20,food:-15,morale:-10}, special:'distancePenalty', log:"Detoured around unmapped crater. +180km added.", tone:'alert' }},
+      { text:"⬇️ Descend through the crater — use cable brake system", req:{},
+        out:{ title:"Crater Descent", desc:"You rig the cable brake and descend. Terrifying. Regolith slides the whole way down. The ascent is worse. You make it, saving 180km.", scene:'images/scenes/result_crater_descent.png', fx:{power:-15,morale:-15,food:-10}, log:"Navigated through crater. Harrowing but successful.", tone:'alert' }},
+      { text:"📡 Radio mission control for alternate route guidance", req:{},
+        out:{ title:"Mission Control Reroutes", desc:"Houston finds a compromise — a 90km detour through a lava tube channel. Slightly longer, much safer.", scene:'images/scenes/result_mc_reroute.png', fx:{power:-10,food:-8,morale:5}, log:"Mission control provided alternate route.", tone:'good' }}
+    ]
+  },
+  {
+    id:'lava_tube', cat:'🌟 DISCOVERY', title:"Lava Tube Entrance", minDay:10, weight:4,
+    desc:"Your science officer grabs your arm. A dark opening in the crater wall ahead — 8 meters wide. A lava tube. Untouched. Possibly running parallel to your route for kilometers. Also a perfect natural shelter.",
+    scene:'images/scenes/event_lava_tube.png',
+    choices:[
+      { text:"🔬 Send science officer in with sample kit (4 hours, EVA consumables)", req:{},
+        out:{ title:"Lava Tube Surveyed", desc:"The science officer returns grinning, holding ancient volcanic rock. Mission control is thrilled. The crew's morale surges — this is why you came.", scene:'images/scenes/result_tube_survey.png', fx:{morale:25,food:-8,oxygen:-10}, log:"Lava tube surveyed. Scientific discovery!", tone:'good' }},
+      { text:"🛡️ Use tube as shelter — camp inside, protected from cosmic rays", req:{},
+        out:{ title:"Natural Shelter", desc:"You drive into the tube and camp. The crew sleeps better than they have in weeks — protected, stable temperature, no cosmic ray flux.", scene:'images/scenes/result_tube_shelter.png', fx:{morale:20,power:10}, log:"Camped in lava tube. Best sleep in weeks.", tone:'good' }},
+      { text:"🚗 Log it and keep moving — mission schedule matters", req:{},
+        out:{ title:"Logged and Moving", desc:"You note the coordinates and file a report. Your science officer doesn't speak for two hours.", scene:'images/scenes/result_tube_skipped.png', fx:{morale:-10}, log:"Lava tube logged. Science officer sulking.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'supply_cache', cat:'📦 SUPPLY CACHE', title:"Unmanned Cache Located", minDay:15, weight:5,
+    desc:"Your orbital map shows a pre-positioned supply cache 12km off your route. Dropped by a cargo lander two years ago in preparation for this mission. It should contain supplies, though there's no guarantee everything survived.",
+    scene:'images/scenes/event_supply_cache.png',
+    choices:[
+      { text:"📦 Divert 12km to retrieve the cache", req:{},
+        out:{ title:"Cache Recovered", desc:"The cache is intact. Six ration boxes, two oxygen canisters, and a repair kit — all vacuum-sealed and perfect.", scene:'images/scenes/result_cache_success.png', fx:{foodBoxes:6,oxygenCanisters:2,repairKits:1,morale:15}, log:"Supply cache recovered. Significant resupply.", tone:'good' }},
+      { text:"🚗 Skip it — 24km round trip isn't worth it", req:{},
+        out:{ title:"Cache Skipped", desc:"You stay the course. Three days later, you wish you hadn't.", scene:'images/scenes/result_cache_skipped.png', fx:{morale:-5}, log:"Skipped supply cache. Staying on direct route.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'smooth_drive', cat:'✅ FAVORABLE CONDITIONS', title:"Exceptional Driving Conditions", minDay:5, weight:8,
+    desc:"Three consecutive days of smooth basaltic plain, perfect sun angle, calm regolith. The rover is performing above spec. You've made exceptional time.",
+    scene:'images/scenes/event_smooth_drive.png',
+    choices:[
+      { text:"🚗 Push hard — maximize distance covered", req:{},
+        out:{ title:"Great Progress", desc:"You cover 340km in three days — nearly double average pace. The crew is energized. You're ahead of schedule.", scene:'images/scenes/result_great_progress.png', fx:{power:10,morale:20,food:-8}, special:'distanceBonus', log:"Exceptional conditions. Covered 340km in 3 days.", tone:'good' }},
+      { text:"💤 Use the time to rest and do maintenance", req:{},
+        out:{ title:"Maintenance Day", desc:"Full systems check. Everything tightened, cleaned, calibrated. The rover feels like new. So does the crew.", scene:'images/scenes/result_maintenance.png', fx:{morale:15,power:20}, log:"Full maintenance day completed. Systems optimal.", tone:'good' }}
+    ]
+  },
+  {
+    id:'earth_call', cat:'📡 COMMS', title:"Scheduled Earth Call", minDay:14, weight:5,
+    desc:"Mission control has approved a 30-minute personal comms window. Each crew member can contact family back on Earth. The 1.3-second signal delay makes it awkward. Nobody cares.",
+    scene:'images/scenes/event_earth_call.png',
+    choices:[
+      { text:"📡 Take the full 30 minutes — crew morale matters", req:{},
+        out:{ title:"Earth Contact Made", desc:"Thirty minutes. Tears on more than one visor. Your engineer's daughter drew a picture of the rover — looks more like a school bus, but nobody says so.", scene:'images/scenes/result_earth_call.png', fx:{morale:35}, log:"Earth comms completed. Crew deeply motivated.", tone:'good' }},
+      { text:"⏩ Keep it brief — 10 minutes, then back to work", req:{},
+        out:{ title:"Brief Check-In", desc:"Quick calls. Everyone heard a voice they love. It's enough.", scene:'images/scenes/result_brief_call.png', fx:{morale:15}, log:"Brief Earth contact. Crew checked in.", tone:'good' }}
+    ]
+  }
+];
+
+// ── GAME STATE ────────────────────────────────────────────
+let S = {};
+let selectedDiff = 'astronaut';
+let loadoutSpend = 0;
+let pendingOutcome = null;
+
+function resetState() {
+  S = {
+    day: 1, kmTraveled: 0, kmLeft: TOTAL_KM,
+    power: 85, oxygen: 100, food: 100, morale: 90,
+    powerCells: 0, oxygenCanisters: 0, foodBoxes: 0, repairKits: 0, medKits: 0,
+    credits: 0,
+    crew: [],
+    crewAlive: 4,
+    roverDegraded: false,
+    chargeReduced: false,
+    inNight: false,
+    nightDay: 0,
+    rationMode: 'standard',
+    difficulty: 'astronaut',
+    usedEvents: new Set(),
+    recentEvents: [],
+    waypointIdx: 0,
+    active: false
+  };
+}
+
+// ── SCREEN NAVIGATION ─────────────────────────────────────
+function goTitle()      { showScreen('screen-title'); }
+function goHowTo()      { showScreen('screen-howto'); }
+function goAbout()      { showScreen('screen-about'); }
+function goNames()      { showScreen('screen-names'); }
+
+function goLoadout() {
+  // Build crew from name inputs (only called once per game)
+  S.crew = ROLES.map((r, i) => {
+    const inp = $(`name-${i}`);
+    const name = (inp && inp.value.trim()) ? inp.value.trim() : r.def;
+    return { name, role:r.role, icon:r.icon, status:'healthy', condition:'nominal', alive:true };
+  });
+  loadoutSpend = 0;
+  refreshLoadoutUI();
+  showScreen('screen-loadout');
+}
+
+function goDifficulty() { showScreen('screen-difficulty'); }
+
+// ── LOADOUT LOGIC ─────────────────────────────────────────
+function refreshLoadoutUI() {
+  const rem = BUDGET - loadoutSpend;
+  $('budget-total').textContent    = '$' + BUDGET.toLocaleString();
+  $('budget-remaining').textContent = '$' + rem.toLocaleString();
+  ['powerCells','oxygenCanisters','foodBoxes','repairKits','medKits'].forEach(k => {
+    const el = $('qty-' + k);
+    if (el) el.textContent = S[k] || 0;
+  });
+}
+
+function adjustItem(item, dir) {
+  const price = PRICES[item];
+  const cur   = S[item] || 0;
+  if (dir > 0 && loadoutSpend + price > BUDGET) return;
+  if (dir < 0 && cur <= 0) return;
+  S[item] = cur + dir;
+  loadoutSpend += dir * price;
+  refreshLoadoutUI();
+}
+
+// Wire up loadout +/− buttons
+document.querySelectorAll('.qty-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    adjustItem(btn.dataset.item, parseInt(btn.dataset.dir));
+  });
+});
+
+// ── DIFFICULTY ────────────────────────────────────────────
+function selectDiff(d) {
+  selectedDiff = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+  $('diff-' + d).classList.add('selected');
+}
+
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => selectDiff(btn.dataset.diff));
+});
+
+// ── LAUNCH ────────────────────────────────────────────────
+function launchMission() {
+  S.difficulty = selectedDiff;
+  S.credits    = BUDGET - loadoutSpend;
+
+  // Safety minimums
+  if (S.foodBoxes === 0)         { S.foodBoxes = 5;         addLog("Mission control added minimum food.", 'alert'); }
+  if (S.oxygenCanisters === 0)   { S.oxygenCanisters = 3;   addLog("Mission control added minimum oxygen.", 'alert'); }
+
+  S.active = true;
+  refreshGameUI();
+  setGameScene('images/scenes/traveling.png', 'TRAVELING');
+  showScreen('screen-game');
+
+  addLog("Mission commenced. Drive safe out there.", 'good');
+  addLog(`Destination: Shackleton Station — ${TOTAL_KM}km south.`, '');
+  addLog(`Crew: ${S.crew.map(c=>c.name).join(', ')}.`, '');
+}
+
+// ── GAME UI ───────────────────────────────────────────────
+function refreshGameUI() {
+  $('hud-day').textContent  = S.day;
+  $('hud-dist').textContent = Math.max(0, S.kmLeft).toLocaleString();
+  $('hud-phase').textContent = S.inNight ? '🌑 NIGHT' : '☀️ DAY';
+
+  const wp = WAYPOINTS[S.waypointIdx];
+  $('hud-location').textContent = S.kmTraveled < 50 ? 'Tranquility Base' : (wp ? '→ ' + wp.name : 'Final Stretch');
+
+  setBar('power',  S.power);
+  setBar('oxygen', S.oxygen);
+  setBar('food',   S.food);
+  setBar('morale', S.morale);
+
+  $('inv-pc').textContent   = S.powerCells;
+  $('inv-o2').textContent   = S.oxygenCanisters;
+  $('inv-food').textContent = S.foodBoxes;
+  $('inv-rk').textContent   = S.repairKits;
+  $('inv-mk').textContent   = S.medKits;
+  $('inv-cr').textContent   = S.credits;
+
+  renderCrew();
+  $('terrain-note').textContent = TERRAIN[Math.floor(Math.random() * TERRAIN.length)];
+}
+
+function setBar(res, val) {
+  const pct = Math.max(0, Math.min(100, val));
+  $('bar-' + res).style.width = pct + '%';
+  $('pct-' + res).textContent = Math.round(pct) + '%';
+}
+
+function renderCrew() {
+  const list = $('crew-list');
+  list.innerHTML = '';
+  S.crew.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'crew-entry';
+
+    const dot = document.createElement('div');
+    dot.className = 'status-dot dot-' + (m.alive ? m.status : 'dead');
+
+    const nm = document.createElement('span');
+    nm.className = 'crew-nm' + (m.alive ? '' : ' dead');
+    nm.textContent = m.icon + ' ' + m.name;
+
+    const cond = document.createElement('span');
+    cond.className = 'crew-cond';
+    cond.textContent = m.alive ? m.condition : 'KIA';
+
+    div.appendChild(dot); div.appendChild(nm); div.appendChild(cond);
+    list.appendChild(div);
+  });
+}
+
+function setGameScene(src, label) {
+  const img = $('game-scene-img');
+  const lbl = $('game-scene-label');
+  const pth = $('game-scene-path');
+  img.src = src;
+  img.onload  = () => img.classList.add('loaded');
+  img.onerror = () => img.classList.remove('loaded');
+  img.classList.remove('loaded');
+  lbl.textContent = '[ ' + label + ' ]';
+  pth.textContent = src;
+}
+
+function addLog(msg, tone) {
+  const log = $('log');
+  const d = document.createElement('div');
+  d.className = 'log-line' + (tone ? ' ' + tone : '');
+  d.textContent = '[D' + S.day + '] ' + msg;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+// ── ACTION HANDLERS ───────────────────────────────────────
+function actDrive() {
+  if (!S.active) return;
+  const days = 5 + Math.floor(Math.random() * 3);
+  advanceTime(days);
+}
+
+function actCharge() {
+  if (!S.active) return;
+  if (S.inNight) { addLog("Cannot charge during lunar night — no sunlight.", 'alert'); return; }
+  const gain = S.chargeReduced ? 30 : 45;
+  S.power = Math.min(100, S.power + gain);
+  S.food  = Math.max(0, S.food - 5);
+  if (S.foodBoxes > 0) S.foodBoxes--;
+  addLog(`Solar array deployed. Power +${gain}%.`, 'good');
+  refreshGameUI();
+  checkGameOver();
+}
+
+function actRations() {
+  if (!S.active) return;
+  const order = ['meager','standard','filling'];
+  const idx   = order.indexOf(S.rationMode);
+  S.rationMode = order[(idx + 1) % order.length];
+  addLog('Ration mode: ' + RATIONS[S.rationMode].label + '.', 'alert');
+}
+
+function actRest() {
+  if (!S.active) return;
+  S.morale = Math.min(100, S.morale + 15);
+  S.power  = Math.max(0, S.power - 8);
+  S.food   = Math.max(0, S.food - 8);
+  if (S.foodBoxes > 0) S.foodBoxes--;
+  S.day++;
+  S.crew.forEach(c => { if (c.alive && c.status === 'injured') c.condition = 'recovering'; });
+  addLog(`Crew rested. Morale +15. Day ${S.day}.`, 'good');
+  refreshGameUI();
+}
+
+function actStatus() {
+  if (!S.active) return;
+  addLog(`Day ${S.day} | ${S.kmTraveled}km traveled, ${S.kmLeft}km to go.`, '');
+  addLog(`Power:${Math.round(S.power)}% O₂:${Math.round(S.oxygen)}% Food:${Math.round(S.food)}% Morale:${Math.round(S.morale)}%`, '');
+  addLog(`Cells:${S.powerCells} O₂cans:${S.oxygenCanisters} Food:${S.foodBoxes} Repair:${S.repairKits} Med:${S.medKits}`, '');
+}
+
+function actAbort() {
+  if (confirm('Abort mission and return to main menu?')) {
+    S.active = false;
+    goTitle();
+  }
+}
+
+// ── CORE ADVANCEMENT ──────────────────────────────────────
+function advanceTime(days) {
+  const diff = DIFF[S.difficulty];
+  const kmPerDay = S.roverDegraded ? 18 : 26;
+  const dist = kmPerDay * days;
+
+  S.kmTraveled += dist;
+  S.kmLeft = Math.max(0, TOTAL_KM - S.kmTraveled);
+  S.day += days;
+
+  // Resource drain
+  const rm = RATIONS[S.rationMode].mult;
+  S.power  = Math.max(0, S.power  - 3.5 * days * diff.resMult);
+  S.oxygen = Math.max(0, S.oxygen - 2.0 * days * diff.resMult);
+  S.food   = Math.max(0, S.food   - 3.0 * days * diff.resMult * rm);
+  S.morale = Math.max(0, Math.min(100, S.morale + RATIONS[S.rationMode].moraleTick * days));
+  if (S.day > 20) S.morale = Math.max(0, S.morale - 0.5 * days); // long-term morale decay
+
+  // Auto-consume reserves
+  if (S.oxygen < 20 && S.oxygenCanisters > 0) { S.oxygen = Math.min(100, S.oxygen + 40); S.oxygenCanisters--; addLog("Auto-tapped O₂ canister.", 'alert'); }
+  if (S.food   < 20 && S.foodBoxes > 0)       { S.food   = Math.min(100, S.food + 30);   S.foodBoxes--;       addLog("Opened ration box.", 'alert'); }
+  if (S.power  < 15 && S.powerCells > 0)      { S.power  = Math.min(100, S.power + 30);  S.powerCells--;      addLog("Emergency power cell activated!", 'alert'); }
+
+  // Lunar night check
+  checkNight();
+
+  addLog(`Traveled ${dist}km. Day ${S.day}. ${Math.round(S.kmLeft)}km remain.`, '');
+
+  // Waypoint check
+  if (checkWaypoint()) return;
+
+  // Destination check
+  if (S.kmLeft <= 0) { refreshGameUI(); triggerVictory(); return; }
+
+  // Event check
+  const evFired = tryEvent();
+  if (!evFired) { refreshGameUI(); checkGameOver(); }
+}
+
+function checkNight() {
+  const cycle = S.day % 28;
+  if (cycle >= 14 && !S.inNight) {
+    S.inNight = true; S.nightDay = 0;
+    addLog("⚠️ LUNAR NIGHT BEGINS. Solar charging offline.", 'bad');
+  } else if (cycle < 14 && S.inNight) {
+    S.inNight = false; S.nightDay = 0;
+    addLog("☀️ Lunar dawn. Solar panels back online.", 'good');
+  }
+  if (S.inNight) { S.power = Math.max(0, S.power - 5); S.nightDay++; }
+}
+
+function checkWaypoint() {
+  const wp = WAYPOINTS[S.waypointIdx];
+  if (!wp || S.kmTraveled < wp.km) return false;
+  S.waypointIdx++;
+  S.credits += wp.credits;
+  addLog(`Arrived at ${wp.name}. Received $${wp.credits}.`, 'good');
+  openWaypoint(wp);
+  return true;
+}
+
+function openWaypoint(wp) {
+  $('wp-title').textContent  = 'WAYPOINT: ' + wp.name.toUpperCase();
+  $('wp-flavor').textContent = wp.flavor;
+  setImg($('wp-img'), null, $('wp-img-path'), wp.scene, wp.name);
+  $('wp-credits').textContent = '$' + S.credits;
+
+  const shop = $('wp-shop');
+  shop.innerHTML = '';
+  const NAMES = { powerCells:'Power Cells', oxygenCanisters:'O₂ Canisters', foodBoxes:'Food Boxes', repairKits:'Repair Kits', medKits:'Medical Kits' };
+  Object.entries(wp.stock).forEach(([key, info]) => {
+    const card = document.createElement('div');
+    card.className = 'shop-card';
+    card.innerHTML = `<div class="shop-name">${NAMES[key]}</div>
+      <div class="shop-desc">Available: ${info.q} units</div>
+      <div class="shop-row">
+        <button class="qty-btn" onclick="waypointBuy('${key}',${info.p})">+ BUY</button>
+        <span class="shop-price">$${info.p} each</span>
+      </div>`;
+    shop.appendChild(card);
+  });
+  showScreen('screen-waypoint');
+}
+
+function waypointBuy(item, price) {
+  if (S.credits < price) { alert('Insufficient credits.'); return; }
+  S[item] = (S[item] || 0) + 1;
+  S.credits -= price;
+  $('wp-credits').textContent = '$' + S.credits;
+  addLog(`Purchased 1x ${item} for $${price}.`, 'good');
+}
+
+function leaveWaypoint() {
+  if (S.kmLeft <= 0) { triggerVictory(); return; }
+  refreshGameUI();
+  showScreen('screen-game');
+  checkGameOver();
+}
+
+// ── EVENTS ────────────────────────────────────────────────
+function tryEvent() {
+  const diff = DIFF[S.difficulty];
+  if (Math.random() > diff.freq) return false;
+
+  const eligible = EVENTS.filter(ev => {
+    if (S.usedEvents.has(ev.id)) return false;
+    if (S.recentEvents.includes(ev.id)) return false;
+    if (ev.minDay && S.day < ev.minDay) return false;
+    if (ev.id === 'night_crisis' && !S.inNight) return false;
+    return true;
+  });
+
+  if (eligible.length === 0) return false;
+
+  // Weighted pick
+  const total = eligible.reduce((s, e) => s + (e.weight || 5), 0);
+  let r = Math.random() * total;
+  let chosen = eligible[eligible.length - 1];
+  for (const ev of eligible) { r -= (ev.weight || 5); if (r <= 0) { chosen = ev; break; } }
+
+  S.usedEvents.add(chosen.id);
+  S.recentEvents = [chosen.id, ...S.recentEvents].slice(0, 3);
+  showEvent(chosen);
+  return true;
+}
+
+function showEvent(ev) {
+  $('ev-cat').textContent   = ev.cat;
+  $('ev-title').textContent = ev.title;
+  $('ev-desc').textContent  = ev.desc;
+  setImg($('ev-img'), $('ev-img-label'), $('ev-img-path'), ev.scene, ev.title);
+
+  const choices = $('ev-choices');
+  choices.innerHTML = '';
+  ev.choices.forEach((ch, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = ch.text;
+    const canAfford = Object.entries(ch.req || {}).every(([k, v]) => (S[k] || 0) >= v);
+    if (!canAfford) { btn.disabled = true; btn.textContent += '  [INSUFFICIENT RESOURCES]'; }
+    btn.addEventListener('click', () => resolveEvent(ch));
+    choices.appendChild(btn);
+  });
+
+  refreshGameUI();
+  showScreen('screen-event');
+}
+
+function resolveEvent(choice) {
+  const out  = choice.out;
+  const diff = DIFF[S.difficulty];
+  const changes = [];
+
+  // Apply resource effects
+  if (out.fx) {
+    Object.entries(out.fx).forEach(([k, delta]) => {
+      const scaled = Math.round(delta * diff.sevMult);
+      const bars = ['power','oxygen','food','morale'];
+      if (bars.includes(k)) {
+        const before = Math.round(S[k]);
+        S[k] = Math.max(0, Math.min(100, S[k] + scaled));
+        const d = Math.round(S[k]) - before;
+        if (d !== 0) changes.push({ text: label(k) + ': ' + (d>0?'+':'') + d + '%', pos: d>0 });
+      } else {
+        const before = S[k] || 0;
+        S[k] = Math.max(0, before + scaled);
+        const d = S[k] - before;
+        if (d !== 0) changes.push({ text: label(k) + ': ' + (d>0?'+':'') + d, pos: d>0 });
+      }
+    });
+  }
+
+  // Special effects
+  if (out.special) applySpecial(out.special, changes);
+
+  // Log
+  if (out.log) addLog(out.log, out.tone || '');
+
+  // Show result screen
+  $('res-title').textContent = out.title;
+  $('res-desc').textContent  = out.desc;
+  setImg($('res-img'), $('res-img-label'), $('res-img-path'), out.scene, out.title);
+
+  const box = $('res-changes');
+  box.innerHTML = '';
+  if (changes.length === 0) {
+    box.innerHTML = '<div class="change neu">No immediate resource change.</div>';
+  } else {
+    changes.forEach(ch => {
+      const d = document.createElement('div');
+      d.className = 'change ' + (ch.pos ? 'pos' : 'neg');
+      d.textContent = (ch.pos ? '▲' : '▼') + ' ' + ch.text;
+      box.appendChild(d);
+    });
+  }
+
+  refreshGameUI();
+  showScreen('screen-result');
+}
+
+function applySpecial(effect, changes) {
+  if (effect === 'roverDegraded') {
+    S.roverDegraded = true;
+    changes.push({ text:'Rover speed reduced until proper repair', pos:false });
+  }
+  if (effect === 'chargeReduced') {
+    S.chargeReduced = true;
+    changes.push({ text:'Solar charging efficiency reduced', pos:false });
+  }
+  if (effect === 'crewHealth') {
+    const alive = S.crew.filter(c => c.alive);
+    if (alive.length > 0) {
+      const t = alive[Math.floor(Math.random() * alive.length)];
+      if (t.status === 'healthy')  { t.status = 'injured';  t.condition = 'injured';   changes.push({ text: t.name + ' is injured', pos:false }); }
+      else if (t.status === 'injured') { t.status = 'critical'; t.condition = 'critical';  changes.push({ text: t.name + ' critical condition', pos:false }); }
+      else { t.alive = false; t.condition = 'deceased'; S.crewAlive--; S.morale = Math.max(0, S.morale - 30);
+             changes.push({ text: t.name + ' has died', pos:false }); }
+    }
+  }
+  if (effect === 'distancePenalty') {
+    S.kmTraveled = Math.max(0, S.kmTraveled - 150);
+    S.kmLeft = Math.max(0, TOTAL_KM - S.kmTraveled);
+    changes.push({ text:'Route detour: +150km added to journey', pos:false });
+  }
+  if (effect === 'distanceBonus') {
+    S.kmTraveled = Math.min(TOTAL_KM, S.kmTraveled + 80);
+    S.kmLeft = Math.max(0, TOTAL_KM - S.kmTraveled);
+    changes.push({ text:'Exceptional conditions: −80km off journey', pos:true });
+  }
+}
+
+function continueFromResult() {
+  if (S.kmLeft <= 0) { triggerVictory(); return; }
+  const over = checkGameOver();
+  if (!over) showScreen('screen-game');
+}
+
+function label(k) {
+  return { power:'Power', oxygen:'Oxygen', food:'Food', morale:'Morale',
+           powerCells:'Power Cells', oxygenCanisters:'O₂ Canisters',
+           foodBoxes:'Ration Boxes', repairKits:'Repair Kits', medKits:'Med Kits' }[k] || k;
+}
+
+// ── GAME OVER ─────────────────────────────────────────────
+function checkGameOver() {
+  if (!S.active) return false;
+  if (S.kmLeft <= 0) { triggerVictory(); return true; }
+
+  let reason = null, cat = 'crew';
+  if (S.crewAlive <= 0)                      { reason = "All crew members have been lost. Mission aborted."; cat = 'crew'; }
+  else if (S.power  <= 0 && S.powerCells <= 0)    { reason = "Power depleted. The rover will not move. Mission over."; cat = 'power'; }
+  else if (S.oxygen <= 0 && S.oxygenCanisters <= 0) { reason = "Oxygen exhausted. The crew cannot breathe. Mission over."; cat = 'oxygen'; }
+  else if (S.food   <= 0 && S.foodBoxes <= 0)     { reason = "Food supply exhausted. The crew cannot continue. Mission over."; cat = 'food'; }
+  else if (S.morale <= 0)                     { reason = "Crew morale has collapsed. The team has voted to abort."; cat = 'morale'; }
+
+  if (reason) { triggerGameOver(reason, cat); return true; }
+  return false;
+}
+
+function triggerGameOver(reason, cat) {
+  S.active = false;
+  $('go-desc').textContent = reason;
+  const list = EPITAPHS[cat] || EPITAPHS.crew;
+  $('go-epitaph').textContent = '"' + list[Math.floor(Math.random() * list.length)] + '"';
+  $('go-stats').innerHTML = `Mission Day: ${S.day}<br>Distance: ${Math.round(S.kmTraveled)}km of ${TOTAL_KM}km<br>Crew Survived: ${S.crewAlive} of 4<br>Difficulty: ${S.difficulty}`;
+  setImg($('go-img'), $('go-img-label'), $('go-img-path'), 'images/scenes/gameover_' + cat + '.png', 'GAME OVER — ' + cat.toUpperCase());
+  showScreen('screen-gameover');
+}
+
+function triggerVictory() {
+  S.active = false;
+  S.kmTraveled = TOTAL_KM; S.kmLeft = 0;
+  const survived = S.crew.filter(c => c.alive).map(c => c.name).join(', ');
+  const crewSc  = S.crewAlive * 500;
+  const resSc   = Math.round((S.power + S.oxygen + S.food + S.morale) * 5);
+  const spdSc   = Math.max(0, 2000 - S.day * 20);
+  const diffBonus = { tourist:0, astronaut:500, commander:1500 }[S.difficulty];
+  const total = crewSc + resSc + spdSc + diffBonus;
+  let rating = total > 4000 ? 'LEGEND' : total > 3000 ? 'HERO' : total > 2000 ? 'ASTRONAUT' : total > 1000 ? 'CREW MEMBER' : 'TRAINEE';
+  $('vic-desc').textContent = `You reached Shackleton Station. ${survived} made it.`;
+  $('vic-score').textContent = `SCORE: ${total.toLocaleString()} — ${rating}`;
+  $('vic-stats').innerHTML = `Mission Duration: ${S.day} Earth days<br>Crew: ${S.crewAlive} of 4 survived<br>Difficulty: ${S.difficulty}<br>Crew +${crewSc} | Resources +${resSc} | Speed +${spdSc} | Difficulty +${diffBonus}`;
+  showScreen('screen-victory');
+}
+
+// ── BUTTON WIRING ─────────────────────────────────────────
+// Title
+$('btn-begin').addEventListener('click', () => { resetState(); goNames(); });
+$('btn-howto').addEventListener('click', goHowTo);
+$('btn-about').addEventListener('click', goAbout);
+
+// How to play
+$('btn-howto-back').addEventListener('click', goTitle);
+$('btn-howto-play').addEventListener('click', () => { resetState(); goNames(); });
+
+// About
+$('btn-about-back').addEventListener('click', goTitle);
+
+// Crew names
+$('btn-names-back').addEventListener('click', goTitle);
+$('btn-names-next').addEventListener('click', goLoadout);
+
+// Loadout
+$('btn-loadout-back').addEventListener('click', goNames);
+$('btn-loadout-next').addEventListener('click', goDifficulty);
+
+// Difficulty
+$('btn-diff-back').addEventListener('click', () => showScreen('screen-loadout'));
+$('btn-launch').addEventListener('click', launchMission);
+
+// Game actions
+$('act-drive').addEventListener('click',   actDrive);
+$('act-charge').addEventListener('click',  actCharge);
+$('act-rations').addEventListener('click', actRations);
+$('act-rest').addEventListener('click',    actRest);
+$('act-status').addEventListener('click',  actStatus);
+$('act-abort').addEventListener('click',   actAbort);
+
+// Result continue
+$('btn-result-continue').addEventListener('click', continueFromResult);
+
+// Waypoint leave
+$('btn-wp-leave').addEventListener('click', leaveWaypoint);
+
+// Game over / Victory
+$('btn-go-retry').addEventListener('click',  () => { resetState(); goNames(); });
+$('btn-go-menu').addEventListener('click',   goTitle);
+$('btn-vic-retry').addEventListener('click', () => { resetState(); goNames(); });
+$('btn-vic-menu').addEventListener('click',  goTitle);
+
+// Keyboard shortcuts (game screen only)
+document.addEventListener('keydown', e => {
+  if (!$('screen-game').classList.contains('active')) return;
+  const map = { d:actDrive, c:actCharge, r:actRest, s:actStatus, f:actRations };
+  const fn = map[e.key.toLowerCase()];
+  if (fn) fn();
+});
+</script>
+</body>
+</html>
