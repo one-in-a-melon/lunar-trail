@@ -1915,6 +1915,17 @@ function triggerVictory() {
 }
 
 // ── BUTTON WIRING ─────────────────────────────────────────
+// Title screen image — wire onload so it shows when ready
+(function() {
+  const titleImg = $('img-title');
+  if (titleImg) {
+    titleImg.onload  = () => titleImg.classList.add('loaded');
+    titleImg.onerror = () => titleImg.classList.remove('loaded');
+    // If already cached and loaded before JS ran, add class immediately
+    if (titleImg.complete && titleImg.naturalWidth > 0) titleImg.classList.add('loaded');
+  }
+})();
+
 // Title
 $('btn-begin').addEventListener('click', () => { resetState(); goNames(); });
 $('btn-howto').addEventListener('click', goHowTo);
