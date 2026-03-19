@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lunar Trail</title>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
@@ -33,8 +33,10 @@ html, body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 16px;
   overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 
 /* ─── STAR BACKGROUND ───────────────────────────────── */
@@ -112,7 +114,7 @@ html, body {
   text-align: center;
 }
 .eyebrow {
-  font-family: var(--ui); font-size: .5rem;
+  font-family: var(--ui); font-size: .75rem;
   letter-spacing: .4em; color: var(--dim); text-transform: uppercase;
 }
 .game-title {
@@ -123,18 +125,19 @@ html, body {
   letter-spacing: .05em;
 }
 .title-sub {
-  font-family: var(--mono); font-size: .72rem;
+  font-family: var(--mono); font-size: 1rem;
   color: var(--dim); letter-spacing: .18em;
 }
-.menu-col { display: flex; flex-direction: column; gap: .6rem; width: 100%; max-width: 260px; }
-.footer-note { font-size: .62rem; color: var(--dim); opacity: .6; }
+.menu-col { display: flex; flex-direction: column; gap: .6rem; width: 100%; max-width: 320px; }
+.footer-note { font-size: .8rem; color: var(--dim); opacity: .6; }
 
 /* ─── BUTTONS ───────────────────────────────────────── */
 button { cursor: pointer; }
 .btn {
-  font-family: var(--ui); font-size: .65rem; letter-spacing: .18em;
-  padding: .7rem 1.5rem; border: none; text-transform: uppercase;
+  font-family: var(--ui); font-size: .85rem; letter-spacing: .18em;
+  padding: .9rem 1.5rem; border: none; text-transform: uppercase;
   transition: all .12s ease; width: 100%;
+  min-height: 48px;
 }
 .btn-primary { background: var(--accent); color: var(--bg); box-shadow: 0 0 18px rgba(0,200,255,.35); }
 .btn-primary:hover { background: #fff; box-shadow: 0 0 28px rgba(0,200,255,.7); transform: translateY(-1px); }
@@ -160,14 +163,14 @@ button { cursor: pointer; }
 .panel.narrow { max-width: 520px; }
 
 .panel-title {
-  font-family: var(--ui); font-size: .9rem; letter-spacing: .25em;
+  font-family: var(--ui); font-size: 1.1rem; letter-spacing: .25em;
   color: var(--accent); padding-bottom: .6rem;
   border-bottom: 1px solid var(--border); margin-bottom: .5rem;
 }
 .panel-sub {
-  font-size: .82rem; color: var(--dim); line-height: 1.55; margin-bottom: 1.25rem;
+  font-size: 1rem; color: var(--dim); line-height: 1.6; margin-bottom: 1.25rem;
 }
-.panel p { font-size: .82rem; line-height: 1.7; color: var(--text); margin-bottom: .9rem; }
+.panel p { font-size: 1rem; line-height: 1.75; color: var(--text); margin-bottom: .9rem; }
 .panel em { color: var(--accent); font-style: normal; }
 .panel b  { color: var(--green); }
 
@@ -179,29 +182,29 @@ button { cursor: pointer; }
 .info-card {
   background: var(--panel2); border: 1px solid var(--border); padding: .85rem;
 }
-.info-card .icon { font-size: 1.4rem; margin-bottom: .4rem; }
+.info-card .icon { font-size: 1.6rem; margin-bottom: .4rem; }
 .info-card h3 {
-  font-family: var(--ui); font-size: .58rem; letter-spacing: .18em;
+  font-family: var(--ui); font-size: .75rem; letter-spacing: .18em;
   color: var(--green); margin-bottom: .4rem;
 }
-.info-card p { font-size: .77rem; line-height: 1.55; color: var(--text); margin: 0; }
+.info-card p { font-size: .95rem; line-height: 1.6; color: var(--text); margin: 0; }
 
 /* ─── CREW NAME SETUP ───────────────────────────────── */
 .crew-rows { display: flex; flex-direction: column; gap: .6rem; margin-bottom: 1.25rem; }
 .crew-row {
-  display: flex; align-items: center; gap: .85rem;
-  background: var(--panel2); border: 1px solid var(--border); padding: .65rem .9rem;
+  display: flex; align-items: center; gap: .85rem; flex-wrap: wrap;
+  background: var(--panel2); border: 1px solid var(--border); padding: .75rem .9rem;
 }
 .crew-row.is-commander { border-color: var(--accent); background: rgba(0,200,255,.04); }
 .crew-role-label {
-  font-family: var(--ui); font-size: .56rem; letter-spacing: .13em;
+  font-family: var(--ui); font-size: .72rem; letter-spacing: .13em;
   color: var(--dim); min-width: 200px;
 }
 .crew-input {
-  flex: 1; background: transparent; border: none;
+  flex: 1; min-width: 140px; background: transparent; border: none;
   border-bottom: 1px solid var(--glow);
-  color: var(--bright); font-family: var(--mono); font-size: .95rem;
-  padding: .2rem .4rem; outline: none;
+  color: var(--bright); font-family: var(--mono); font-size: 1.1rem;
+  padding: .3rem .4rem; outline: none;
 }
 .crew-input:focus { border-bottom-color: var(--accent); }
 
@@ -213,27 +216,27 @@ button { cursor: pointer; }
 .loadout-card {
   background: var(--panel2); border: 1px solid var(--border); padding: .85rem;
 }
-.loadout-icon { font-size: 1.3rem; margin-bottom: .35rem; }
+.loadout-icon { font-size: 1.5rem; margin-bottom: .35rem; }
 .loadout-name {
-  font-family: var(--ui); font-size: .6rem; letter-spacing: .14em;
+  font-family: var(--ui); font-size: .78rem; letter-spacing: .14em;
   color: var(--green); margin-bottom: .3rem;
 }
-.loadout-desc { font-size: .73rem; color: var(--dim); line-height: 1.45; margin-bottom: .6rem; }
+.loadout-desc { font-size: .9rem; color: var(--dim); line-height: 1.5; margin-bottom: .6rem; }
 .qty-row { display: flex; align-items: center; gap: .45rem; }
 .qty-btn {
   background: var(--border); border: none; color: var(--bright);
-  width: 26px; height: 26px; font-size: .95rem;
+  width: 40px; height: 40px; font-size: 1.2rem;
   display: flex; align-items: center; justify-content: center;
-  transition: background .1s;
+  transition: background .1s; flex-shrink: 0;
 }
 .qty-btn:hover { background: var(--accent); color: var(--bg); }
 .qty-num {
-  font-family: var(--display); font-size: 1.35rem; color: var(--bright);
+  font-family: var(--display); font-size: 1.6rem; color: var(--bright);
   min-width: 2ch; text-align: center;
 }
-.qty-cost { font-size: .68rem; color: var(--dim); margin-left: auto; }
+.qty-cost { font-size: .85rem; color: var(--dim); margin-left: auto; }
 .budget-bar {
-  font-family: var(--ui); font-size: .7rem; letter-spacing: .18em;
+  font-family: var(--ui); font-size: .85rem; letter-spacing: .18em;
   color: var(--warn); text-align: right;
   padding: .6rem 0; border-top: 1px solid var(--border); margin-bottom: .9rem;
 }
@@ -247,9 +250,9 @@ button { cursor: pointer; }
   color: var(--text); text-align: left; transition: all .13s;
 }
 .diff-btn:hover, .diff-btn.selected { border-color: var(--accent); background: rgba(0,200,255,.05); }
-.diff-icon { font-size: 1.4rem; grid-row: 1/3; align-self: center; }
-.diff-name { font-family: var(--ui); font-size: .65rem; letter-spacing: .14em; color: var(--accent); }
-.diff-desc { font-size: .73rem; color: var(--dim); line-height: 1.4; }
+.diff-icon { font-size: 1.6rem; grid-row: 1/3; align-self: center; }
+.diff-name { font-family: var(--ui); font-size: .82rem; letter-spacing: .14em; color: var(--accent); }
+.diff-desc { font-size: .9rem; color: var(--dim); line-height: 1.4; }
 
 /* ─── GAME SCREEN ────────────────────────────────────── */
 #screen-game {
@@ -259,32 +262,35 @@ button { cursor: pointer; }
 
 .hud {
   display: flex; justify-content: space-between; align-items: center;
-  padding: .45rem 1rem; background: var(--panel);
+  padding: .5rem .75rem; background: var(--panel);
   border-bottom: 1px solid var(--border); flex-shrink: 0; gap: .5rem;
   flex-wrap: wrap;
 }
 .hud-block { display: flex; flex-direction: column; align-items: center; }
 .hud-lbl {
-  font-family: var(--ui); font-size: .45rem; letter-spacing: .22em; color: var(--dim);
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .18em; color: var(--dim);
 }
 .hud-val {
-  font-family: var(--display); font-size: 1rem; color: var(--bright);
+  font-family: var(--display); font-size: 1.1rem; color: var(--bright);
 }
 
 .res-bar-row {
-  display: flex; gap: .5rem; padding: .45rem 1rem;
+  display: flex; gap: .4rem; padding: .5rem .75rem;
   background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
-.res-item { display: flex; align-items: center; gap: .35rem; flex: 1; min-width: 0; }
-.res-icon { font-size: .75rem; flex-shrink: 0; }
-.res-lbl { font-family: var(--ui); font-size: .42rem; letter-spacing: .13em; color: var(--dim); white-space: nowrap; }
-.res-track { flex: 1; height: 5px; background: rgba(255,255,255,.07); border: 1px solid var(--border); overflow: hidden; }
+.res-item { display: flex; align-items: center; gap: .3rem; flex: 1; min-width: 0; }
+.res-icon { font-size: 1rem; flex-shrink: 0; }
+.res-lbl {
+  font-family: var(--ui); font-size: .65rem; letter-spacing: .08em;
+  color: var(--text); white-space: nowrap; font-weight: bold;
+}
+.res-track { flex: 1; height: 7px; background: rgba(255,255,255,.07); border: 1px solid var(--border); overflow: hidden; }
 .res-fill { height: 100%; transition: width .4s ease; width: 100%; }
 .fill-power  { background: var(--warn); }
 .fill-oxygen { background: var(--accent); }
 .fill-food   { background: var(--green); }
 .fill-morale { background: #cc88ff; }
-.res-pct { font-family: var(--display); font-size: .82rem; color: var(--bright); min-width: 3ch; text-align: right; }
+.res-pct { font-family: var(--display); font-size: 1rem; color: var(--bright); min-width: 3.5ch; text-align: right; }
 
 .game-body { display: flex; flex: 1; overflow: hidden; }
 
@@ -313,36 +319,36 @@ button { cursor: pointer; }
   width: 260px; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden;
 }
 .col-header {
-  font-family: var(--ui); font-size: .5rem; letter-spacing: .22em;
-  color: var(--accent); padding: .35rem .65rem;
+  font-family: var(--ui); font-size: .65rem; letter-spacing: .22em;
+  color: var(--accent); padding: .4rem .65rem;
   background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 .crew-col { border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .crew-entry {
   display: flex; align-items: center; gap: .45rem;
-  padding: .28rem .5rem; font-size: .72rem;
+  padding: .35rem .5rem; font-size: .88rem;
   border-bottom: 1px solid rgba(255,255,255,.04);
 }
 .crew-entry:last-child { border-bottom: none; }
-.status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .dot-healthy  { background: var(--green); }
 .dot-injured  { background: var(--warn); }
 .dot-critical { background: var(--danger); animation: blink 1s infinite; }
 .dot-dead     { background: var(--dim); }
 .crew-nm { flex: 1; }
 .crew-nm.dead { color: var(--dim); text-decoration: line-through; }
-.crew-cond { font-size: .62rem; color: var(--dim); }
+.crew-cond { font-size: .78rem; color: var(--dim); }
 
 .inv-col { border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .inv-grid { display: grid; grid-template-columns: 1fr 1fr; padding: .4rem .5rem; gap: .05rem; }
-.inv-item { font-size: .7rem; color: var(--dim); padding: .18rem .2rem; display: flex; align-items: center; gap: .28rem; }
+.inv-item { font-size: .85rem; color: var(--dim); padding: .2rem .2rem; display: flex; align-items: center; gap: .28rem; }
 
 .log-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .log-scroll {
   flex: 1; overflow-y: auto; padding: .4rem .5rem;
-  font-size: .7rem; line-height: 1.55; color: var(--dim);
+  font-size: .85rem; line-height: 1.6; color: var(--dim);
 }
-.log-line { padding-left: .4rem; border-left: 2px solid var(--border); margin-bottom: .25rem; }
+.log-line { padding-left: .4rem; border-left: 2px solid var(--border); margin-bottom: .3rem; }
 .log-line.good   { color: var(--green); border-color: var(--green); }
 .log-line.alert  { color: var(--warn);  border-color: var(--warn); }
 .log-line.bad    { color: var(--danger); border-color: var(--danger); }
@@ -352,14 +358,15 @@ button { cursor: pointer; }
   background: var(--panel); flex-shrink: 0;
 }
 .act-btn {
-  flex: 1; padding: .55rem .3rem;
+  flex: 1; padding: .7rem .2rem;
   background: transparent; border: none; border-right: 1px solid var(--border);
-  color: var(--text); font-family: var(--ui); font-size: .46rem;
-  letter-spacing: .08em; text-align: center; transition: all .1s;
+  color: var(--text); font-family: var(--ui); font-size: .58rem;
+  letter-spacing: .05em; text-align: center; transition: all .1s;
+  min-height: 52px; line-height: 1.3;
 }
 .act-btn:last-child { border-right: none; }
-.act-btn:hover { background: rgba(0,200,255,.08); color: var(--accent); }
-.act-btn.red:hover { background: rgba(255,51,68,.1); color: var(--danger); }
+.act-btn:hover, .act-btn:active { background: rgba(0,200,255,.08); color: var(--accent); }
+.act-btn.red:hover, .act-btn.red:active { background: rgba(255,51,68,.1); color: var(--danger); }
 
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
@@ -373,47 +380,78 @@ button { cursor: pointer; }
   max-height: calc(100vh - 2rem); overflow-y: auto;
 }
 .ev-cat {
-  font-family: var(--ui); font-size: .52rem; letter-spacing: .28em;
+  font-family: var(--ui); font-size: .72rem; letter-spacing: .28em;
   color: var(--warn); margin-bottom: .35rem;
 }
 .ev-title {
-  font-family: var(--display); font-size: 1.9rem; color: var(--bright); line-height: 1.1;
+  font-family: var(--display); font-size: 2.2rem; color: var(--bright); line-height: 1.1;
   margin-bottom: .75rem;
 }
-.ev-desc { font-size: .82rem; line-height: 1.68; color: var(--text); margin-bottom: 1rem; }
-.ev-choices { display: flex; flex-direction: column; gap: .45rem; margin-top: 1rem; }
+.ev-desc { font-size: 1rem; line-height: 1.7; color: var(--text); margin-bottom: 1rem; }
+.ev-choices { display: flex; flex-direction: column; gap: .5rem; margin-top: 1rem; }
 .choice-btn {
   background: var(--panel2); border: 1px solid var(--border);
-  color: var(--text); font-family: var(--mono); font-size: .78rem;
-  padding: .7rem .9rem; text-align: left; line-height: 1.4; transition: all .13s;
+  color: var(--text); font-family: var(--mono); font-size: .95rem;
+  padding: .9rem 1rem; text-align: left; line-height: 1.45; transition: all .13s;
+  min-height: 52px;
 }
-.choice-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(0,200,255,.06); color: var(--bright); }
+.choice-btn:hover:not(:disabled), .choice-btn:active:not(:disabled) { border-color: var(--accent); background: rgba(0,200,255,.06); color: var(--bright); }
 .choice-btn:disabled { opacity: .38; cursor: not-allowed; }
 
 /* ─── RESULT SCREEN ──────────────────────────────────── */
 .result-changes {
   background: var(--panel2); border: 1px solid var(--border);
-  padding: .65rem .9rem; margin: .85rem 0; font-size: .78rem; line-height: 1.8;
+  padding: .75rem 1rem; margin: .85rem 0; font-size: .95rem; line-height: 1.9;
 }
 .change { display: flex; align-items: center; gap: .4rem; }
 .change.pos { color: var(--green); }
 .change.neg { color: var(--danger); }
 .change.neu { color: var(--dim); }
 
-/* ─── WAYPOINT SCREEN ────────────────────────────────── */
+/* ─── WAYPOINT SHOP ──────────────────────────────────── */
 .shop-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-  gap: .7rem; margin: .9rem 0;
+  display: flex; flex-direction: column;
+  gap: .6rem; margin: .9rem 0;
 }
 .shop-card {
-  background: var(--panel2); border: 1px solid var(--border); padding: .75rem;
+  background: var(--panel2); border: 1px solid var(--border); padding: .85rem;
+  display: flex; align-items: center; gap: .85rem;
 }
-.shop-name { font-family: var(--ui); font-size: .58rem; letter-spacing: .13em; color: var(--green); margin-bottom: .25rem; }
-.shop-desc { font-size: .7rem; color: var(--dim); line-height: 1.4; margin-bottom: .5rem; }
-.shop-row { display: flex; align-items: center; gap: .45rem; }
-.shop-price { font-size: .68rem; color: var(--warn); margin-left: auto; }
+.shop-card.in-cart {
+  border-color: var(--accent); background: rgba(0,200,255,.05);
+}
+.shop-card-left { flex: 1; min-width: 0; }
+.shop-name { font-family: var(--ui); font-size: .72rem; letter-spacing: .13em; color: var(--green); margin-bottom: .2rem; }
+.shop-desc { font-size: .88rem; color: var(--dim); line-height: 1.4; }
+.shop-card-right { display: flex; flex-direction: column; align-items: center; gap: .35rem; flex-shrink: 0; }
+.shop-qty-row { display: flex; align-items: center; gap: .35rem; }
+.shop-price { font-size: .82rem; color: var(--warn); white-space: nowrap; }
+.shop-qty-num { font-family: var(--display); font-size: 1.5rem; color: var(--bright); min-width: 2ch; text-align: center; }
+
+.cart-summary {
+  background: var(--panel); border: 1px solid var(--border);
+  padding: .85rem 1rem; margin: .75rem 0;
+}
+.cart-title {
+  font-family: var(--ui); font-size: .68rem; letter-spacing: .2em;
+  color: var(--accent); margin-bottom: .5rem;
+}
+.cart-item {
+  display: flex; justify-content: space-between;
+  font-size: .88rem; color: var(--text); padding: .2rem 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.cart-item:last-child { border-bottom: none; }
+.cart-item-cost { color: var(--warn); }
+.cart-empty { font-size: .88rem; color: var(--dim); font-style: italic; }
+.cart-total {
+  display: flex; justify-content: space-between;
+  font-family: var(--ui); font-size: .75rem; letter-spacing: .1em;
+  color: var(--bright); padding-top: .5rem; margin-top: .25rem;
+  border-top: 1px solid var(--border);
+}
 .credits-line {
-  font-family: var(--ui); font-size: .7rem; letter-spacing: .18em;
+  font-family: var(--ui); font-size: .82rem; letter-spacing: .18em;
   color: var(--warn); text-align: right;
   padding: .6rem 0; border-top: 1px solid var(--border); margin-bottom: .85rem;
 }
@@ -425,32 +463,88 @@ button { cursor: pointer; }
   padding: 2.25rem; max-width: 580px; width: calc(100% - 2rem);
   max-height: calc(100vh - 2rem); overflow-y: auto; text-align: center;
 }
-.end-icon { font-size: 2.8rem; margin-bottom: .6rem; }
-.end-title { font-family: var(--display); font-size: 2.8rem; line-height: 1; margin-bottom: .5rem; }
+.end-icon { font-size: 3rem; margin-bottom: .6rem; }
+.end-title { font-family: var(--display); font-size: 3rem; line-height: 1; margin-bottom: .5rem; }
 .end-title.fail    { color: var(--danger); }
 .end-title.success { color: var(--green); }
-.end-desc { font-size: .83rem; color: var(--dim); line-height: 1.6; margin: .75rem 0; }
+.end-desc { font-size: 1rem; color: var(--dim); line-height: 1.65; margin: .75rem 0; }
 .epitaph {
-  font-family: var(--display); font-size: 1.1rem; color: var(--dim);
-  border: 1px solid var(--border); padding: .65rem .9rem; margin: .85rem 0;
+  font-family: var(--display); font-size: 1.3rem; color: var(--dim);
+  border: 1px solid var(--border); padding: .75rem 1rem; margin: .85rem 0;
 }
 .stats-box {
   background: var(--panel2); border: 1px solid var(--border);
-  padding: .85rem; font-size: .78rem; line-height: 1.85; color: var(--dim);
+  padding: .9rem 1rem; font-size: .92rem; line-height: 1.9; color: var(--dim);
   text-align: left; margin: .85rem 0;
 }
-.victory-score { font-family: var(--display); font-size: 1.8rem; color: var(--warn); margin: .75rem 0; }
+.victory-score { font-family: var(--display); font-size: 2rem; color: var(--warn); margin: .75rem 0; }
 
 /* ─── SCROLLBAR ─────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--panel2); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ─── RESPONSIVE ─────────────────────────────────────── */
-@media (max-width: 560px) {
+/* ─── RESPONSIVE / MOBILE ────────────────────────────── */
+@media (max-width: 600px) {
+  /* Hide sidebar on phones — log and crew shown via status action */
   .info-col { display: none; }
-  .scene-col { flex: 1; }
-  .hud { gap: .25rem; }
+  .scene-col { flex: 1; border-right: none; }
+
+  /* Tighter HUD on small screens */
+  .hud { padding: .35rem .5rem; gap: .25rem; }
+  .hud-lbl { font-size: .52rem; letter-spacing: .1em; }
+  .hud-val { font-size: .9rem; }
+
+  /* Resource bar — stack label above bar */
+  .res-bar-row { padding: .4rem .5rem; gap: .3rem; }
+  .res-lbl { font-size: .58rem; }
+  .res-pct { font-size: .9rem; }
+
+  /* Panels fill the screen with comfortable padding */
+  .panel, .event-wrap, .end-wrap {
+    width: 100%; max-width: 100%;
+    border-left: none; border-right: none;
+    padding: 1.25rem 1rem;
+    max-height: 100vh; border-radius: 0;
+  }
+
+  /* Info grid stacks to single column */
+  .info-grid { grid-template-columns: 1fr; }
+
+  /* Crew name rows stack vertically */
+  .crew-row { flex-direction: column; align-items: flex-start; gap: .4rem; }
+  .crew-role-label { min-width: unset; }
+  .crew-input { width: 100%; }
+
+  /* Loadout cards stack single column */
+  .loadout-grid { grid-template-columns: 1fr; }
+
+  /* Scene boxes shorter on phone */
+  .scene-box { aspect-ratio: 16/8; }
+
+  /* Action bar — 3 buttons per row using wrap */
+  .action-bar { flex-wrap: wrap; }
+  .act-btn {
+    flex: 1 1 30%;
+    font-size: .62rem;
+    padding: .65rem .2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Event/result screens */
+  .ev-title { font-size: 1.8rem; }
+  .choice-btn { font-size: .9rem; padding: .85rem .9rem; }
+
+  /* Shop cards stay single column, good on mobile */
+  .shop-card { flex-direction: column; align-items: flex-start; gap: .5rem; }
+  .shop-card-right { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; }
+}
+
+@media (max-width: 380px) {
+  .game-title { font-size: 4.5rem; }
+  .hud-val { font-size: .8rem; }
+  .res-lbl { display: none; }
+  .act-btn { font-size: .55rem; }
 }
 </style>
 </head>
@@ -834,9 +928,25 @@ button { cursor: pointer; }
       <span class="placeholder">[ WAYPOINT SCENE ]</span>
       <span class="filepath" id="wp-img-path"></span>
     </div>
+
+    <!-- Available items -->
     <div class="shop-grid" id="wp-shop"></div>
-    <div class="credits-line">CREDITS: <span id="wp-credits">$0</span></div>
-    <button class="btn btn-primary" id="btn-wp-leave">DEPART WAYPOINT →</button>
+
+    <!-- Cart summary -->
+    <div class="cart-summary">
+      <div class="cart-title">🛒 YOUR CART</div>
+      <div id="cart-items"><div class="cart-empty">No items selected yet.</div></div>
+      <div class="cart-total">
+        <span>TOTAL COST</span>
+        <span id="cart-total-cost">$0</span>
+      </div>
+    </div>
+
+    <div class="credits-line">AVAILABLE CREDITS: <span id="wp-credits">$0</span></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-wp-clear">CLEAR CART</button>
+      <button class="btn btn-primary" id="btn-wp-confirm">CONFIRM &amp; DEPART →</button>
+    </div>
   </div>
 </div>
 
@@ -1492,38 +1602,126 @@ function checkWaypoint() {
   return true;
 }
 
+// ── WAYPOINT SHOP (CART SYSTEM) ───────────────────────
+let wpCart = {};      // { itemKey: qty }
+let wpStock = {};     // { itemKey: { p, q, available } }
+let wpCreditsBase = 0; // credits at waypoint entry
+
+const ITEM_NAMES = {
+  powerCells:'Power Cells', oxygenCanisters:'O₂ Canisters',
+  foodBoxes:'Food Boxes', repairKits:'Repair Kits', medKits:'Medical Kits'
+};
+
 function openWaypoint(wp) {
   $('wp-title').textContent  = 'WAYPOINT: ' + wp.name.toUpperCase();
   $('wp-flavor').textContent = wp.flavor;
   setImg($('wp-img'), null, $('wp-img-path'), wp.scene, wp.name);
-  $('wp-credits').textContent = '$' + S.credits;
 
-  const shop = $('wp-shop');
-  shop.innerHTML = '';
-  const NAMES = { powerCells:'Power Cells', oxygenCanisters:'O₂ Canisters', foodBoxes:'Food Boxes', repairKits:'Repair Kits', medKits:'Medical Kits' };
+  // Reset cart and stock
+  wpCart = {};
+  wpStock = {};
+  wpCreditsBase = S.credits;
   Object.entries(wp.stock).forEach(([key, info]) => {
-    const card = document.createElement('div');
-    card.className = 'shop-card';
-    card.innerHTML = `<div class="shop-name">${NAMES[key]}</div>
-      <div class="shop-desc">Available: ${info.q} units</div>
-      <div class="shop-row">
-        <button class="qty-btn" onclick="waypointBuy('${key}',${info.p})">+ BUY</button>
-        <span class="shop-price">$${info.p} each</span>
-      </div>`;
-    shop.appendChild(card);
+    wpStock[key] = { p: info.p, available: info.q };
+    wpCart[key] = 0;
   });
+
+  renderWaypointShop();
   showScreen('screen-waypoint');
 }
 
-function waypointBuy(item, price) {
-  if (S.credits < price) { alert('Insufficient credits.'); return; }
-  S[item] = (S[item] || 0) + 1;
-  S.credits -= price;
-  $('wp-credits').textContent = '$' + S.credits;
-  addLog(`Purchased 1x ${item} for $${price}.`, 'good');
+function renderWaypointShop() {
+  const cartCost = calcCartCost();
+  const creditsLeft = wpCreditsBase - cartCost;
+
+  $('wp-credits').textContent = '$' + creditsLeft.toLocaleString();
+  $('cart-total-cost').textContent = '$' + cartCost.toLocaleString();
+
+  // Render shop items
+  const shop = $('wp-shop');
+  shop.innerHTML = '';
+  Object.entries(wpStock).forEach(([key, info]) => {
+    const inCart = wpCart[key] || 0;
+    const canAdd = info.available > inCart && creditsLeft >= info.p;
+    const card = document.createElement('div');
+    card.className = 'shop-card' + (inCart > 0 ? ' in-cart' : '');
+
+    card.innerHTML = `
+      <div class="shop-card-left">
+        <div class="shop-name">${ITEM_NAMES[key]}</div>
+        <div class="shop-desc">$${info.p} each · ${info.available} available</div>
+      </div>
+      <div class="shop-card-right">
+        <div class="shop-qty-row">
+          <button class="qty-btn shop-minus" data-key="${key}" ${inCart === 0 ? 'disabled style="opacity:.35"' : ''}>−</button>
+          <span class="shop-qty-num">${inCart}</span>
+          <button class="qty-btn shop-plus" data-key="${key}" ${!canAdd ? 'disabled style="opacity:.35"' : ''}>+</button>
+        </div>
+        <div class="shop-price">${inCart > 0 ? '$' + (inCart * info.p).toLocaleString() : ''}</div>
+      </div>`;
+    shop.appendChild(card);
+  });
+
+  // Wire +/− buttons
+  shop.querySelectorAll('.shop-plus').forEach(btn => {
+    btn.addEventListener('click', () => adjustCart(btn.dataset.key, 1));
+  });
+  shop.querySelectorAll('.shop-minus').forEach(btn => {
+    btn.addEventListener('click', () => adjustCart(btn.dataset.key, -1));
+  });
+
+  // Render cart
+  const cartEl = $('cart-items');
+  const cartEntries = Object.entries(wpCart).filter(([, qty]) => qty > 0);
+  if (cartEntries.length === 0) {
+    cartEl.innerHTML = '<div class="cart-empty">No items selected yet.</div>';
+  } else {
+    cartEl.innerHTML = '';
+    cartEntries.forEach(([key, qty]) => {
+      const cost = qty * wpStock[key].p;
+      const row = document.createElement('div');
+      row.className = 'cart-item';
+      row.innerHTML = `<span>${qty}× ${ITEM_NAMES[key]}</span><span class="cart-item-cost">$${cost.toLocaleString()}</span>`;
+      cartEl.appendChild(row);
+    });
+  }
 }
 
-function leaveWaypoint() {
+function adjustCart(key, dir) {
+  const current = wpCart[key] || 0;
+  const stock = wpStock[key];
+  if (dir > 0) {
+    const cartCost = calcCartCost();
+    if (current >= stock.available) return;
+    if (wpCreditsBase - cartCost < stock.p) return;
+    wpCart[key] = current + 1;
+  } else {
+    if (current <= 0) return;
+    wpCart[key] = current - 1;
+  }
+  renderWaypointShop();
+}
+
+function calcCartCost() {
+  return Object.entries(wpCart).reduce((sum, [key, qty]) => sum + qty * (wpStock[key]?.p || 0), 0);
+}
+
+function clearCart() {
+  Object.keys(wpCart).forEach(k => wpCart[k] = 0);
+  renderWaypointShop();
+}
+
+function confirmWaypoint() {
+  // Apply cart to game state
+  const cartCost = calcCartCost();
+  Object.entries(wpCart).forEach(([key, qty]) => {
+    if (qty > 0) {
+      S[key] = (S[key] || 0) + qty;
+      addLog(`Purchased ${qty}× ${ITEM_NAMES[key]} for $${(qty * wpStock[key].p).toLocaleString()}.`, 'good');
+    }
+  });
+  S.credits = wpCreditsBase - cartCost;
+
   if (S.kmLeft <= 0) { triggerVictory(); return; }
   refreshGameUI();
   showScreen('screen-game');
@@ -1752,8 +1950,9 @@ $('act-abort').addEventListener('click',   actAbort);
 // Result continue
 $('btn-result-continue').addEventListener('click', continueFromResult);
 
-// Waypoint leave
-$('btn-wp-leave').addEventListener('click', leaveWaypoint);
+// Waypoint
+$('btn-wp-clear').addEventListener('click', clearCart);
+$('btn-wp-confirm').addEventListener('click', confirmWaypoint);
 
 // Game over / Victory
 $('btn-go-retry').addEventListener('click',  () => { resetState(); goNames(); });
