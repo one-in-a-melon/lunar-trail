@@ -239,9 +239,10 @@ button { cursor: pointer; }
   font-family: var(--ui); font-size: .85rem; letter-spacing: .18em;
   color: var(--warn); text-align: center;
   padding: .65rem 1rem; margin: 0 0 1.25rem 0;
-  background: rgba(255,204,0,.08);
-  border: 1px solid rgba(255,204,0,.35);
+  background: rgba(12, 8, 0, 0.97);
+  border: 1px solid rgba(255,204,0,.6);
   position: sticky; top: 0; z-index: 5;
+  box-shadow: 0 2px 12px rgba(0,0,0,.8);
 }
 
 /* ─── DIFFICULTY ─────────────────────────────────────── */
@@ -271,7 +272,7 @@ button { cursor: pointer; }
 }
 .hud-block { display: flex; flex-direction: column; align-items: center; }
 .hud-lbl {
-  font-family: var(--ui); font-size: .6rem; letter-spacing: .18em; color: var(--dim);
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .18em; color: var(--text);
 }
 .hud-val {
   font-family: var(--display); font-size: 1.1rem; color: var(--bright);
@@ -874,8 +875,8 @@ button { cursor: pointer; }
   <div class="stars"></div>
   <div class="scanlines"></div>
   <div class="content">
-    <div class="eyebrow">TRANQUILITY BASE MISSION CONTROL — 2031</div>
-    <h1 class="game-title">LUNAR<br>TRAIL</h1>
+    <div class="eyebrow">Gregory Melon Presents</div>
+    <h1 class="game-title">LUNAR<br>TRAIL<span style="font-size:.4em;vertical-align:super;color:var(--dim);font-family:var(--ui);letter-spacing:0">™</span></h1>
     <div class="title-sub">An overland rover simulation across the lunar surface</div>
 
     <div class="scene-box" style="max-width:500px">
@@ -884,12 +885,16 @@ button { cursor: pointer; }
       <span class="filepath">images/scenes/title_screen.png</span>
     </div>
 
+    <!-- About text visible on title screen -->
+    <div style="max-width:480px;text-align:center;font-size:.82rem;line-height:1.7;color:var(--dim);padding:0 .5rem">
+      Inspired by the 1971 classic <span style="color:var(--accent)">Oregon Trail</span>. Where pioneers once crossed 3,200 km of American wilderness, your crew crosses 2,400 km of airless lunar regolith. No rivers to ford — but solar panels to charge. No dysentery — but oxygen scrubber failures. No hostile weather — but lunar nights that last 14 Earth days and drop to -173°C. Every decision matters.
+    </div>
+
     <div class="menu-col">
       <button class="btn btn-primary" id="btn-begin">▶ BEGIN MISSION</button>
       <button class="btn btn-secondary" id="btn-howto">HOW TO PLAY</button>
-      <button class="btn btn-secondary" id="btn-about">ABOUT</button>
     </div>
-    <div class="footer-note">Mouse or keyboard (D=Drive C=Charge R=Rest S=Status)</div>
+    <div class="footer-note" style="margin-top:.25rem">Mouse or keyboard · D=Drive · C=Charge · R=Rest · S=Status</div>
   </div>
 </div>
 
@@ -1188,12 +1193,12 @@ button { cursor: pointer; }
 
   <!-- Action buttons -->
   <div class="action-bar">
-    <button class="act-btn" id="act-drive">🚗 DRIVE (D)</button>
-    <button class="act-btn" id="act-charge">⚡ CHARGE (C)</button>
-    <button class="act-btn" id="act-rations">🍱 RATIONS (F)</button>
-    <button class="act-btn" id="act-rest">💤 REST (R)</button>
-    <button class="act-btn" id="act-status">📊 STATUS (S)</button>
-    <button class="act-btn" id="act-cell">🔋 CELL (E)</button>
+    <button class="act-btn" id="act-drive">🚗 DRIVE</button>
+    <button class="act-btn" id="act-charge">⚡ CHARGE</button>
+    <button class="act-btn" id="act-rations">🍱 RATIONS</button>
+    <button class="act-btn" id="act-rest">💤 REST</button>
+    <button class="act-btn" id="act-cell">🔋 CELL</button>
+    <button class="act-btn" id="act-inv">📦 INVENTORY</button>
     <button class="act-btn" id="act-crew">👥 CREW</button>
     <button class="act-btn red" id="act-abort">⚠️ ABORT</button>
   </div>
@@ -1202,21 +1207,35 @@ button { cursor: pointer; }
   <div class="crew-drawer-overlay" id="crew-drawer-overlay">
     <div class="crew-drawer">
       <div class="crew-drawer-header">
-        <span>👥 CREW &amp; INVENTORY</span>
+        <span>👥 CREW STATUS</span>
         <button class="crew-drawer-close" id="crew-drawer-close">✕</button>
       </div>
       <div class="crew-drawer-body">
         <div class="drawer-section-title">CREW STATUS</div>
         <div id="drawer-crew-list"></div>
-        <div class="drawer-section-title" style="margin-top:.5rem">INVENTORY</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory drawer overlay (slides in from right) -->
+  <div class="crew-drawer-overlay" id="inv-drawer-overlay">
+    <div class="crew-drawer">
+      <div class="crew-drawer-header">
+        <span>📦 INVENTORY</span>
+        <button class="crew-drawer-close" id="inv-drawer-close">✕</button>
+      </div>
+      <div class="crew-drawer-body">
+        <div class="drawer-section-title">SUPPLIES</div>
         <div class="drawer-inv-grid">
-          <div class="drawer-inv-item">⚡ <span id="dinv-pc">0</span> cells</div>
-          <div class="drawer-inv-item">🫁 <span id="dinv-o2">0</span> O₂</div>
-          <div class="drawer-inv-item">🍱 <span id="dinv-food">0</span> food</div>
-          <div class="drawer-inv-item">🔩 <span id="dinv-rk">0</span> kits</div>
-          <div class="drawer-inv-item">💉 <span id="dinv-mk">0</span> med</div>
-          <div class="drawer-inv-item">💳 $<span id="dinv-cr">0</span></div>
+          <div class="drawer-inv-item">⚡ <span id="dinv-pc">0</span> power cells</div>
+          <div class="drawer-inv-item">🫁 <span id="dinv-o2">0</span> O₂ canisters</div>
+          <div class="drawer-inv-item">🍱 <span id="dinv-food">0</span> ration boxes</div>
+          <div class="drawer-inv-item">🔩 <span id="dinv-rk">0</span> repair kits</div>
+          <div class="drawer-inv-item">💉 <span id="dinv-mk">0</span> med kits</div>
+          <div class="drawer-inv-item">💳 $<span id="dinv-cr">0</span> credits</div>
         </div>
+        <div class="drawer-section-title" style="margin-top:.75rem">RATION MODE</div>
+        <div style="padding:.4rem .5rem;font-size:.9rem;color:var(--warn)" id="dinv-ration-mode">Standard Rations</div>
       </div>
     </div>
   </div>
@@ -1355,8 +1374,12 @@ button { cursor: pointer; }
     <div class="mg-title">⚡ CELL SEQUENCE</div>
     <div class="mg-subtitle">POWER BAY CALIBRATION PROTOCOL</div>
     <div class="mg-instruction" id="mg-cells-instruction">
-      Watch the sequence, then tap the cells in the same order.
+      Watch the sequence of cells light up, then tap them in the same order. Each round adds one more cell. The thermal bar fills while you hesitate — tap faster to keep it low.
     </div>
+
+    <button class="btn btn-primary" id="btn-mg-cells-start" style="width:100%;max-width:380px">
+      ▶ START SEQUENCE
+    </button>
 
     <div class="mg-status-bar">
       <span class="mg-round">ROUND <span id="mg-cells-round">1</span> / 3</span>
@@ -1610,7 +1633,7 @@ const EVENTS = [
     ]
   },
   {
-    id:'forgot_charge', cat:'⚡ POWER FAILURE', title:"You Forgot to Charge", minDay:3, weight:5,
+    id:'forgot_charge', cat:'⚡ POWER FAILURE', title:"You Forgot to Charge", minDay:8, weight:5,
     desc:"It was your watch. The solar charging cycle ran overnight — or it was supposed to. The panels didn't charge. You've been running on residual battery all day. Current power level: 18%. In this environment, that's not funny.",
     scene:'images/scenes/event_forgot_charge.png',
     choices:[
@@ -1713,7 +1736,7 @@ const EVENTS = [
       { text:"🎙️ Hold a formal crew meeting — air grievances, new protocols", req:{},
         out:{ title:"Tension Cleared", desc:"It's uncomfortable. Things are said. Eventually something shifts. They're professionals again. A weight lifts from the cabin.", scene:'images/scenes/result_crew_talk.png', fx:{morale:20,food:-5}, log:"Crew meeting held. Conflict addressed.", tone:'good' }},
       { text:"🎮 Deploy morale pack — games, extra rations, music from the data drive", req:{},
-        out:{ title:"Morale Pack Deployed", desc:"NASA packed a comfort kit for exactly this scenario. Board games. A curated playlist. Double rations for one night. Works better than therapy.", scene:'images/scenes/result_morale_pack.png', fx:{morale:30,food:-10}, log:"Morale pack deployed. Crew bonding.", tone:'good' }},
+        out:{ title:"Morale Pack Deployed", desc:"Mission Control packed a comfort kit for exactly this scenario. Board games. A curated playlist. Double rations for one night. Works better than therapy.", scene:'images/scenes/result_morale_pack.png', fx:{morale:30,food:-10}, log:"Morale pack deployed. Crew bonding.", tone:'good' }},
       { text:"😑 Ignore it — they'll sort themselves out", req:{},
         out:{ title:"Conflict Festers", desc:"Bad call. By end of week, the friction has spread. Small mistakes start happening. Morale in free fall.", scene:'images/scenes/result_conflict_ignored.png', fx:{morale:-30,food:-5}, log:"Conflict ignored. Spreading through crew.", tone:'bad' }}
     ]
@@ -1793,6 +1816,19 @@ const EVENTS = [
     ]
   },
   {
+    id:'antenna_alignment_event', cat:'📡 COMMS EMERGENCY', title:"Antenna Array Misaligned", minDay:6, weight:12, repeatable:true,
+    desc:"A proximity alert from the navigation system flags an issue with the primary comms array. Vibration from the last stretch of rough terrain has knocked the antenna off its calibrated bearing. Mission control can't reach you — and you can't reach them. You'll need to manually realign the array using the azimuth and elevation controls.",
+    scene:'images/scenes/event_antenna.png',
+    choices:[
+      { text:"📡 Manually realign the antenna — launch alignment protocol", req:{},
+        out:{ title:"Alignment Protocol Launched", desc:"The manual alignment interface is now active. Adjust both sliders until the signal peaks, then hold the lock for the required duration.", scene:'images/scenes/result_antenna_start.png', fx:{}, log:"Antenna alignment protocol initiated.", tone:'alert', special:'launchAntenna' }},
+      { text:"🔩 Engineer bypasses to backup antenna — lower range but functional (1 repair kit)", req:{repairKits:1},
+        out:{ title:"Backup Antenna Online", desc:"Your engineer routes comms through the short-range backup array. You can receive transmissions but outgoing signal is weak. Mission control can hear you, barely.", scene:'images/scenes/result_antenna_backup.png', fx:{repairKits:-1,morale:5}, log:"Backup antenna online. Reduced comms range.", tone:'alert' }},
+      { text:"🚗 Keep driving — comms blackout isn't mission-critical right now", req:{},
+        out:{ title:"Comms Blackout Accepted", desc:"You press on. Mission control will be concerned. You'll fix it later. Probably.", scene:'images/scenes/result_antenna_ignored.png', fx:{morale:-10}, log:"Antenna misalignment ignored. Comms blackout.", tone:'bad' }}
+    ]
+  },
+  {
     id:'earth_call', cat:'📡 COMMS', title:"Scheduled Earth Call", minDay:14, weight:5,
     desc:"Mission control has approved a 30-minute personal comms window. Each crew member can contact family back on Earth. The 1.3-second signal delay makes it awkward. Nobody cares.",
     scene:'images/scenes/event_earth_call.png',
@@ -1835,7 +1871,7 @@ const EVENTS = [
     scene:'images/scenes/event_bmu_failure.png',
     choices:[
       { text:"🔩 Emergency BMU bypass — engineer rigs manual cell switching (2 repair kits)", req:{repairKits:2},
-        out:{ title:"Manual Power Control Established", desc:"It takes four hours and most of your spare components, but your engineer builds a manual switching board. Not elegant. Definitely not what NASA intended. But the drain rate is back to normal.", scene:'images/scenes/result_bmu_bypass.png', fx:{repairKits:-2,power:-10,morale:5}, special:'fixBmu', log:"BMU bypassed. Manual power control online.", tone:'good' }},
+        out:{ title:"Manual Power Control Established", desc:"It takes four hours and most of your spare components, but your engineer builds a manual switching board. Not elegant. Definitely not what Mission Control intended. But the drain rate is back to normal.", scene:'images/scenes/result_bmu_bypass.png', fx:{repairKits:-2,power:-10,morale:5}, special:'fixBmu', log:"BMU bypassed. Manual power control online.", tone:'good' }},
       { text:"⚡ Deplete backup cells to compensate — accept the higher drain rate", req:{powerCells:3},
         out:{ title:"Running on Backup Cells", desc:"You burn through three backup cells to maintain margin while the BMU failure bleeds the main pack. Not a solution — just buying time.", scene:'images/scenes/result_bmu_cells.png', fx:{powerCells:-3}, special:'bmuFailed', log:"BMU failed. Running on backup cells. Drain rate doubled.", tone:'bad' }},
       { text:"📡 Radio mission control for a software patch workaround", req:{},
@@ -1984,6 +2020,7 @@ function resetState() {
     repeatableEvents: new Set(), // events that CAN repeat
     waypointIdx: 0,
     resupplyDroneFailed: false,
+    pendingMiniGame: null,
     active: false
   };
 }
@@ -2124,10 +2161,20 @@ function renderCrew() {
   });
 }
 
-function openCrewDrawer() {
-  // Sync drawer inventory before opening
+function openInvDrawer() {
+  // Sync inventory values
   const d = { pc: S.powerCells, o2: S.oxygenCanisters, food: S.foodBoxes, rk: S.repairKits, mk: S.medKits, cr: S.credits };
   Object.entries(d).forEach(([k, v]) => { const el = $('dinv-' + k); if (el) el.textContent = v; });
+  const rm = $('dinv-ration-mode');
+  if (rm) rm.textContent = (S.rationMode || 'standard').charAt(0).toUpperCase() + (S.rationMode || 'standard').slice(1) + ' Rations';
+  $('inv-drawer-overlay').classList.add('open');
+}
+
+function closeInvDrawer() {
+  $('inv-drawer-overlay').classList.remove('open');
+}
+
+function openCrewDrawer() {
   $('crew-drawer-overlay').classList.add('open');
 }
 
@@ -2324,6 +2371,20 @@ function checkWaypoint() {
   S.waypointIdx++;
   S.credits += wp.credits;
   addLog(`Arrived at ${wp.name}. Received $${wp.credits}.`, 'good');
+
+  // Auto-repair all lingering damage flags at waypoints (item 14)
+  const repairs = [];
+  if (S.roverDegraded)  { S.roverDegraded  = false; repairs.push('wheel/motor damage'); }
+  if (S.motorSeized)    { S.motorSeized    = false; repairs.push('drive motor seizure'); }
+  if (S.chargeReduced)  { S.chargeReduced  = false; repairs.push('solar panel damage'); }
+  if (S.bmuFailed)      { S.bmuFailed      = false; repairs.push('battery management unit'); }
+  if (S.waterReclaim)   { S.waterReclaim   = false; repairs.push('water reclamation system'); }
+  if (S.hullCracked)    { S.hullCracked    = false; repairs.push('hull microcrack'); }
+  if (S.navBlackout)    { S.navBlackout    = false; S.navBlackoutDays = 0; repairs.push('navigation computer'); }
+  if (repairs.length > 0) {
+    addLog(`Waypoint technicians repaired: ${repairs.join(', ')}. Rover restored to full functionality.`, 'good');
+  }
+
   openWaypoint(wp);
   return true;
 }
@@ -2468,6 +2529,7 @@ function tryEvent() {
     if (ev.maxDay && S.day > ev.maxDay) return false;
     // Conditional events
     if (ev.id === 'night_crisis' && !S.inNight) return false;
+    if (ev.id === 'solar_flare' && S.inNight) return false;   // pointless during lunar night
     if (ev.id === 'resupply_failure' && S.resupplyDroneFailed) return false;
     // Only show repair events if that system is actually broken
     if (ev.id === 'bmu_repair_offer' && !S.bmuFailed) return false;
@@ -2491,18 +2553,40 @@ function tryEvent() {
   return true;
 }
 
+// ── CREW NAME INJECTION ───────────────────────────────────
+// Replaces role placeholders with actual crew names in event text
+function injectCrewNames(text) {
+  if (!S.crew || S.crew.length < 4) return text;
+  const engineer = S.crew[1].name;
+  const scientist = S.crew[2].name;
+  const medic     = S.crew[3].name;
+  const commander = S.crew[0].name;
+  return text
+    .replace(/\byour engineer\b/gi,          `your engineer ${engineer}`)
+    .replace(/\bthe engineer\b/gi,           `${engineer}`)
+    .replace(/\byour science officer\b/gi,   `your science officer ${scientist}`)
+    .replace(/\bthe science officer\b/gi,    `${scientist}`)
+    .replace(/\byour medical officer\b/gi,   `your medical officer ${medic}`)
+    .replace(/\bthe medical officer\b/gi,    `${medic}`)
+    .replace(/\byour medic\b/gi,             `your medic ${medic}`)
+    .replace(/\byour commander\b/gi,         `your commander ${commander}`)
+    .replace(/\bscience officer\b/gi,        `science officer ${scientist}`)
+    .replace(/\bengineers?\b(?! ${engineer})/gi, m => m.toLowerCase().startsWith('engineer') ? `engineer ${engineer}` : m)
+    .replace(/\bmedical officer\b/gi,        `medical officer ${medic}`);
+}
+
 function showEvent(ev) {
   $('ev-cat').textContent   = ev.cat;
   $('ev-title').textContent = ev.title;
-  $('ev-desc').textContent  = ev.desc;
+  $('ev-desc').textContent  = injectCrewNames(ev.desc);
   setImg($('ev-img'), $('ev-img-label'), $('ev-img-path'), ev.scene, ev.title);
 
   const choices = $('ev-choices');
   choices.innerHTML = '';
-  ev.choices.forEach((ch, i) => {
+  ev.choices.forEach((ch) => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = ch.text;
+    btn.textContent = injectCrewNames(ch.text);
     const canAfford = Object.entries(ch.req || {}).every(([k, v]) => (S[k] || 0) >= v);
     if (!canAfford) { btn.disabled = true; btn.textContent += '  [INSUFFICIENT RESOURCES]'; }
     btn.addEventListener('click', () => resolveEvent(ch));
@@ -2545,7 +2629,7 @@ function resolveEvent(choice) {
 
   // Show result screen
   $('res-title').textContent = out.title;
-  $('res-desc').textContent  = out.desc;
+  $('res-desc').textContent  = injectCrewNames(out.desc);
   setImg($('res-img'), $('res-img-label'), $('res-img-path'), out.scene, out.title);
 
   const box = $('res-changes');
@@ -2657,10 +2741,36 @@ function applySpecial(effect, changes) {
     S.kmLeft = Math.max(0, TOTAL_KM - S.kmTraveled);
     changes.push({ text:'Exceptional conditions: −80km off journey', pos:true });
   }
+  if (effect === 'launchAntenna') {
+    S.pendingMiniGame = 'antenna';
+  }
 }
 
 function continueFromResult() {
   if (S.kmLeft <= 0) { triggerVictory(); return; }
+
+  // Check for pending mini-game triggered by an event outcome
+  if (S.pendingMiniGame === 'antenna') {
+    S.pendingMiniGame = null;
+    mgReturnScreen = 'screen-game';
+    mgOnFinish = (outcome) => {
+      if (outcome === 'lock') {
+        S.morale = Math.min(100, S.morale + 15);
+        addLog('Antenna realigned. Mission control contact restored. Morale up.', 'good');
+      } else if (outcome === 'partial') {
+        addLog('Partial antenna alignment. Degraded comms established.', 'alert');
+      } else {
+        S.morale = Math.max(0, S.morale - 10);
+        addLog('Antenna alignment failed. Comms remain offline.', 'bad');
+      }
+      refreshGameUI();
+      clearInlineLog();
+      showScreen('screen-game');
+    };
+    startAntennaGame('antenna_event', mgOnFinish);
+    return;
+  }
+
   const over = checkGameOver();
   if (!over) showScreen('screen-game');
 }
@@ -2700,16 +2810,22 @@ function triggerGameOver(reason, cat) {
 function triggerVictory() {
   S.active = false;
   S.kmTraveled = TOTAL_KM; S.kmLeft = 0;
-  const survived = S.crew.filter(c => c.alive).map(c => c.name).join(', ');
+  const survivorNames = S.crew.filter(c => c.alive).map(c => c.name);
+  let survived;
+  if (survivorNames.length === 0)      survived = 'no one';
+  else if (survivorNames.length === 1) survived = survivorNames[0];
+  else survived = survivorNames.slice(0, -1).join(', ') + ' and ' + survivorNames[survivorNames.length - 1];
+
   const crewSc  = S.crewAlive * 500;
   const resSc   = Math.round((S.power + S.oxygen + S.food + S.morale) * 5);
   const spdSc   = Math.max(0, 2000 - S.day * 20);
   const diffBonus = { tourist:0, astronaut:500, commander:1500 }[S.difficulty];
   const total = crewSc + resSc + spdSc + diffBonus;
   let rating = total > 4000 ? 'LEGEND' : total > 3000 ? 'HERO' : total > 2000 ? 'ASTRONAUT' : total > 1000 ? 'CREW MEMBER' : 'TRAINEE';
+  const diffLabel = S.difficulty.charAt(0).toUpperCase() + S.difficulty.slice(1);
   $('vic-desc').textContent = `You reached Shackleton Station. ${survived} made it.`;
   $('vic-score').textContent = `SCORE: ${total.toLocaleString()} — ${rating}`;
-  $('vic-stats').innerHTML = `Mission Duration: ${S.day} Earth days<br>Crew: ${S.crewAlive} of 4 survived<br>Difficulty: ${S.difficulty}<br>Crew +${crewSc} | Resources +${resSc} | Speed +${spdSc} | Difficulty +${diffBonus}`;
+  $('vic-stats').innerHTML = `Mission Duration: ${S.day} Earth days<br>Crew: ${S.crewAlive} of 4 survived<br>Difficulty: ${diffLabel}<br>Crew +${crewSc} | Resources +${resSc} | Speed +${spdSc} | Difficulty +${diffBonus}`;
   showScreen('screen-victory');
 }
 
@@ -2789,19 +2905,19 @@ function startCellGame(context) {
   mgCells.savedKit = false;
   mgCells.phase = 'idle';
 
-  // Sequence length: 3 on round 1, grows by 1 per round
   buildCellSequence();
   updateCellUI();
   showScreen('screen-mg-cells');
 
-  // Short countdown before first round starts
-  $('mg-cells-phase').textContent = 'WATCH...';
+  // Reset UI — wait for player to tap Start
+  $('mg-cells-phase').textContent = 'READY';
   $('mg-cells-result').textContent = '';
   $('mg-cells-result').className = 'mg-result-msg';
   $('btn-mg-cells-done').style.display = 'none';
+  $('btn-mg-cells-start').style.display = 'block';
+  updateThermalBar();
   setCellsIdle(true);
-
-  setTimeout(() => startCellRound(), 1200);
+  disableCells(true);
 }
 
 function buildCellSequence() {
@@ -3284,6 +3400,11 @@ function launchAntennaGame(onFinishCallback) {
 
 // ── BUTTON WIRING ─────────────────────────────────────────
 // Mini-game done buttons
+$('btn-mg-cells-start').addEventListener('click', () => {
+  $('btn-mg-cells-start').style.display = 'none';
+  $('mg-cells-phase').textContent = 'WATCH...';
+  startCellRound();
+});
 $('btn-mg-cells-done').addEventListener('click', cellGameDone);
 $('btn-mg-antenna-done').addEventListener('click', () => {
   const outcome = $('btn-mg-antenna-done').dataset.outcome || 'fail';
@@ -3308,7 +3429,6 @@ initSliderDrag('el');
 // Title
 $('btn-begin').addEventListener('click', () => { resetState(); goNames(); });
 $('btn-howto').addEventListener('click', goHowTo);
-$('btn-about').addEventListener('click', goAbout);
 
 // How to play
 $('btn-howto-back').addEventListener('click', goTitle);
@@ -3334,7 +3454,7 @@ $('act-drive').addEventListener('click',   actDrive);
 $('act-charge').addEventListener('click',  actCharge);
 $('act-rations').addEventListener('click', actRations);
 $('act-rest').addEventListener('click',    actRest);
-$('act-status').addEventListener('click',  actStatus);
+$('act-inv').addEventListener('click', () => { if (S.active) openInvDrawer(); });
 $('act-cell').addEventListener('click', () => {
   if (!S.active) return;
   if (S.powerCells < 1) { clearInlineLog(); addLog("No power cells in inventory.", 'alert'); return; }
@@ -3347,9 +3467,14 @@ $('act-abort').addEventListener('click',   actAbort);
 
 // Crew drawer close
 $('crew-drawer-close').addEventListener('click', closeCrewDrawer);
-// Tap overlay background to close
 $('crew-drawer-overlay').addEventListener('click', e => {
   if (e.target === $('crew-drawer-overlay')) closeCrewDrawer();
+});
+
+// Inventory drawer close
+$('inv-drawer-close').addEventListener('click', closeInvDrawer);
+$('inv-drawer-overlay').addEventListener('click', e => {
+  if (e.target === $('inv-drawer-overlay')) closeInvDrawer();
 });
 
 // Result continue
