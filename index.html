@@ -614,6 +614,250 @@ button { cursor: pointer; }
   .shop-card-right { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; }
 }
 
+/* ═══════════════════════════════════════════════════
+   MINI-GAME SHARED STYLES
+═══════════════════════════════════════════════════ */
+.minigame-wrap {
+  position: relative; z-index: 10;
+  background: rgba(3,13,26,.98); border: 1px solid var(--border);
+  box-shadow: 0 0 60px rgba(0,200,255,.15);
+  padding: 1.75rem 2rem;
+  max-width: 560px; width: calc(100% - 2rem);
+  max-height: calc(100vh - 2rem); overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+}
+.mg-title {
+  font-family: var(--display); font-size: 2rem; color: var(--accent);
+  letter-spacing: .05em; text-align: center; line-height: 1;
+}
+.mg-subtitle {
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .25em;
+  color: var(--warn); text-align: center;
+}
+.mg-instruction {
+  font-size: .9rem; color: var(--text); text-align: center;
+  line-height: 1.6; max-width: 420px;
+}
+.mg-status-bar {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  padding: .5rem .75rem; background: var(--panel);
+  border: 1px solid var(--border); font-family: var(--ui); font-size: .65rem;
+  letter-spacing: .15em;
+}
+.mg-timer { color: var(--warn); }
+.mg-round { color: var(--accent); }
+.mg-score { color: var(--green); }
+
+/* ── POWER CELL SEQUENCE ─────────────────────────── */
+.cell-bay {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .75rem;
+  width: 100%; max-width: 380px;
+  padding: 1rem;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+.cell-slot {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: .3rem; cursor: pointer;
+  transition: transform .08s ease, border-color .15s ease;
+  position: relative; overflow: hidden;
+  user-select: none; -webkit-user-select: none;
+}
+.cell-slot:active { transform: scale(.93); }
+.cell-slot.lit {
+  animation: cellPulse .35s ease-out;
+}
+.cell-slot.correct {
+  border-color: var(--green) !important;
+  background: rgba(0,255,157,.12) !important;
+}
+.cell-slot.wrong {
+  border-color: var(--danger) !important;
+  background: rgba(255,51,68,.15) !important;
+  animation: cellShake .3s ease;
+}
+.cell-slot.idle { opacity: .5; }
+.cell-icon { font-size: 1.6rem; }
+.cell-label {
+  font-family: var(--ui); font-size: .45rem; letter-spacing: .12em;
+  color: var(--dim);
+}
+.cell-number {
+  position: absolute; top: 4px; right: 6px;
+  font-family: var(--display); font-size: .9rem; color: rgba(255,255,255,.2);
+}
+
+@keyframes cellPulse {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(0,200,255,.8); }
+  40%  { transform: scale(1.06); box-shadow: 0 0 0 12px rgba(0,200,255,0); }
+  100% { transform: scale(1);    box-shadow: none; }
+}
+@keyframes cellShake {
+  0%, 100% { transform: translateX(0); }
+  25%  { transform: translateX(-6px); }
+  75%  { transform: translateX(6px); }
+}
+
+.thermal-bar-wrap {
+  width: 100%; max-width: 380px;
+}
+.thermal-bar-label {
+  font-family: var(--ui); font-size: .55rem; letter-spacing: .15em;
+  color: var(--dim); margin-bottom: .3rem; display: flex;
+  justify-content: space-between;
+}
+.thermal-bar-track {
+  height: 8px; background: rgba(255,255,255,.07);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.thermal-bar-fill {
+  height: 100%; width: 0%;
+  transition: width .1s linear, background .3s ease;
+  background: var(--accent);
+}
+.thermal-bar-fill.warm  { background: var(--warn); }
+.thermal-bar-fill.hot   { background: var(--danger); }
+
+.mg-phase-label {
+  font-family: var(--display); font-size: 1.4rem; color: var(--text);
+  text-align: center; letter-spacing: .1em; min-height: 2rem;
+}
+.mg-result-msg {
+  font-size: 1rem; text-align: center; line-height: 1.6;
+  color: var(--text); min-height: 3rem;
+}
+.mg-result-msg.good  { color: var(--green); }
+.mg-result-msg.bad   { color: var(--danger); }
+.mg-result-msg.ok    { color: var(--warn); }
+
+/* ── ANTENNA ALIGNMENT ───────────────────────────── */
+.signal-meter-wrap {
+  width: 100%; max-width: 420px;
+  background: var(--panel2); border: 1px solid var(--border);
+  padding: .85rem 1rem;
+}
+.signal-meter-label {
+  font-family: var(--ui); font-size: .55rem; letter-spacing: .2em;
+  color: var(--dim); margin-bottom: .5rem; display: flex;
+  justify-content: space-between; align-items: center;
+}
+.signal-strength-val {
+  font-family: var(--display); font-size: 1.1rem; color: var(--accent);
+}
+.signal-waveform {
+  height: 48px; width: 100%;
+  background: var(--panel); border: 1px solid var(--border);
+  position: relative; overflow: hidden; margin-bottom: .5rem;
+}
+.waveform-line {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 100%;
+}
+.signal-bar-track {
+  height: 10px; background: rgba(255,255,255,.07);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.signal-bar-fill {
+  height: 100%; width: 0%;
+  transition: width .15s ease;
+  background: linear-gradient(90deg, var(--danger), var(--warn) 50%, var(--green));
+}
+
+.sliders-area {
+  width: 100%; max-width: 420px; display: flex; gap: 1.5rem;
+}
+.slider-col {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: .5rem;
+}
+.slider-col-label {
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .2em; color: var(--accent);
+}
+.slider-track {
+  width: 100%; height: 8px;
+  background: rgba(255,255,255,.07); border: 1px solid var(--border);
+  position: relative; border-radius: 4px;
+  cursor: pointer; touch-action: none;
+}
+.slider-thumb {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--bright);
+  box-shadow: 0 0 8px rgba(0,200,255,.6);
+  cursor: grab; touch-action: none;
+  transition: box-shadow .15s ease;
+}
+.slider-thumb:active { cursor: grabbing; box-shadow: 0 0 18px rgba(0,200,255,1); }
+.slider-thumb.in-zone {
+  background: var(--green);
+  box-shadow: 0 0 14px rgba(0,255,157,.8);
+}
+.slider-val {
+  font-family: var(--display); font-size: 1rem; color: var(--text);
+}
+
+.lock-bar-wrap {
+  width: 100%; max-width: 420px;
+}
+.lock-bar-label {
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .2em;
+  color: var(--dim); margin-bottom: .3rem; display: flex;
+  justify-content: space-between;
+}
+.lock-bar-track {
+  height: 14px; background: rgba(255,255,255,.07);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.lock-bar-fill {
+  height: 100%; width: 0%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(0,255,157,.5);
+  transition: background .2s ease;
+}
+.lock-bar-fill.locked {
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(0,200,255,.9);
+  animation: lockPulse 1s ease-in-out infinite;
+}
+@keyframes lockPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .6; }
+}
+
+.antenna-timer-ring {
+  width: 70px; height: 70px; position: relative;
+  flex-shrink: 0;
+}
+.antenna-timer-ring svg { transform: rotate(-90deg); }
+.timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+.timer-ring-fg {
+  fill: none; stroke: var(--warn); stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 188;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset .1s linear, stroke .3s ease;
+}
+.timer-ring-fg.urgent { stroke: var(--danger); }
+.timer-ring-text {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-size: 1.3rem; color: var(--bright);
+}
+
+@media (max-width: 560px) {
+  .minigame-wrap { padding: 1.25rem 1rem; gap: .75rem; }
+  .cell-bay { gap: .5rem; padding: .75rem; }
+  .cell-icon { font-size: 1.3rem; }
+  .sliders-area { flex-direction: column; gap: 1rem; }
+  .slider-track { height: 10px; }
+  .slider-thumb { width: 28px; height: 28px; }
+}
+
 @media (max-width: 380px) {
   .game-title { font-size: 4.5rem; }
   .hud-val { font-size: .8rem; }
@@ -949,6 +1193,7 @@ button { cursor: pointer; }
     <button class="act-btn" id="act-rations">🍱 RATIONS (F)</button>
     <button class="act-btn" id="act-rest">💤 REST (R)</button>
     <button class="act-btn" id="act-status">📊 STATUS (S)</button>
+    <button class="act-btn" id="act-cell">🔋 CELL (E)</button>
     <button class="act-btn" id="act-crew">👥 CREW</button>
     <button class="act-btn red" id="act-abort">⚠️ ABORT</button>
   </div>
@@ -1100,6 +1345,156 @@ button { cursor: pointer; }
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 13: MINI-GAME — POWER CELL SEQUENCE
+═══════════════════════════════════════════════════════ -->
+<div id="screen-mg-cells" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="minigame-wrap">
+    <div class="mg-title">⚡ CELL SEQUENCE</div>
+    <div class="mg-subtitle">POWER BAY CALIBRATION PROTOCOL</div>
+    <div class="mg-instruction" id="mg-cells-instruction">
+      Watch the sequence, then tap the cells in the same order.
+    </div>
+
+    <div class="mg-status-bar">
+      <span class="mg-round">ROUND <span id="mg-cells-round">1</span> / 3</span>
+      <span class="mg-phase-label" id="mg-cells-phase">GET READY</span>
+      <span class="mg-score">+<span id="mg-cells-power-gain">0</span>% PWR</span>
+    </div>
+
+    <!-- 3×2 cell grid (6 cells) -->
+    <div class="cell-bay" id="cell-bay">
+      <div class="cell-slot" id="cell-0" data-idx="0">
+        <div class="cell-icon">🔴</div>
+        <div class="cell-label">HIGH</div>
+        <div class="cell-number">1</div>
+      </div>
+      <div class="cell-slot" id="cell-1" data-idx="1">
+        <div class="cell-icon">🔵</div>
+        <div class="cell-label">MID</div>
+        <div class="cell-number">2</div>
+      </div>
+      <div class="cell-slot" id="cell-2" data-idx="2">
+        <div class="cell-icon">🟡</div>
+        <div class="cell-label">LOW</div>
+        <div class="cell-number">3</div>
+      </div>
+      <div class="cell-slot" id="cell-3" data-idx="3">
+        <div class="cell-icon">⚪</div>
+        <div class="cell-label">RESERVE</div>
+        <div class="cell-number">4</div>
+      </div>
+      <div class="cell-slot" id="cell-4" data-idx="4">
+        <div class="cell-icon">🟢</div>
+        <div class="cell-label">SOLAR</div>
+        <div class="cell-number">5</div>
+      </div>
+      <div class="cell-slot" id="cell-5" data-idx="5">
+        <div class="cell-icon">🟠</div>
+        <div class="cell-label">EMRG</div>
+        <div class="cell-number">6</div>
+      </div>
+    </div>
+
+    <!-- Thermal warning bar -->
+    <div class="thermal-bar-wrap">
+      <div class="thermal-bar-label">
+        <span>THERMAL OVERLOAD WARNING</span>
+        <span id="mg-cells-thermal-pct">0%</span>
+      </div>
+      <div class="thermal-bar-track">
+        <div class="thermal-bar-fill" id="mg-cells-thermal"></div>
+      </div>
+    </div>
+
+    <div class="mg-result-msg" id="mg-cells-result"></div>
+    <button class="btn btn-primary" id="btn-mg-cells-done" style="display:none;width:100%;max-width:380px">
+      CONTINUE →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 14: MINI-GAME — ANTENNA ALIGNMENT
+═══════════════════════════════════════════════════════ -->
+<div id="screen-mg-antenna" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="minigame-wrap">
+    <div class="mg-title">📡 ANTENNA ALIGN</div>
+    <div class="mg-subtitle">EMERGENCY COMMS LOCK PROTOCOL</div>
+    <div class="mg-instruction" id="mg-antenna-instruction">
+      Adjust both sliders until the signal peaks. Hold both in the green zone to lock the transmission.
+    </div>
+
+    <!-- Signal meter -->
+    <div class="signal-meter-wrap">
+      <div class="signal-meter-label">
+        <span>SIGNAL STRENGTH</span>
+        <span class="signal-strength-val" id="mg-antenna-signal-val">0%</span>
+      </div>
+      <div class="signal-waveform" id="mg-antenna-waveform">
+        <canvas id="mg-antenna-canvas" width="420" height="48"></canvas>
+      </div>
+      <div class="signal-bar-track">
+        <div class="signal-bar-fill" id="mg-antenna-signal-bar"></div>
+      </div>
+    </div>
+
+    <!-- Sliders -->
+    <div class="sliders-area">
+      <div class="slider-col">
+        <div class="slider-col-label">AZIMUTH (AZ)</div>
+        <div class="slider-track" id="mg-slider-az">
+          <div class="slider-thumb" id="mg-thumb-az"></div>
+        </div>
+        <div class="slider-val" id="mg-az-val">0°</div>
+      </div>
+      <div class="slider-col">
+        <div class="slider-col-label">ELEVATION (EL)</div>
+        <div class="slider-track" id="mg-slider-el">
+          <div class="slider-thumb" id="mg-thumb-el"></div>
+        </div>
+        <div class="slider-val" id="mg-el-val">0°</div>
+      </div>
+    </div>
+
+    <!-- Lock progress and timer -->
+    <div class="lock-bar-wrap">
+      <div class="lock-bar-label">
+        <span>TRANSMISSION LOCK</span>
+        <span id="mg-antenna-lock-pct">0%</span>
+      </div>
+      <div class="lock-bar-track">
+        <div class="lock-bar-fill" id="mg-antenna-lock-bar"></div>
+      </div>
+    </div>
+
+    <div class="mg-status-bar" style="width:100%;max-width:420px">
+      <div class="antenna-timer-ring">
+        <svg viewBox="0 0 64 64" width="64" height="64">
+          <circle class="timer-ring-bg" cx="32" cy="32" r="30"/>
+          <circle class="timer-ring-fg" id="mg-antenna-ring" cx="32" cy="32" r="30"/>
+        </svg>
+        <div class="timer-ring-text" id="mg-antenna-timer-txt">45</div>
+      </div>
+      <div style="flex:1;text-align:center">
+        <div class="mg-phase-label" id="mg-antenna-phase">SEARCHING...</div>
+        <div style="font-size:.75rem;color:var(--dim);margin-top:.3rem" id="mg-antenna-hint">
+          Both sliders must be in the green zone simultaneously
+        </div>
+      </div>
+    </div>
+
+    <div class="mg-result-msg" id="mg-antenna-result"></div>
+    <button class="btn btn-primary" id="btn-mg-antenna-done" style="display:none;width:100%;max-width:420px">
+      CONTINUE →
+    </button>
+  </div>
+</div>
+
 <script>
 /* ═══════════════════════════════════════════════════════
    LUNAR TRAIL — All game logic in one self-contained script
@@ -1131,9 +1526,9 @@ const BUDGET    = 2400;
 const PRICES = { powerCells:200, oxygenCanisters:150, foodBoxes:50, repairKits:300, medKits:250 };
 
 const DIFF = {
-  tourist:   { freq:.25, resMult:.7,  sevMult:.7  },
-  astronaut: { freq:.4,  resMult:1.0, sevMult:1.0 },
-  commander: { freq:.6,  resMult:1.4, sevMult:1.4 }
+  tourist:   { freq:.30, resMult:.75, sevMult:.75 },
+  astronaut: { freq:.50, resMult:1.1, sevMult:1.0 },
+  commander: { freq:.70, resMult:1.5, sevMult:1.4 }
 };
 
 const ROLES = [
@@ -1407,8 +1802,151 @@ const EVENTS = [
       { text:"⏩ Keep it brief — 10 minutes, then back to work", req:{},
         out:{ title:"Brief Check-In", desc:"Quick calls. Everyone heard a voice they love. It's enough.", scene:'images/scenes/result_brief_call.png', fx:{morale:15}, log:"Brief Earth contact. Crew checked in.", tone:'good' }}
     ]
+  },
+  {
+    id:'suit_puncture', cat:'🚨 SUIT EMERGENCY', title:"EVA Suit Puncture", minDay:3, weight:8,
+    desc:"A sharp crack from the airlock. Your engineer just completed a routine exterior inspection when a micrometeorite fragment punched clean through the outer layer of their suit. The inner bladder held — barely. They're back inside but pale. Oxygen is escaping the outer layer fast. You have about two hours before the inner bladder fails too.",
+    scene:'images/scenes/event_suit_puncture.png',
+    choices:[
+      { text:"💉 Emergency suit repair + full medical treatment (1 repair kit + 1 med kit)", req:{repairKits:1,medKits:1},
+        out:{ title:"Suit Sealed, Crew Stable", desc:"Your medical officer works on the crew member while the engineer patches the suit from the outside. Forty tense minutes. The suit holds. The crew member is shaken but uninjured.", scene:'images/scenes/result_suit_sealed.png', fx:{repairKits:-1,medKits:-1,morale:10}, log:"Suit puncture sealed. Close call.", tone:'good' }},
+      { text:"🔩 Patch suit only — skip the medical exam (1 repair kit)", req:{repairKits:1},
+        out:{ title:"Suit Patched, Status Unknown", desc:"The suit is sealed. Your engineer seems okay. But without a full exam, you won't know if there was any hypoxic exposure until the symptoms show up — and they might.", scene:'images/scenes/result_suit_patched_only.png', fx:{repairKits:-1,morale:-5}, special:'crewHealth', log:"Suit patched. Skipped medical exam.", tone:'alert' }},
+      { text:"😰 No repair kit — improvise with emergency sealant tape", req:{},
+        out:{ title:"Taped and Praying", desc:"You use every roll of emergency sealant tape on the suit. It holds for now. Probably. You've added 'find a replacement suit' to the mission priority list.", scene:'images/scenes/result_suit_taped.png', fx:{morale:-25,oxygen:-15}, special:'crewDeath', log:"Suit improvised-patched. Crew member in critical condition.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'solar_particle_event', cat:'☢️ RADIATION EMERGENCY', title:"Solar Particle Event — No Warning", minDay:6, weight:6,
+    desc:"No alarm. No warning from mission control. Just a sudden cascade on the dosimeters as a high-energy proton storm sweeps across the surface. By the time you realize what's happening, two crew members have already absorbed a significant dose. Symptoms will appear within 24 to 48 hours.",
+    scene:'images/scenes/event_solar_particle.png',
+    choices:[
+      { text:"💉 Immediate radiation treatment protocol (2 med kits)", req:{medKits:2},
+        out:{ title:"Radiation Mitigated", desc:"Your medic administers the full proton exposure protocol — potassium iodide, radioprotective compounds, IV fluids. It won't reverse the exposure but it'll blunt the worst effects.", scene:'images/scenes/result_rad_treated.png', fx:{medKits:-2,morale:-10}, log:"Solar particle event. Radiation treatment administered.", tone:'alert' }},
+      { text:"🛡️ Shelter deep inside rover — maximum shielding for 24 hours", req:{},
+        out:{ title:"Sheltered But Dosed", desc:"You pull everyone to the center of the rover and pile equipment around the walls for shielding. It reduces further exposure. But the initial dose is done. Two crew members will be sick for days.", scene:'images/scenes/result_rad_sheltered.png', fx:{power:-10,food:-8,morale:-15}, special:'radSickness', log:"Solar particle event. Crew sheltered. Radiation sickness developing.", tone:'bad' }},
+      { text:"🚗 Keep driving — you were already through the worst of it", req:{},
+        out:{ title:"Driving Through Exposure", desc:"Maybe you were already past the peak. Or maybe you weren't. Either way, the crew spends the next week fighting fatigue, headaches, and a creeping sense that this mission has a cost.", scene:'images/scenes/result_rad_ignored.png', fx:{morale:-25}, special:'radSickness', log:"Solar particle event ignored. Radiation sickness setting in.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'bmu_failure', cat:'⚡ CRITICAL SYSTEM', title:"Battery Management Unit Failure", minDay:8, weight:6,
+    desc:"It starts as a strange reading on the power panel — cells draining out of sequence, the charge percentage jumping erratically. Then the diagnostic confirms it: the battery management unit has failed. It's not just low power. The system that controls HOW power is distributed is gone. Every cell is now draining at roughly twice its rated rate.",
+    scene:'images/scenes/event_bmu_failure.png',
+    choices:[
+      { text:"🔩 Emergency BMU bypass — engineer rigs manual cell switching (2 repair kits)", req:{repairKits:2},
+        out:{ title:"Manual Power Control Established", desc:"It takes four hours and most of your spare components, but your engineer builds a manual switching board. Not elegant. Definitely not what NASA intended. But the drain rate is back to normal.", scene:'images/scenes/result_bmu_bypass.png', fx:{repairKits:-2,power:-10,morale:5}, special:'fixBmu', log:"BMU bypassed. Manual power control online.", tone:'good' }},
+      { text:"⚡ Deplete backup cells to compensate — accept the higher drain rate", req:{powerCells:3},
+        out:{ title:"Running on Backup Cells", desc:"You burn through three backup cells to maintain margin while the BMU failure bleeds the main pack. Not a solution — just buying time.", scene:'images/scenes/result_bmu_cells.png', fx:{powerCells:-3}, special:'bmuFailed', log:"BMU failed. Running on backup cells. Drain rate doubled.", tone:'bad' }},
+      { text:"📡 Radio mission control for a software patch workaround", req:{},
+        out:{ title:"Partial Software Fix", desc:"Houston pushes a firmware patch that recovers maybe 40% of normal BMU function. Better than nothing. Worse than fixed.", scene:'images/scenes/result_bmu_partial.png', fx:{power:-5,morale:5}, special:'bmuFailed', log:"BMU partially patched via software. Still degraded.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'water_reclaim_fail', cat:'💧 LIFE SUPPORT', title:"Water Reclamation System Down", minDay:10, weight:6,
+    desc:"The water reclamation unit has failed. It normally processes the crew's biological waste back into 93% drinkable water — which also feeds the oxygen generation system. Without it, you're burning through food rations for hydration and the O₂ recycling loop is running at reduced efficiency. This one is silent. And it's been running degraded for a day before anyone noticed.",
+    scene:'images/scenes/event_water_fail.png',
+    choices:[
+      { text:"🔩 Full system rebuild — engineer tears it apart and starts over (1 repair kit, 8 hours)", req:{repairKits:1},
+        out:{ title:"System Rebuilt", desc:"A long, messy job. Your engineer emerges from the lower cabin covered in things nobody wants to be covered in. But the unit is running.", scene:'images/scenes/result_water_fixed.png', fx:{repairKits:-1,food:-10,morale:-5}, special:'fixWater', log:"Water reclamation rebuilt. Full system function restored.", tone:'good' }},
+      { text:"🍱 Increase food rations as substitute — compensate for fluid loss", req:{foodBoxes:4},
+        out:{ title:"Manual Hydration Protocol", desc:"You pull four extra ration boxes and put the crew on a forced hydration schedule using the food pack moisture content. Calorie-inefficient. Effective enough.", scene:'images/scenes/result_water_manual.png', fx:{foodBoxes:-4}, special:'waterReclaim', log:"Water reclamation offline. Manual hydration protocol.", tone:'alert' }},
+      { text:"😬 Ignore it — the crew can manage short-term dehydration", req:{},
+        out:{ title:"Dehydration Setting In", desc:"You push through. By day three the crew is sluggish, headaches constant, decision-making impaired. This is going to compound everything else that goes wrong.", scene:'images/scenes/result_water_ignored.png', fx:{morale:-20,oxygen:-10}, special:'waterReclaim', log:"Water reclamation failure ignored. Crew dehydrating.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'nav_blackout', cat:'🗺️ NAVIGATION FAILURE', title:"Navigation Computer Offline", minDay:5, weight:6,
+    desc:"The navigation computer has gone silent. No GPS. No orbital positioning. The display shows nothing but static where the route map used to be. You can still drive — but you're doing it by dead reckoning, using the sun angle and crater landmarks. And the sun angle on the moon is tricky. You could be going slightly the wrong direction and not know it for days.",
+    scene:'images/scenes/event_nav_blackout.png',
+    choices:[
+      { text:"🔩 Engineer attempts hardware restart and recalibration (1 repair kit)", req:{repairKits:1},
+        out:{ title:"Navigation Restored", desc:"Three hours of carefully reseating connectors and recalibrating the star tracker. The map flickers back on. You lost half a day but you know exactly where you are.", scene:'images/scenes/result_nav_restored.png', fx:{repairKits:-1,food:-5,morale:5}, special:'fixNav', log:"Navigation restored after hardware recalibration.", tone:'good' }},
+      { text:"📡 Request emergency position update from mission control", req:{},
+        out:{ title:"Position Fix Received", desc:"Houston triangulates your position from orbital assets and sends coordinates. You're mostly on track — about 40km off bearing. They'll ping you every 6 hours until the computer comes back.", scene:'images/scenes/result_nav_mc_fix.png', fx:{morale:5}, special:'navBlackout', log:"Nav blackout. Mission control providing manual position fixes.", tone:'alert' }},
+      { text:"🌙 Navigate by lunar landmarks — crater walls and horizon markers", req:{},
+        out:{ title:"Navigating by Eye", desc:"Your science officer turns out to have memorized the orbital survey maps. You make progress. Probably in the right direction.", scene:'images/scenes/result_nav_landmarks.png', fx:{morale:-10,power:-8}, special:'navBlackout', log:"Nav blackout. Navigating by landmark. Risk of drift.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'hull_crack_progressive', cat:'⚠️ HULL INTEGRITY', title:"Progressive Hull Microcrack", minDay:4, weight:7,
+    repeatable: false,
+    desc:"The pressure alarm isn't screaming — it's a slow, barely-there chirp every few minutes. Hull sensors have found a microcrack near the rear airlock seal, probably from thermal cycling stress. It's small. It's getting bigger. Every temperature swing between lunar day and night is working the crack open another fraction of a millimeter.",
+    scene:'images/scenes/event_hull_crack.png',
+    choices:[
+      { text:"🔩 Stop and seal it properly now (1 repair kit)", req:{repairKits:1},
+        out:{ title:"Crack Sealed", desc:"A proper fix — thermal sealant injected into the crack, backed with a pressure plate. It'll hold for the rest of the mission.", scene:'images/scenes/result_hull_sealed_proper.png', fx:{repairKits:-1,morale:5}, log:"Hull crack sealed properly.", tone:'good' }},
+      { text:"🩹 Tape it and keep moving — monitor the pressure readings", req:{},
+        out:{ title:"Taped and Monitoring", desc:"Emergency sealant tape over the crack. It buys time. But you're now watching a gauge that shouldn't require watching.", scene:'images/scenes/result_hull_taped.png', fx:{morale:-10}, special:'hullCrack', log:"Hull crack taped. O2 bleeding slowly. Monitoring.", tone:'alert' }},
+      { text:"😤 It's within tolerance — ignore it", req:{},
+        out:{ title:"Ignoring the Crack", desc:"It's fine. Probably fine. The crack is expanding roughly 0.1mm per temperature cycle. There are about 40 temperature cycles left in the mission.", scene:'images/scenes/result_hull_ignored.png', fx:{morale:-5}, special:'hullCrack', log:"Hull crack unaddressed. O2 slowly leaking.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'resupply_failure', cat:'📡 MISSION CONTROL', title:"Resupply Drone Failed to Deploy", minDay:20, weight:5,
+    desc:"Mission control has bad news. The orbital resupply drone — carrying an additional 800 credits of supplies pre-positioned for your mission — experienced a thruster failure during de-orbit. It's sitting in a 200km orbit doing nothing. The supplies are gone. The credits are gone. And they sound like they feel worse about it than you do.",
+    scene:'images/scenes/event_resupply_fail.png',
+    choices:[
+      { text:"📊 Reassess budget and continue — adjust plans accordingly", req:{},
+        out:{ title:"Mission Adjusted", desc:"You do the math. It's tight. But it's manageable if nothing else goes wrong. Which, on the moon, is a significant if.", scene:'images/scenes/result_resupply_adjusted.png', fx:{morale:-15,credits:-200}, log:"Resupply drone lost. Budget reduced. Mission continues.", tone:'alert' }},
+      { text:"📡 Request emergency resupply authorization (mission control grants $400 emergency credits)", req:{},
+        out:{ title:"Emergency Credits Authorized", desc:"Mission control pulls strings. You get half of what you lost. Someone is going to have a very long debrief when this is over.", scene:'images/scenes/result_resupply_partial.png', fx:{morale:-5,credits:200}, log:"Emergency resupply credits authorized. Partial recovery.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'awol_crew', cat:'😤 CREW CRISIS', title:"Crew Member Refuses Duty", minDay:25, weight:5,
+    desc:"It's been weeks. Your science officer has locked themselves in the rear equipment bay and hasn't responded to morning check-in in four hours. When they finally open the hatch, they're calm. Eerily calm. They say they're done. Done with the mission, done with the rover, done with the concept of continuing south. They're not violent. They're just — finished.",
+    scene:'images/scenes/event_awol_crew.png',
+    choices:[
+      { text:"🎙️ Spend a full day talking it through — really listen", req:{},
+        out:{ title:"Crisis Averted", desc:"Six hours of the most honest conversation your crew has had since launch. What comes out is fear, exhaustion, and a grief they've been holding since day one. By the end, your science officer is back. Quieter. But back.", scene:'images/scenes/result_awol_resolved.png', fx:{morale:15,food:-8}, log:"Crew crisis resolved through extended conversation.", tone:'good' }},
+      { text:"💉 Medic administers anxiety medication — get them functional", req:{medKits:1},
+        out:{ title:"Medicated and Moving", desc:"Not ideal. But they're back on duty. They don't make eye contact for three days. They do their job.", scene:'images/scenes/result_awol_medicated.png', fx:{medKits:-1,morale:-10}, log:"Crew member stabilized with medication. Back on duty.", tone:'alert' }},
+      { text:"😑 Order them back to duty — this isn't optional", req:{},
+        out:{ title:"Order Followed, Trust Gone", desc:"They comply. Technically. But the damage is done. The rest of the crew watched you handle a crisis like it was a malfunction. That's not something morale recovers from quickly.", scene:'images/scenes/result_awol_ordered.png', fx:{morale:-35}, log:"Crew member ordered back to duty. Morale severely damaged.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'motor_seize', cat:'🔧 MECHANICAL FAILURE', title:"Drive Motor Seizure", minDay:7, weight:7,
+    desc:"A grinding sound from the left rear wheel hub, then silence. The wheel has locked. The other three wheels are still working and the rover is technically mobile, but you're dragging a locked wheel across lunar regolith at roughly the speed of a bad day. Until that motor is freed, you're crawling.",
+    scene:'images/scenes/event_motor_seize.png',
+    choices:[
+      { text:"🔩 Full motor replacement — 6 hours but fully fixed (2 repair kits)", req:{repairKits:2},
+        out:{ title:"Motor Replaced", desc:"Six hours of work in the wheel well. Two repair kits and a lot of leverage. The motor turns freely. Speed restored.", scene:'images/scenes/result_motor_replaced.png', fx:{repairKits:-2,food:-8}, special:'fixMotor', log:"Drive motor replaced. Full speed restored.", tone:'good' }},
+      { text:"🔩 Free the seized wheel — temporary fix (1 repair kit)", req:{repairKits:1},
+        out:{ title:"Wheel Freed, Still Damaged", desc:"The wheel turns again, but the motor is scored. You've bought distance, not time. It could seize again at any point.", scene:'images/scenes/result_motor_freed.png', fx:{repairKits:-1,morale:-5}, special:'roverDegraded', log:"Seized motor freed temporarily. Still degraded.", tone:'alert' }},
+      { text:"🐢 Drive on three wheels — accept the crawl speed", req:{},
+        out:{ title:"Three-Wheel Crawl", desc:"You disconnect the seized motor and redistribute power. It works. Badly. But it works.", scene:'images/scenes/result_motor_crawl.png', fx:{morale:-15}, special:'motorSeized', log:"Driving on three wheels. Speed severely reduced.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'bad_terrain_repeat', cat:'⚠️ TERRAIN', title:"Rough Terrain Stretch", minDay:3, weight:9, repeatable:true,
+    desc:"The terrain ahead is significantly worse than the survey predicted. A wide belt of impact ejecta — jagged regolith fragments the size of furniture — stretching across your route for at least 80km. Slow going or risk a tire.",
+    scene:'images/scenes/event_bad_terrain.png',
+    choices:[
+      { text:"🐢 Slow down and pick through it carefully — safe but slow", req:{},
+        out:{ title:"Careful Passage", desc:"Three days of crawling through the ejecta field. Painfully slow. No incidents.", scene:'images/scenes/result_terrain_slow.png', fx:{power:-15,food:-12,morale:-12}, log:"Navigated ejecta field carefully. Three days lost.", tone:'alert' }},
+      { text:"🚗 Push through at speed — risk it", req:{},
+        out:{ title:"Pushing Through", desc:"You take the ejecta at half-speed. A few hard jolts. One alarming bang from the undercarriage that turns out to be nothing. You're through.", scene:'images/scenes/result_terrain_pushed.png', fx:{power:-8,morale:-5}, log:"Pushed through rough terrain. Minor impacts.", tone:'alert' }},
+      { text:"🗺️ Find a detour route around the worst of it", req:{},
+        out:{ title:"Detour Taken", desc:"A 60km detour around the worst section. You lose some time but save the rover.", scene:'images/scenes/result_terrain_detour.png', fx:{power:-20,food:-10,morale:-8}, special:'distancePenalty', log:"Detoured around ejecta field.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'hypoxia_silent', cat:'🫁 MEDICAL ALERT', title:"Silent Hypoxia Episode", minDay:12, weight:6,
+    desc:"Your medical officer finds your engineer slumped over the navigation console during second watch. Not unconscious — just wrong. Slow responses. Confused. The CO₂ scrubber has been running inefficient for days and nobody flagged it. The engineer has been breathing slightly elevated CO₂ for at least 48 hours. They're functional. But there's cognitive impairment that won't clear quickly.",
+    scene:'images/scenes/event_hypoxia.png',
+    choices:[
+      { text:"💉 Full treatment + scrubber overhaul (1 med kit + 1 repair kit)", req:{medKits:1,repairKits:1},
+        out:{ title:"Full Recovery", desc:"Treatment for the hypoxia, new scrubber cartridge. The engineer is clear-headed within 12 hours.", scene:'images/scenes/result_hypoxia_treated.png', fx:{medKits:-1,repairKits:-1,oxygen:15,morale:5}, log:"Hypoxia treated. Scrubber overhauled. Crew recovering.", tone:'good' }},
+      { text:"💉 Treat the crew member — leave the scrubber running", req:{medKits:1},
+        out:{ title:"Crew Treated, Root Cause Remains", desc:"The engineer recovers. The scrubber is still running inefficiently. You've treated the symptom.", scene:'images/scenes/result_hypoxia_partial.png', fx:{medKits:-1,oxygen:-10,morale:-5}, log:"Hypoxia treated. Scrubber still degraded.", tone:'alert' }},
+      { text:"😬 Fresh air rotation and rest — no kits spent", req:{},
+        out:{ title:"Resting It Off", desc:"You put the engineer on rest and rotate their O₂ line to the freshest canister. Slow recovery. Cognitive impairment lingers for days.", scene:'images/scenes/result_hypoxia_rest.png', fx:{morale:-20,oxygen:-15}, special:'crewHealth', log:"Hypoxia managed without treatment. Crew degraded.", tone:'bad' }}
+    ]
   }
 ];
+
 
 // ── GAME STATE ────────────────────────────────────────────
 let S = {};
@@ -1424,15 +1962,28 @@ function resetState() {
     credits: 0,
     crew: [],
     crewAlive: 4,
-    roverDegraded: false,
-    chargeReduced: false,
+    // Rover damage flags (compounding)
+    roverDegraded: false,       // wheel/motor damage — slower speed
+    chargeReduced: false,       // solar panel damage — less charge per stop
+    motorSeized: false,         // drive motor seized — very slow
+    bmuFailed: false,           // battery management unit failed — power drains faster
+    waterReclaim: false,        // water reclamation failure — food/O2 drain faster
+    navBlackout: false,         // navigation failure — may lose distance
+    navBlackoutDays: 0,         // days remaining on nav blackout
+    hullCracked: false,         // hull crack — O2 leaking each turn
+    // Crew injury tracking (per-crew countdown for radiation sickness)
+    radSicknessDays: 0,
+    // Night
     inNight: false,
     nightDay: 0,
+    // Meta
     rationMode: 'standard',
     difficulty: 'astronaut',
     usedEvents: new Set(),
     recentEvents: [],
+    repeatableEvents: new Set(), // events that CAN repeat
     waypointIdx: 0,
+    resupplyDroneFailed: false,
     active: false
   };
 }
@@ -1687,7 +2238,11 @@ function actAbort() {
 // ── CORE ADVANCEMENT ──────────────────────────────────────
 function advanceTime(days) {
   const diff = DIFF[S.difficulty];
-  const kmPerDay = S.roverDegraded ? 18 : 26;
+
+  // Speed — motor seized stacks on top of general degradation
+  let kmPerDay = 26;
+  if (S.roverDegraded) kmPerDay = 20;
+  if (S.motorSeized)   kmPerDay = 12;
   const dist = kmPerDay * days;
 
   S.kmTraveled += dist;
@@ -1696,16 +2251,44 @@ function advanceTime(days) {
 
   // Resource drain
   const rm = RATIONS[S.rationMode].mult;
-  S.power  = Math.max(0, S.power  - 3.5 * days * diff.resMult);
-  S.oxygen = Math.max(0, S.oxygen - 2.0 * days * diff.resMult);
-  S.food   = Math.max(0, S.food   - 3.0 * days * diff.resMult * rm);
-  S.morale = Math.max(0, Math.min(100, S.morale + RATIONS[S.rationMode].moraleTick * days));
-  if (S.day > 20) S.morale = Math.max(0, S.morale - 0.5 * days); // long-term morale decay
+  let powerDrain  = 3.5 * days * diff.resMult;
+  let oxygenDrain = 2.0 * days * diff.resMult;
+  let foodDrain   = 3.0 * days * diff.resMult * rm;
 
-  // Auto-consume reserves
-  if (S.oxygen < 20 && S.oxygenCanisters > 0) { S.oxygen = Math.min(100, S.oxygen + 40); S.oxygenCanisters--; addLog("Auto-tapped O₂ canister.", 'alert'); }
-  if (S.food   < 20 && S.foodBoxes > 0)       { S.food   = Math.min(100, S.food + 30);   S.foodBoxes--;       addLog("Opened ration box.", 'alert'); }
-  if (S.power  < 15 && S.powerCells > 0)      { S.power  = Math.min(100, S.power + 30);  S.powerCells--;      addLog("Emergency power cell activated!", 'alert'); }
+  // Compounding damage multipliers
+  if (S.bmuFailed)    powerDrain  *= 1.9;  // battery mgmt failure — power bleeds fast
+  if (S.hullCracked)  oxygenDrain *= 1.7;  // hull crack — O2 leaks continuously
+  if (S.waterReclaim) { foodDrain *= 1.5; oxygenDrain *= 1.3; } // water reclaim failure
+
+  S.power  = Math.max(0, S.power  - powerDrain);
+  S.oxygen = Math.max(0, S.oxygen - oxygenDrain);
+  S.food   = Math.max(0, S.food   - foodDrain);
+  S.morale = Math.max(0, Math.min(100, S.morale + RATIONS[S.rationMode].moraleTick * days));
+  if (S.day > 20) S.morale = Math.max(0, S.morale - 0.5 * days);
+
+  // Radiation sickness — ongoing morale/crew damage
+  if (S.radSicknessDays > 0) {
+    S.radSicknessDays = Math.max(0, S.radSicknessDays - days);
+    S.morale = Math.max(0, S.morale - 3 * days);
+    if (S.radSicknessDays === 0) addLog("Radiation sickness has passed. Crew recovering.", 'good');
+  }
+
+  // Navigation blackout — random chance of going wrong direction
+  if (S.navBlackoutDays > 0) {
+    S.navBlackoutDays = Math.max(0, S.navBlackoutDays - days);
+    if (Math.random() < 0.4) {
+      const lost = Math.round(kmPerDay * days * 0.5);
+      S.kmTraveled = Math.max(0, S.kmTraveled - lost);
+      S.kmLeft = Math.max(0, TOTAL_KM - S.kmTraveled);
+      addLog(`Navigation blackout: drifted off course. Lost ~${lost}km.`, 'bad');
+    }
+    if (S.navBlackoutDays === 0) { S.navBlackout = false; addLog("Navigation systems back online.", 'good'); }
+  }
+
+  // Auto-consume reserves — tightened thresholds (only at true critical)
+  if (S.oxygen < 10 && S.oxygenCanisters > 0) { S.oxygen = Math.min(100, S.oxygen + 40); S.oxygenCanisters--; addLog("⚠️ CRITICAL: Auto-tapped O₂ canister.", 'bad'); }
+  if (S.food   < 10 && S.foodBoxes > 0)       { S.food   = Math.min(100, S.food + 30);   S.foodBoxes--;       addLog("⚠️ CRITICAL: Opened emergency ration box.", 'bad'); }
+  if (S.power  < 8  && S.powerCells > 0)      { S.power  = Math.min(100, S.power + 30);  S.powerCells--;      addLog("⚠️ CRITICAL: Emergency power cell activated!", 'bad'); }
 
   // Lunar night check
   checkNight();
@@ -1877,10 +2460,20 @@ function tryEvent() {
   if (Math.random() > diff.freq) return false;
 
   const eligible = EVENTS.filter(ev => {
-    if (S.usedEvents.has(ev.id)) return false;
+    // Non-repeatable: skip if used
+    if (!ev.repeatable && S.usedEvents.has(ev.id)) return false;
+    // Repeatable but recently seen: skip
     if (S.recentEvents.includes(ev.id)) return false;
     if (ev.minDay && S.day < ev.minDay) return false;
+    if (ev.maxDay && S.day > ev.maxDay) return false;
+    // Conditional events
     if (ev.id === 'night_crisis' && !S.inNight) return false;
+    if (ev.id === 'resupply_failure' && S.resupplyDroneFailed) return false;
+    // Only show repair events if that system is actually broken
+    if (ev.id === 'bmu_repair_offer' && !S.bmuFailed) return false;
+    if (ev.id === 'water_repair_offer' && !S.waterReclaim) return false;
+    if (ev.id === 'nav_repair_offer' && !S.navBlackout) return false;
+    if (ev.id === 'hull_repair_offer' && !S.hullCracked) return false;
     return true;
   });
 
@@ -1892,8 +2485,8 @@ function tryEvent() {
   let chosen = eligible[eligible.length - 1];
   for (const ev of eligible) { r -= (ev.weight || 5); if (r <= 0) { chosen = ev; break; } }
 
-  S.usedEvents.add(chosen.id);
-  S.recentEvents = [chosen.id, ...S.recentEvents].slice(0, 3);
+  if (!chosen.repeatable) S.usedEvents.add(chosen.id);
+  S.recentEvents = [chosen.id, ...S.recentEvents].slice(0, 4);
   showEvent(chosen);
   return true;
 }
@@ -1975,20 +2568,83 @@ function resolveEvent(choice) {
 function applySpecial(effect, changes) {
   if (effect === 'roverDegraded') {
     S.roverDegraded = true;
-    changes.push({ text:'Rover speed reduced until proper repair', pos:false });
+    changes.push({ text:'Rover speed reduced (20km/day) until repaired', pos:false });
   }
   if (effect === 'chargeReduced') {
     S.chargeReduced = true;
     changes.push({ text:'Solar charging efficiency reduced', pos:false });
+  }
+  if (effect === 'motorSeized') {
+    S.motorSeized = true;
+    changes.push({ text:'Drive motor seized — crawling at 12km/day', pos:false });
+  }
+  if (effect === 'bmuFailed') {
+    S.bmuFailed = true;
+    changes.push({ text:'Battery management unit failed — power draining 2× faster', pos:false });
+  }
+  if (effect === 'waterReclaim') {
+    S.waterReclaim = true;
+    changes.push({ text:'Water reclamation offline — food and O₂ draining faster', pos:false });
+  }
+  if (effect === 'navBlackout') {
+    S.navBlackout = true;
+    S.navBlackoutDays = 4 + Math.floor(Math.random() * 4);
+    changes.push({ text:`Navigation blackout for ~${S.navBlackoutDays} days — risk of drifting off course`, pos:false });
+  }
+  if (effect === 'hullCrack') {
+    S.hullCracked = true;
+    changes.push({ text:'Hull microcrack — O₂ leaking continuously until patched', pos:false });
+  }
+  if (effect === 'radSickness') {
+    S.radSicknessDays = 10;
+    changes.push({ text:'Radiation sickness — crew morale degrading for 10 days', pos:false });
+    applySpecial('crewHealth', changes); // also injures someone
+  }
+  if (effect === 'fixMotor') {
+    S.motorSeized = false; S.roverDegraded = false;
+    changes.push({ text:'Drive motor repaired — speed restored', pos:true });
+  }
+  if (effect === 'fixBmu') {
+    S.bmuFailed = false;
+    changes.push({ text:'Battery management unit restored', pos:true });
+  }
+  if (effect === 'fixWater') {
+    S.waterReclaim = false;
+    changes.push({ text:'Water reclamation system restored', pos:true });
+  }
+  if (effect === 'fixNav') {
+    S.navBlackout = false; S.navBlackoutDays = 0;
+    changes.push({ text:'Navigation systems restored', pos:true });
+  }
+  if (effect === 'fixHull') {
+    S.hullCracked = false;
+    changes.push({ text:'Hull crack sealed — O₂ loss stopped', pos:true });
   }
   if (effect === 'crewHealth') {
     const alive = S.crew.filter(c => c.alive);
     if (alive.length > 0) {
       const t = alive[Math.floor(Math.random() * alive.length)];
       if (t.status === 'healthy')  { t.status = 'injured';  t.condition = 'injured';   changes.push({ text: t.name + ' is injured', pos:false }); }
-      else if (t.status === 'injured') { t.status = 'critical'; t.condition = 'critical';  changes.push({ text: t.name + ' critical condition', pos:false }); }
-      else { t.alive = false; t.condition = 'deceased'; S.crewAlive--; S.morale = Math.max(0, S.morale - 30);
+      else if (t.status === 'injured') { t.status = 'critical'; t.condition = 'critical';  changes.push({ text: t.name + ' is in critical condition', pos:false }); }
+      else { t.alive = false; t.condition = 'deceased'; S.crewAlive--; S.morale = Math.max(0, S.morale - 35);
              changes.push({ text: t.name + ' has died', pos:false }); }
+    }
+  }
+  if (effect === 'crewDeath') {
+    // Skip injured stage — instant critical threat
+    const alive = S.crew.filter(c => c.alive);
+    if (alive.length > 0) {
+      const t = alive[Math.floor(Math.random() * alive.length)];
+      if (t.status !== 'dead') {
+        if (t.status === 'critical') {
+          t.alive = false; t.condition = 'deceased'; S.crewAlive--;
+          S.morale = Math.max(0, S.morale - 40);
+          changes.push({ text: t.name + ' has died', pos:false });
+        } else {
+          t.status = 'critical'; t.condition = 'critical — needs immediate treatment';
+          changes.push({ text: t.name + ' in critical condition — treat immediately', pos:false });
+        }
+      }
     }
   }
   if (effect === 'distancePenalty') {
@@ -2057,7 +2713,587 @@ function triggerVictory() {
   showScreen('screen-victory');
 }
 
+// ═══════════════════════════════════════════════════════
+//  MINI-GAME ENGINE — shared callback interface
+//  Both games call mgFinish(powerGain, moraleMod, savedKit)
+//  when complete, which applies results and returns to game.
+// ═══════════════════════════════════════════════════════
+
+let mgReturnScreen = 'screen-game'; // which screen to go back to
+let mgOnFinish = null;              // callback(powerGain, moraleMod, savedKit)
+
+function mgFinish(powerGain, moraleMod, savedKit) {
+  // Apply outcomes to game state
+  if (powerGain > 0) {
+    S.power = Math.min(100, S.power + powerGain);
+    addLog(`Power cell sequence: +${powerGain}% power restored.`, powerGain >= 25 ? 'good' : 'alert');
+  }
+  if (moraleMod !== 0) {
+    S.morale = Math.max(0, Math.min(100, S.morale + moraleMod));
+  }
+  if (savedKit) {
+    addLog('Cell installed perfectly — repair kit conserved.', 'good');
+  }
+  refreshGameUI();
+  clearInlineLog();
+  showScreen(mgReturnScreen);
+}
+
+function mgAntennaFinish(outcome) {
+  // outcome: 'lock' | 'partial' | 'fail'
+  if (outcome === 'lock') {
+    addLog('Antenna locked. Transmission established.', 'good');
+    if (mgOnFinish) mgOnFinish('lock');
+  } else if (outcome === 'partial') {
+    addLog('Partial signal achieved. Reduced benefit applied.', 'alert');
+    if (mgOnFinish) mgOnFinish('partial');
+  } else {
+    addLog('Antenna alignment failed. No signal established.', 'bad');
+    S.morale = Math.max(0, S.morale - 10);
+    if (mgOnFinish) mgOnFinish('fail');
+  }
+  refreshGameUI();
+  clearInlineLog();
+  showScreen(mgReturnScreen);
+}
+
+// ── POWER CELL SEQUENCE GAME ──────────────────────────
+const CELLS = [
+  { icon:'🔴', label:'HIGH',    color:'#ff4455', glow:'rgba(255,68,85,.6)'  },
+  { icon:'🔵', label:'MID',     color:'#4488ff', glow:'rgba(68,136,255,.6)' },
+  { icon:'🟡', label:'LOW',     color:'#ffcc00', glow:'rgba(255,204,0,.6)'  },
+  { icon:'⚪', label:'RESERVE', color:'#aaccee', glow:'rgba(170,204,238,.6)'},
+  { icon:'🟢', label:'SOLAR',   color:'#00ff9d', glow:'rgba(0,255,157,.6)'  },
+  { icon:'🟠', label:'EMRG',    color:'#ff6b35', glow:'rgba(255,107,53,.6)' }
+];
+
+let mgCells = {
+  sequence: [],
+  playerInput: [],
+  round: 1,
+  maxRound: 3,
+  phase: 'idle',   // 'showing' | 'input' | 'feedback' | 'done'
+  powerGained: 0,
+  thermalPct: 0,
+  thermalTimer: null,
+  showTimer: null,
+  savedKit: false,
+  difficultyTimings: { tourist:950, astronaut:700, commander:500 }
+};
+
+function startCellGame(context) {
+  // context: 'battery_drain' | 'power_charge' | 'bmu_repair'
+  mgCells.round = 1;
+  mgCells.powerGained = 0;
+  mgCells.thermalPct = 0;
+  mgCells.savedKit = false;
+  mgCells.phase = 'idle';
+
+  // Sequence length: 3 on round 1, grows by 1 per round
+  buildCellSequence();
+  updateCellUI();
+  showScreen('screen-mg-cells');
+
+  // Short countdown before first round starts
+  $('mg-cells-phase').textContent = 'WATCH...';
+  $('mg-cells-result').textContent = '';
+  $('mg-cells-result').className = 'mg-result-msg';
+  $('btn-mg-cells-done').style.display = 'none';
+  setCellsIdle(true);
+
+  setTimeout(() => startCellRound(), 1200);
+}
+
+function buildCellSequence() {
+  const len = 2 + mgCells.round; // 3, 4, 5
+  mgCells.sequence = [];
+  for (let i = 0; i < len; i++) {
+    let next;
+    do { next = Math.floor(Math.random() * 6); }
+    while (mgCells.sequence.length > 0 && next === mgCells.sequence[mgCells.sequence.length - 1]);
+    mgCells.sequence.push(next);
+  }
+  mgCells.playerInput = [];
+}
+
+function startCellRound() {
+  mgCells.phase = 'showing';
+  $('mg-cells-round').textContent = mgCells.round;
+  $('mg-cells-phase').textContent = 'WATCH...';
+  setCellsIdle(true);
+  disableCells(true);
+
+  const timing = mgCells.difficultyTimings[S.difficulty] || 700;
+  let idx = 0;
+
+  function showNext() {
+    if (idx >= mgCells.sequence.length) {
+      // All shown — switch to input phase
+      setTimeout(() => {
+        setCellsIdle(false);
+        disableCells(false);
+        mgCells.phase = 'input';
+        $('mg-cells-phase').textContent = 'YOUR TURN';
+        startThermalTimer();
+      }, 400);
+      return;
+    }
+    const cellIdx = mgCells.sequence[idx];
+    flashCell(cellIdx, () => {
+      idx++;
+      setTimeout(showNext, 200);
+    });
+  }
+  setTimeout(showNext, 600);
+}
+
+function flashCell(cellIdx, cb) {
+  const el = $('cell-' + cellIdx);
+  const c = CELLS[cellIdx];
+  el.style.background = c.color;
+  el.style.boxShadow = `0 0 20px ${c.glow}`;
+  el.style.borderColor = c.color;
+  el.classList.add('lit');
+  const timing = mgCells.difficultyTimings[S.difficulty] || 700;
+  setTimeout(() => {
+    el.style.background = '';
+    el.style.boxShadow = '';
+    el.style.borderColor = '';
+    el.classList.remove('lit');
+    if (cb) cb();
+  }, timing * 0.85);
+}
+
+function setCellsIdle(idle) {
+  for (let i = 0; i < 6; i++) {
+    const el = $('cell-' + i);
+    if (idle) el.classList.add('idle');
+    else el.classList.remove('idle');
+  }
+}
+
+function disableCells(disabled) {
+  for (let i = 0; i < 6; i++) {
+    $('cell-' + i).style.pointerEvents = disabled ? 'none' : 'auto';
+  }
+}
+
+function onCellTap(idx) {
+  if (mgCells.phase !== 'input') return;
+  const expected = mgCells.sequence[mgCells.playerInput.length];
+
+  // Reset thermal on each tap
+  mgCells.thermalPct = Math.max(0, mgCells.thermalPct - 20);
+  updateThermalBar();
+
+  if (idx === expected) {
+    // Correct
+    flashCell(idx, null);
+    const el = $('cell-' + idx);
+    el.classList.add('correct');
+    setTimeout(() => el.classList.remove('correct'), 600);
+    mgCells.playerInput.push(idx);
+
+    if (mgCells.playerInput.length === mgCells.sequence.length) {
+      // Round complete
+      clearThermalTimer();
+      disableCells(true);
+      mgCells.phase = 'feedback';
+      onRoundComplete(true);
+    }
+  } else {
+    // Wrong
+    const el = $('cell-' + idx);
+    el.classList.add('wrong');
+    setTimeout(() => el.classList.remove('wrong'), 400);
+    clearThermalTimer();
+    disableCells(true);
+    mgCells.phase = 'feedback';
+    onRoundComplete(false);
+  }
+}
+
+function onRoundComplete(success) {
+  const powerTable = [0, 15, 28, 45]; // rounds 0,1,2,3
+  const bonus = powerTable[mgCells.round] || 0;
+
+  if (success) {
+    mgCells.powerGained += bonus;
+    $('mg-cells-power-gain').textContent = mgCells.powerGained;
+
+    if (mgCells.round >= mgCells.maxRound) {
+      // All 3 rounds done perfectly — kit saved!
+      mgCells.savedKit = true;
+      showCellsResult(
+        `SEQUENCE COMPLETE — ALL ${mgCells.maxRound} ROUNDS FLAWLESS.\n+${mgCells.powerGained}% power restored. Repair kit conserved.`,
+        'good'
+      );
+      endCellGame();
+    } else {
+      mgCells.round++;
+      buildCellSequence();
+      $('mg-cells-phase').textContent = 'ROUND CLEAR ✓';
+      setTimeout(() => startCellRound(), 1000);
+    }
+  } else {
+    // Failed this round — end with whatever was accumulated
+    showCellsResult(
+      mgCells.powerGained > 0
+        ? `WRONG SEQUENCE. Partial installation complete.\n+${mgCells.powerGained}% power restored.`
+        : 'WRONG SEQUENCE. Installation failed. No power restored.',
+      mgCells.powerGained > 0 ? 'ok' : 'bad'
+    );
+    endCellGame();
+  }
+}
+
+function showCellsResult(msg, cls) {
+  const el = $('mg-cells-result');
+  el.textContent = msg;
+  el.className = 'mg-result-msg ' + cls;
+  $('mg-cells-phase').textContent = cls === 'good' ? '✓ COMPLETE' : cls === 'bad' ? '✗ FAILED' : '~ PARTIAL';
+}
+
+function endCellGame() {
+  setCellsIdle(true);
+  disableCells(true);
+  $('btn-mg-cells-done').style.display = 'block';
+}
+
+function startThermalTimer() {
+  clearThermalTimer();
+  mgCells.thermalPct = 0;
+  const tickRate = 120; // ms per tick
+  const increment = 1.8; // pct per tick — fills in ~6.6s
+  mgCells.thermalTimer = setInterval(() => {
+    mgCells.thermalPct = Math.min(100, mgCells.thermalPct + increment);
+    updateThermalBar();
+    if (mgCells.thermalPct >= 100) {
+      clearThermalTimer();
+      if (mgCells.phase === 'input') {
+        mgCells.phase = 'feedback';
+        disableCells(true);
+        showCellsResult(
+          mgCells.powerGained > 0
+            ? `THERMAL OVERLOAD — too slow.\n+${mgCells.powerGained}% power from completed rounds.`
+            : 'THERMAL OVERLOAD. Sequence reset. No power restored.',
+          mgCells.powerGained > 0 ? 'ok' : 'bad'
+        );
+        endCellGame();
+      }
+    }
+  }, tickRate);
+}
+
+function clearThermalTimer() {
+  if (mgCells.thermalTimer) { clearInterval(mgCells.thermalTimer); mgCells.thermalTimer = null; }
+}
+
+function updateThermalBar() {
+  const bar = $('mg-cells-thermal');
+  const pct = $('mg-cells-thermal-pct');
+  if (!bar) return;
+  bar.style.width = mgCells.thermalPct + '%';
+  bar.className = 'thermal-bar-fill' + (mgCells.thermalPct > 70 ? ' hot' : mgCells.thermalPct > 40 ? ' warm' : '');
+  if (pct) pct.textContent = Math.round(mgCells.thermalPct) + '%';
+}
+
+function updateCellUI() {
+  $('mg-cells-round').textContent = mgCells.round;
+  $('mg-cells-power-gain').textContent = mgCells.powerGained;
+}
+
+function cellGameDone() {
+  mgFinish(mgCells.powerGained, mgCells.powerGained >= 40 ? 5 : 0, mgCells.savedKit);
+}
+
+// Wire cell tap events
+document.querySelectorAll('.cell-slot').forEach(el => {
+  el.addEventListener('click', () => onCellTap(parseInt(el.dataset.idx)));
+  el.addEventListener('touchstart', e => { e.preventDefault(); onCellTap(parseInt(el.dataset.idx)); }, { passive: false });
+});
+
+
+// ── ANTENNA ALIGNMENT GAME ────────────────────────────
+let mgAntenna = {
+  azPos: 0.1,   // 0–1 normalized position
+  elPos: 0.1,
+  azZone: 0,    // center of sweet spot (0–1)
+  elZone: 0,
+  zoneWidth: 0.14,
+  driftSpeed: 0,
+  lockPct: 0,
+  lockRequired: 0,  // seconds needed
+  timeLeft: 0,
+  totalTime: 0,
+  phase: 'playing',  // 'playing' | 'done'
+  rafId: null,
+  lastTs: 0,
+  dragging: null,  // 'az' | 'el' | null
+  waveOffset: 0,
+  onFinish: null
+};
+
+function startAntennaGame(context, onFinish) {
+  mgAntenna.onFinish = onFinish || null;
+
+  // Difficulty settings
+  const settings = {
+    tourist:   { time: 45, lockRequired: 3,  zoneWidth: 0.18, driftSpeed: 0.006 },
+    astronaut: { time: 35, lockRequired: 5,  zoneWidth: 0.13, driftSpeed: 0.010 },
+    commander: { time: 28, lockRequired: 8,  zoneWidth: 0.10, driftSpeed: 0.016 }
+  };
+  const cfg = settings[S.difficulty] || settings.astronaut;
+
+  mgAntenna.azPos = 0.1 + Math.random() * 0.3;
+  mgAntenna.elPos = 0.1 + Math.random() * 0.3;
+  mgAntenna.azZone = 0.25 + Math.random() * 0.5;
+  mgAntenna.elZone = 0.25 + Math.random() * 0.5;
+  mgAntenna.zoneWidth = cfg.zoneWidth;
+  mgAntenna.driftSpeed = cfg.driftSpeed;
+  mgAntenna.lockRequired = cfg.lockRequired;
+  mgAntenna.timeLeft = cfg.time;
+  mgAntenna.totalTime = cfg.time;
+  mgAntenna.lockPct = 0;
+  mgAntenna.phase = 'playing';
+  mgAntenna.waveOffset = 0;
+  mgAntenna.dragging = null;
+
+  // Reset UI
+  $('mg-antenna-result').textContent = '';
+  $('mg-antenna-result').className = 'mg-result-msg';
+  $('btn-mg-antenna-done').style.display = 'none';
+  $('mg-antenna-phase').textContent = 'SEARCHING...';
+  $('mg-antenna-hint').textContent = 'Both sliders must be in the green zone simultaneously';
+
+  updateAntennaSliders();
+  showScreen('screen-mg-antenna');
+
+  // Start game loop
+  if (mgAntenna.rafId) cancelAnimationFrame(mgAntenna.rafId);
+  mgAntenna.lastTs = performance.now();
+  mgAntenna.rafId = requestAnimationFrame(antennaLoop);
+}
+
+function antennaLoop(ts) {
+  if (mgAntenna.phase !== 'playing') return;
+
+  const dt = Math.min((ts - mgAntenna.lastTs) / 1000, 0.1); // seconds, capped
+  mgAntenna.lastTs = ts;
+
+  // Drift sweet spots slowly
+  mgAntenna.azZone += mgAntenna.driftSpeed * Math.sin(ts * 0.0008);
+  mgAntenna.elZone += mgAntenna.driftSpeed * Math.cos(ts * 0.0011);
+  mgAntenna.azZone = Math.max(0.1, Math.min(0.9, mgAntenna.azZone));
+  mgAntenna.elZone = Math.max(0.1, Math.min(0.9, mgAntenna.elZone));
+
+  // Timer
+  mgAntenna.timeLeft = Math.max(0, mgAntenna.timeLeft - dt);
+  updateAntennaTimerRing();
+
+  // Check if both sliders in zone
+  const azIn = Math.abs(mgAntenna.azPos - mgAntenna.azZone) < mgAntenna.zoneWidth / 2;
+  const elIn = Math.abs(mgAntenna.elPos - mgAntenna.elZone) < mgAntenna.zoneWidth / 2;
+  const bothIn = azIn && elIn;
+
+  // Update lock bar
+  if (bothIn) {
+    mgAntenna.lockPct = Math.min(100, mgAntenna.lockPct + dt * (100 / mgAntenna.lockRequired));
+  }
+  // Lock bar doesn't decrease when out of zone — just pauses
+
+  // Update signal strength
+  const azDist = Math.abs(mgAntenna.azPos - mgAntenna.azZone);
+  const elDist = Math.abs(mgAntenna.elPos - mgAntenna.elZone);
+  const maxDist = mgAntenna.zoneWidth * 3;
+  const azSig = Math.max(0, 1 - azDist / maxDist);
+  const elSig = Math.max(0, 1 - elDist / maxDist);
+  const signal = Math.round(azSig * elSig * 100);
+
+  // Waveform
+  mgAntenna.waveOffset += dt * 80;
+  drawAntennaWaveform(signal);
+
+  // Update UI
+  $('mg-antenna-signal-val').textContent = signal + '%';
+  $('mg-antenna-signal-bar').style.width = signal + '%';
+  $('mg-antenna-lock-bar').style.width = mgAntenna.lockPct + '%';
+  $('mg-antenna-lock-pct').textContent = Math.round(mgAntenna.lockPct) + '%';
+
+  const lockEl = $('mg-antenna-lock-bar');
+  if (mgAntenna.lockPct >= 100) {
+    lockEl.classList.add('locked');
+  } else {
+    lockEl.classList.remove('locked');
+  }
+
+  // Update thumb zone styling
+  $('mg-thumb-az').classList.toggle('in-zone', azIn);
+  $('mg-thumb-el').classList.toggle('in-zone', elIn);
+
+  // Phase label
+  if (mgAntenna.lockPct >= 100) {
+    $('mg-antenna-phase').textContent = '🔒 LOCKED!';
+  } else if (bothIn) {
+    $('mg-antenna-phase').textContent = '🟢 HOLD STEADY...';
+  } else if (signal > 40) {
+    $('mg-antenna-phase').textContent = '🟡 GETTING CLOSER';
+  } else {
+    $('mg-antenna-phase').textContent = 'SEARCHING...';
+  }
+
+  // Check win/lose
+  if (mgAntenna.lockPct >= 100) {
+    antennaGameEnd('lock');
+    return;
+  }
+  if (mgAntenna.timeLeft <= 0) {
+    const outcome = mgAntenna.lockPct >= 40 ? 'partial' : 'fail';
+    antennaGameEnd(outcome);
+    return;
+  }
+
+  mgAntenna.rafId = requestAnimationFrame(antennaLoop);
+}
+
+function drawAntennaWaveform(signal) {
+  const canvas = $('mg-antenna-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const amplitude = (signal / 100) * (h * 0.38);
+  const noise = (1 - signal / 100) * (h * 0.15);
+  const freq = 0.04 + (signal / 100) * 0.04;
+  const color = signal > 60 ? '#00ff9d' : signal > 30 ? '#ffcc00' : '#4a7a9b';
+
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = signal > 60 ? 6 : 2;
+  ctx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const y = h / 2
+      + Math.sin((x + mgAntenna.waveOffset) * freq) * amplitude
+      + (Math.random() - 0.5) * noise;
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+function updateAntennaTimerRing() {
+  const ring = $('mg-antenna-ring');
+  const txt  = $('mg-antenna-timer-txt');
+  if (!ring || !txt) return;
+  const pct = mgAntenna.timeLeft / mgAntenna.totalTime;
+  const circumference = 188;
+  ring.style.strokeDashoffset = circumference * (1 - pct);
+  ring.classList.toggle('urgent', mgAntenna.timeLeft < 10);
+  txt.textContent = Math.ceil(mgAntenna.timeLeft);
+}
+
+function updateAntennaSliders() {
+  const setThumb = (id, pos) => {
+    const track = $('mg-slider-' + id);
+    const thumb = $('mg-thumb-' + id);
+    if (!track || !thumb) return;
+    const w = track.offsetWidth || 300;
+    thumb.style.left = Math.round(pos * w) + 'px';
+  };
+  setThumb('az', mgAntenna.azPos);
+  setThumb('el', mgAntenna.elPos);
+  $('mg-az-val').textContent = Math.round(mgAntenna.azPos * 360) + '°';
+  $('mg-el-val').textContent = Math.round(mgAntenna.elPos * 90) + '°';
+}
+
+function antennaGameEnd(outcome) {
+  mgAntenna.phase = 'done';
+  if (mgAntenna.rafId) { cancelAnimationFrame(mgAntenna.rafId); mgAntenna.rafId = null; }
+
+  const msgs = {
+    lock:    { text: 'TRANSMISSION LOCKED. Signal established with mission control.', cls: 'good' },
+    partial: { text: 'PARTIAL LOCK. Reduced signal acquired before timeout.', cls: 'ok' },
+    fail:    { text: 'ALIGNMENT FAILED. No signal established. Morale −10.', cls: 'bad' }
+  };
+  const m = msgs[outcome];
+  $('mg-antenna-result').textContent = m.text;
+  $('mg-antenna-result').className = 'mg-result-msg ' + m.cls;
+  $('mg-antenna-phase').textContent = outcome === 'lock' ? '✓ LOCKED' : outcome === 'partial' ? '~ PARTIAL' : '✗ FAILED';
+  $('btn-mg-antenna-done').style.display = 'block';
+  $('btn-mg-antenna-done').dataset.outcome = outcome;
+}
+
+// Slider drag handling — works for both mouse and touch
+function initSliderDrag(axisId) {
+  const track = $('mg-slider-' + axisId);
+  if (!track) return;
+
+  function getPos(clientX) {
+    const rect = track.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  }
+
+  function onMove(clientX) {
+    if (mgAntenna.phase !== 'playing') return;
+    const pos = getPos(clientX);
+    if (axisId === 'az') mgAntenna.azPos = pos;
+    else mgAntenna.elPos = pos;
+    updateAntennaSliders();
+  }
+
+  // Mouse
+  track.addEventListener('mousedown', e => {
+    mgAntenna.dragging = axisId;
+    onMove(e.clientX);
+  });
+  document.addEventListener('mousemove', e => {
+    if (mgAntenna.dragging === axisId) onMove(e.clientX);
+  });
+  document.addEventListener('mouseup', () => {
+    if (mgAntenna.dragging === axisId) mgAntenna.dragging = null;
+  });
+
+  // Touch
+  track.addEventListener('touchstart', e => {
+    e.preventDefault();
+    mgAntenna.dragging = axisId;
+    onMove(e.touches[0].clientX);
+  }, { passive: false });
+  document.addEventListener('touchmove', e => {
+    if (mgAntenna.dragging === axisId) onMove(e.touches[0].clientX);
+  }, { passive: true });
+  document.addEventListener('touchend', () => {
+    if (mgAntenna.dragging === axisId) mgAntenna.dragging = null;
+  });
+}
+
+// ── PUBLIC LAUNCH FUNCTIONS ───────────────────────────
+// Called by event choices to launch the appropriate mini-game
+
+function launchCellGame() {
+  mgReturnScreen = 'screen-game';
+  startCellGame('power_charge');
+}
+
+function launchAntennaGame(onFinishCallback) {
+  mgReturnScreen = 'screen-game';
+  mgOnFinish = onFinishCallback || null;
+  startAntennaGame('nav_blackout', onFinishCallback);
+}
+
 // ── BUTTON WIRING ─────────────────────────────────────────
+// Mini-game done buttons
+$('btn-mg-cells-done').addEventListener('click', cellGameDone);
+$('btn-mg-antenna-done').addEventListener('click', () => {
+  const outcome = $('btn-mg-antenna-done').dataset.outcome || 'fail';
+  mgAntennaFinish(outcome);
+});
+
+// Init antenna sliders
+initSliderDrag('az');
+initSliderDrag('el');
+
 // Title screen image — wire onload so it shows when ready
 (function() {
   const titleImg = $('img-title');
@@ -2099,6 +3335,13 @@ $('act-charge').addEventListener('click',  actCharge);
 $('act-rations').addEventListener('click', actRations);
 $('act-rest').addEventListener('click',    actRest);
 $('act-status').addEventListener('click',  actStatus);
+$('act-cell').addEventListener('click', () => {
+  if (!S.active) return;
+  if (S.powerCells < 1) { clearInlineLog(); addLog("No power cells in inventory.", 'alert'); return; }
+  clearInlineLog();
+  addLog("Installing power cell — initiating calibration sequence.", 'alert');
+  launchCellGame();
+});
 $('act-crew').addEventListener('click',  openCrewDrawer);
 $('act-abort').addEventListener('click',   actAbort);
 
@@ -2125,7 +3368,7 @@ $('btn-vic-menu').addEventListener('click',  goTitle);
 // Keyboard shortcuts (game screen only)
 document.addEventListener('keydown', e => {
   if (!$('screen-game').classList.contains('active')) return;
-  const map = { d:actDrive, c:actCharge, r:actRest, s:actStatus, f:actRations };
+  const map = { d:actDrive, c:actCharge, r:actRest, s:actStatus, f:actRations, e:() => $('act-cell').click() };
   const fn = map[e.key.toLowerCase()];
   if (fn) fn();
 });
