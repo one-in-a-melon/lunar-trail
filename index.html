@@ -1692,6 +1692,7 @@ const ROLES = [
   { role:'Medical Officer',   icon:'💊', def:'Medic'     }
 ];
 
+
 const RATIONS = {
   meager:   { mult:.5,  moraleTick:-1.5, label:'Meager Rations'   },
   standard: { mult:1.0, moraleTick:0,    label:'Standard Rations' },
@@ -2122,6 +2123,372 @@ const EVENTS = [
       { text:"😬 Fresh air rotation and rest — no kits spent", req:{},
         out:{ title:"Resting It Off", desc:"You put the engineer on rest and rotate their O₂ line to the freshest canister. Slow recovery. Cognitive impairment lingers for days.", scene:'images/scenes/result_hypoxia_rest.png', fx:{morale:-20,oxygen:-15}, special:'crewHealth', log:"Hypoxia managed without treatment. Crew degraded.", tone:'bad' }}
     ]
+  },
+
+  // ── CREW STORY EVENTS ────────────────────────────────
+  {
+    id:'story_clutch_repair', cat:'🔧 CREW MOMENT', title:"The Clutch Repair",
+    minDay:5, weight:4, crewStory:true,
+    desc:"You wake to find your engineer already suited up. They caught a hairline fracture in the primary coolant loop at 3am, on their own watch, and patched it before it could become a crisis. When you ask why they didn't wake anyone, they shrug. They had it covered. They did.",
+    scene:'images/scenes/story_clutch_repair.png',
+    choices:[
+      { text:"\u{1F44F} Formally commend them in the mission log", req:{},
+        out:{ title:"Commendation Logged", desc:"Your engineer waves it off, but you can tell it means something. The rest of the crew heard it too. Everyone stands a little straighter.", scene:'images/scenes/result_story_commend.png', fx:{morale:20}, log:"Engineer prevented a system failure overnight. Formally commended.", tone:'good' }},
+      { text:"\u2615 Just say thank you and hand them the good coffee", req:{},
+        out:{ title:"Small Gesture, Big Moment", desc:"No speech. No ceremony. Just a warm cup and a nod that says everything. Your engineer smiles and goes to sleep. The rover is fine.", scene:'images/scenes/result_story_coffee.png', fx:{morale:15}, log:"Engineer overnight repair acknowledged. Morale up.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_navigation_call', cat:'\u{1F5FA}\uFE0F CREW MOMENT', title:"The Perfect Call",
+    minDay:8, weight:4, crewStory:true,
+    desc:"Your science officer has been running terrain density analysis in their spare time. They interrupt route planning to flag a subsurface anomaly ahead — a buried lava tube collapse that would have swallowed the front axle. Their detour saves days of potential recovery work.",
+    scene:'images/scenes/story_navigation_call.png',
+    choices:[
+      { text:"\u{1F4CA} Adjust the route and log their contribution", req:{},
+        out:{ title:"Course Corrected", desc:"The mission log credits your science officer's analysis. Mission control responds with appreciation. Your scientist reads the reply three times.", scene:'images/scenes/result_story_course_corrected.png', fx:{morale:18}, log:"Science officer terrain analysis averted a hazard. Route adjusted.", tone:'good' }},
+      { text:"\u{1F697} Trust their instinct and quietly change course", req:{},
+        out:{ title:"Quietly Averted", desc:"No announcement. You just turn the wheel. Your science officer watches the original path disappear behind you and says nothing. Some things don't need words.", scene:'images/scenes/result_story_quiet_detour.png', fx:{morale:12}, log:"Route adjusted on science officer recommendation. Hazard avoided.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_morale_speech', cat:'\u{1F4AC} CREW MOMENT', title:"The Speech Nobody Expected",
+    minDay:20, weight:4, crewStory:true,
+    desc:"It has been a long stretch of bad luck and longer silences. Then, during a routine meal, one of your crew just starts talking. About why they came. About what this mission means. About the people they left behind. Nobody interrupts. By the end, two people are blinking a little too hard.",
+    scene:'images/scenes/story_morale_speech.png',
+    choices:[
+      { text:"\u{1F91D} Let the moment breathe — no rushing back to business", req:{},
+        out:{ title:"Something Shifted", desc:"You give it space. The conversation goes another hour. Turns out everyone had been holding something in. The rover feels a little less like a metal box after that.", scene:'images/scenes/result_story_moment_breathe.png', fx:{morale:30,food:-5}, log:"Spontaneous crew conversation. Morale significantly up.", tone:'good' }},
+      { text:"\u{1F4CB} Brief everyone and get back on schedule", req:{},
+        out:{ title:"Back to It", desc:"Professional. Efficient. A little cold. But the words were already said. They don't unsay themselves just because you moved on. Morale improves — just a little less.", scene:'images/scenes/result_story_back_to_it.png', fx:{morale:15}, log:"Crew moment noted. Returned to mission schedule.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_field_surgery', cat:'\u{1F48A} CREW MOMENT', title:"Steady Hands",
+    minDay:10, weight:4, crewStory:true,
+    desc:"A jagged equipment edge catches a crew member during EVA prep — nothing life-threatening, but deep enough to need real attention. Your medical officer works under cramped conditions, in partial suit, with rover vibration in the background. When they finish they look up and say: good as new. They are right.",
+    scene:'images/scenes/story_field_surgery.png',
+    choices:[
+      { text:"\u{1F4A4} Full recovery time — 8 hours rest before any duty", req:{},
+        out:{ title:"Full Recovery", desc:"Your medical officer insists on rest and gets it. The patient is genuinely fine. No lingering complications. Your medic's thoroughness is quietly noted by everyone.", scene:'images/scenes/result_story_full_recovery.png', fx:{morale:15,food:-5}, log:"Field surgery successful. Patient fully recovered.", tone:'good' }},
+      { text:"\u{1F4AA} Patient insists they are fine — light duty only", req:{},
+        out:{ title:"Light Duty, Full Spirit", desc:"Back at their post in two hours. Maybe not smart. Definitely in character. The crew finds it reassuring in ways that are hard to articulate.", scene:'images/scenes/result_story_light_duty_ok.png', fx:{morale:10}, log:"Field surgery successful. Patient returned to light duty.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_lucky_find', cat:'\u{1F4E6} CREW MOMENT', title:"Sharp Eyes",
+    minDay:15, weight:4, crewStory:true,
+    desc:"Your science officer calls a halt. Everyone groans. But they point at something catching the sun at an angle, 30 meters off route: a sealed container, partially buried, with a mission patch logo that is not yours. An unmapped cache from a precursor mission. Nobody knew it was there.",
+    scene:'images/scenes/story_lucky_find.png',
+    choices:[
+      { text:"\u{1F4E6} Divert to retrieve it — 20 minutes off schedule", req:{},
+        out:{ title:"Bonus Cache Recovered", desc:"Inside: two oxygen canisters and a repair kit, vacuum-sealed since 2027. Your science officer is trying very hard not to look smug. They have earned it.", scene:'images/scenes/result_story_cache_found.png', fx:{oxygenCanisters:2,repairKits:1,morale:20}, log:"Science officer spotted unmapped precursor cache. Retrieved.", tone:'good' }},
+      { text:"\u{1F697} Log the coordinates and keep moving", req:{},
+        out:{ title:"Coordinates Logged", desc:"You file the find with mission control. Your science officer watches the cache disappear behind you with an expression you will remember.", scene:'images/scenes/result_story_cache_logged.png', fx:{morale:5,credits:150}, log:"Unmapped cache located and reported. Credits awarded.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_rationing_genius', cat:'\u{1F371} CREW MOMENT', title:"Better Than Expected",
+    minDay:12, weight:4, crewStory:true,
+    desc:"Your medical officer pulls you aside with a spreadsheet. They have been quietly analyzing caloric needs against consumption and worked out a meal rotation that gets 15% more mileage from current rations without anyone going hungry. It is not glamorous work. It might save the mission.",
+    scene:'images/scenes/story_rationing_genius.png',
+    choices:[
+      { text:"\u{1F4CB} Implement the new plan immediately", req:{},
+        out:{ title:"Ration Efficiency Improved", desc:"Nobody notices a difference in how full they feel. Three extra ration boxes effectively materialized from clever math. Your medical officer nods with quiet satisfaction.", scene:'images/scenes/result_story_ration_plan.png', fx:{morale:12,foodBoxes:3}, log:"Medical officer rationing plan implemented. Effective food reserves increased.", tone:'good' }},
+      { text:"\u{1F914} Review it yourself before committing", req:{},
+        out:{ title:"Cautious Adoption", desc:"You check the numbers. They are right. You implement it a day later, slightly sheepishly. Two extra boxes effectively created.", scene:'images/scenes/result_story_ration_cautious.png', fx:{morale:8,foodBoxes:2}, log:"Revised rationing plan adopted after review.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_creative_fix', cat:'\u{1F527} CREW MOMENT', title:"That Should Not Have Worked",
+    minDay:18, weight:4, crewStory:true,
+    desc:"The navigation display has been glitching for days. Your engineer disappears into the instrument bay for 40 minutes and emerges holding what appears to be a repurposed water reclamation seal and two spare bolts. The display works perfectly. Nobody asks how.",
+    scene:'images/scenes/story_creative_fix.png',
+    choices:[
+      { text:"\u{1F604} Ask how — this seems important to understand", req:{},
+        out:{ title:"The Explanation Was Worse", desc:"Your engineer explains. It takes 20 minutes and three diagrams. You understand approximately 30% of it. The display works. That will have to be enough.", scene:'images/scenes/result_story_explain_fix.png', fx:{morale:18}, log:"Engineer improvised a navigation display repair. Inexplicably successful.", tone:'good' }},
+      { text:"\u2705 Log it as standard maintenance and move on", req:{},
+        out:{ title:"Official Record: Routine Maintenance", desc:"The mission log will reflect a routine repair. Mission control will never know. Your engineer winks.", scene:'images/scenes/result_story_log_routine.png', fx:{morale:15}, log:"Navigation display repaired. Logged as routine maintenance.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_stargazing', cat:'\u{1F30C} CREW MOMENT', title:"Earth Is Right There",
+    minDay:14, weight:4, crewStory:true,
+    desc:"During a charging stop, your science officer asks everyone to the observation port for five minutes. No agenda. Just: look up. Earth is hanging in the black sky, impossibly bright and impossibly small. Someone says something quiet and everyone laughs. It costs nothing except a few minutes.",
+    scene:'images/scenes/story_stargazing.png',
+    choices:[
+      { text:"\u{1F30D} Stay for the full 20 minutes", req:{},
+        out:{ title:"Twenty Good Minutes", desc:"Nobody mentions the schedule. When you get moving again the rover feels different. Lighter. You cannot explain it exactly.", scene:'images/scenes/result_story_stargazing_long.png', fx:{morale:25,food:-5}, log:"Crew observation break. Morale significantly boosted.", tone:'good' }},
+      { text:"\u23F1\uFE0F Five minutes, then back on track", req:{},
+        out:{ title:"Five Minutes Well Spent", desc:"Brief but real. Something about seeing the whole planet where everyone you have ever known lives their ordinary day puts things into perspective. In a good way.", scene:'images/scenes/result_story_stargazing_brief.png', fx:{morale:15}, log:"Brief observation break. Crew morale improved.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_volunteer_eva', cat:'\u{1F468}\u200D\u{1F680} CREW MOMENT', title:"I Will Go",
+    minDay:22, weight:4, crewStory:true,
+    desc:"A critical exterior component needs manual inspection. Surface conditions are rough — elevated radiation, unstable regolith, temperature swings. Before you finish explaining, one of your crew raises their hand. No drama. Just that.",
+    scene:'images/scenes/story_volunteer_eva.png',
+    choices:[
+      { text:"\u{1F44D} Accept the offer — they know the risks", req:{},
+        out:{ title:"EVA Completed Successfully", desc:"They suit up, go out, do the job, come back. When they cycle through the airlock, nobody moves for a moment. Then someone starts a slow clap that another person immediately stops because it is too much. The repair holds.", scene:'images/scenes/result_story_eva_success.png', fx:{morale:22,power:10}, log:"Volunteer EVA completed successfully. Component repaired.", tone:'good' }},
+      { text:"\u{1F5F3}\uFE0F Ask for volunteers from the full crew first", req:{},
+        out:{ title:"The First Hand Stays Up", desc:"Nobody else moves. The original volunteer holds their hand steady while you look around the room. Eventually you nod. They were always going.", scene:'images/scenes/result_story_eva_inevitable.png', fx:{morale:18,power:10}, log:"EVA volunteer confirmed. Repair successful.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_birthday', cat:'\u{1F382} CREW MOMENT', title:"Someone Remembered",
+    minDay:8, weight:4, crewStory:true,
+    desc:"At morning check-in, your medical officer announces that today is someone's birthday. They have acquired one extra ration pack and fashioned it into something that resembles a cake if you squint. There is a candle. The candle is a chemlight. The singing is terrible. It is perfect.",
+    scene:'images/scenes/story_birthday.png',
+    choices:[
+      { text:"\u{1F382} Full celebration — extra ration, everyone shares", req:{foodBoxes:1},
+        out:{ title:"Mission Day Birthday", desc:"The chemlight gets blown out on the third try. Someone makes a wish. Nobody asks what it was. The extra ration disappears in minutes. Morale is at its highest point in weeks.", scene:'images/scenes/result_story_birthday_full.png', fx:{morale:30,foodBoxes:-1}, log:"Crew birthday celebration. Morale significantly boosted.", tone:'good' }},
+      { text:"\u{1F60A} Keep it simple — the gesture is enough", req:{},
+        out:{ title:"Just Enough", desc:"The chemlight gets lit. The singing happens. It is enough. More than enough, actually.", scene:'images/scenes/result_story_birthday_simple.png', fx:{morale:20}, log:"Crew birthday acknowledged. Morale up.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_commendation', cat:'\u{1F4E1} CREW MOMENT', title:"Mission Control Noticed",
+    minDay:25, weight:4, crewStory:true,
+    desc:"An unexpected transmission arrives — a formal commendation for one of your crew, signed by mission leadership. Their technical work during a recent crisis was flagged as exceptional and will be included in the mission debrief record. They read it twice and do not say anything for a while.",
+    scene:'images/scenes/story_commendation.png',
+    choices:[
+      { text:"\u{1F4E2} Read it aloud to the full crew at dinner", req:{},
+        out:{ title:"Public Recognition", desc:"You read it verbatim. The commended crew member stares at the floor. Everyone else is grinning. Mission control, 384,000km away, managed to do something that feels human.", scene:'images/scenes/result_story_commend_public.png', fx:{morale:25}, log:"Mission control commendation received and shared. Crew morale up.", tone:'good' }},
+      { text:"\u{1F910} Pass it to them privately", req:{},
+        out:{ title:"Private Recognition", desc:"You hand them the printed transmission without comment. They read it. They fold it carefully and put it in their suit pocket. You go back to driving.", scene:'images/scenes/result_story_commend_private.png', fx:{morale:18}, log:"Mission control commendation delivered privately.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_covered_watch', cat:'\u{1F4A4} CREW MOMENT', title:"Covered",
+    minDay:16, weight:4, crewStory:true,
+    desc:"One of your crew looks completely rested — more than a standard rotation should allow. Checking the log, another crew member quietly took their shift without being asked. The entry just says: they needed the sleep.",
+    scene:'images/scenes/story_covered_watch.png',
+    choices:[
+      { text:"\u{1F4CB} Log it as an approved schedule adjustment", req:{},
+        out:{ title:"Quietly Noted", desc:"You make it official. The crew member who gave up their sleep waves off your thanks. It is fine. They clearly mean it. Morale takes a quiet, solid step upward.", scene:'images/scenes/result_story_covered_noted.png', fx:{morale:18}, log:"Crew member voluntarily covered a watch shift. Morale up.", tone:'good' }},
+      { text:"\u{1F91D} Just let it be what it was", req:{},
+        out:{ title:"No Entry Needed", desc:"You close the log without adding anything. Some things are better left off the record.", scene:'images/scenes/result_story_covered_quiet.png', fx:{morale:15}, log:"Unreported crew kindness. Morale quietly improved.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_the_joke', cat:'\u{1F604} CREW MOMENT', title:"The Worst Joke on the Moon",
+    minDay:10, weight:4, crewStory:true,
+    desc:"Day fourteen of a difficult stretch. Nobody has laughed in three days. Then one of your crew delivers a joke so spectacularly terrible that three crew members involuntarily laugh at the audacity of it. The joke was about oxygen recycling. You do not want to repeat it.",
+    scene:'images/scenes/story_the_joke.png',
+    choices:[
+      { text:"\u{1F602} Request an encore", req:{},
+        out:{ title:"The Encore Was Worse", desc:"The follow-up is somehow worse than the original. Everyone agrees it was the best moment of the mission so far. It should not have worked. It absolutely worked.", scene:'images/scenes/result_story_joke_encore.png', fx:{morale:22}, log:"Crew morale restored by genuinely terrible joke.", tone:'good' }},
+      { text:"\u{1F644} Officially ban further jokes for 48 hours", req:{},
+        out:{ title:"The Laughter Rule", desc:"The ban lasts eleven minutes before someone quietly violates it. You pretend not to notice.", scene:'images/scenes/result_story_joke_ban.png', fx:{morale:18}, log:"Joke officially banned. Ban lasted approximately 11 minutes.", tone:'good' }}
+    ]
+  },
+
+  // ── NEGATIVE ──────────────────────────────────────────
+  {
+    id:'story_the_spill', cat:'\u26A0\uFE0F CREW MOMENT', title:"The Spill",
+    minDay:4, weight:4, crewStory:true,
+    desc:"A hard jolt through a regolith field. A container of rations that was not properly secured. Your crew member watches it fall. Some of those packs are not going to make it.",
+    scene:'images/scenes/story_the_spill.png',
+    choices:[
+      { text:"\u{1F371} Assess the damage and salvage what you can", req:{},
+        out:{ title:"Partial Salvage", desc:"You save about half. The rest goes out the airlock. Your crew member apologizes twice. You tell them to stop. They apologize a third time.", scene:'images/scenes/result_story_spill_salvage.png', fx:{foodBoxes:-2,morale:-8}, log:"Ration container unsecured during rough terrain. Partial loss.", tone:'alert' }},
+      { text:"\u{1F610} Say nothing — accidents happen", req:{},
+        out:{ title:"No Blame Assigned", desc:"You help clean up without comment. Your crew member is harder on themselves than any words could be. Three boxes lost.", scene:'images/scenes/result_story_spill_silent.png', fx:{foodBoxes:-3,morale:-5}, log:"Ration spill during traverse. Food loss noted.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_sleepwalk', cat:'\u26A0\uFE0F CREW MOMENT', title:"Found at the Airlock",
+    minDay:18, weight:4, crewStory:true,
+    desc:"At 0200 hours, your engineer is found standing at the inner airlock door in their sleep clothes, hand on the release handle, eyes open but completely unresponsive. It takes 40 seconds to wake them. They have no memory of getting up. The handle was not engaged. You check three times.",
+    scene:'images/scenes/story_sleepwalk.png',
+    choices:[
+      { text:"\u{1F489} Medical evaluation — full cognitive assessment (1 med kit)", req:{medKits:1},
+        out:{ title:"Assessment Complete", desc:"Your medical officer finds severe sleep deprivation presenting as a parasomnia episode. Monitored rest prescribed. The airlock handle gets a physical lock cover installed.", scene:'images/scenes/result_story_sleepwalk_assessed.png', fx:{medKits:-1,morale:-10}, log:"Crew member found sleepwalking at airlock. Medical assessment completed. No injury.", tone:'alert' }},
+      { text:"\u{1F512} Install the safety cover and quietly monitor them", req:{},
+        out:{ title:"Watched Carefully", desc:"You say nothing to the crew. You install the cover. You add a check on their sleep readings to your daily routine. Nobody sleeps particularly well for a few days.", scene:'images/scenes/result_story_sleepwalk_monitor.png', fx:{morale:-15,oxygen:-8}, log:"Airlock safety cover installed. Monitoring ongoing.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'story_wrong_button', cat:'\u26A1 CREW MOMENT', title:"The Wrong Button",
+    minDay:6, weight:4, crewStory:true,
+    desc:"During a routine diagnostic, your engineer initiates a command sequence one step out of order. This triggers an automatic partial power discharge. It runs for four minutes before they catch it. They come to find you immediately and are already composing an apology before they have finished opening the door.",
+    scene:'images/scenes/story_wrong_button.png',
+    choices:[
+      { text:"\u{1F4CB} Log it as a training incident and move on", req:{},
+        out:{ title:"Logged and Learned", desc:"It goes in the record. Your engineer signs off on a refresher checklist. The power loss stings. They will not make that mistake again.", scene:'images/scenes/result_story_wrong_btn_log.png', fx:{power:-18,morale:-8}, log:"Accidental power discharge during diagnostic. Power loss noted.", tone:'alert' }},
+      { text:"\u{1F620} Express your frustration clearly", req:{},
+        out:{ title:"Acknowledged", desc:"You say your piece. They take it without flinching. The air clears. You both go back to work. The power is still gone.", scene:'images/scenes/result_story_wrong_btn_frustration.png', fx:{power:-18,morale:-15}, log:"Accidental power discharge. Crew friction noted.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'story_food_poisoning', cat:'\u{1F912} CREW MOMENT', title:"That Pack Was Off",
+    minDay:12, weight:4, crewStory:true,
+    desc:"One of your crew is not okay this morning. Your medical officer does not need them to explain — the symptoms are clear. A borderline ration pack that someone decided was probably fine. It was not fine. They will recover, but not today.",
+    scene:'images/scenes/story_food_poisoning.png',
+    choices:[
+      { text:"\u{1F489} Full treatment and rest (1 med kit)", req:{medKits:1},
+        out:{ title:"Recovery in Progress", desc:"IV fluids, antiemetics, and a 16-hour rest cycle. Your crew member comes around slowly. Your medical officer goes through every remaining pack with a scanner. Four get ejected.", scene:'images/scenes/result_story_food_poison_treated.png', fx:{medKits:-1,foodBoxes:-4,morale:-10}, log:"Food poisoning incident. Crew member treated. Contaminated packs discarded.", tone:'alert' }},
+      { text:"\u{1F4A7} Rest and fluids — ride it out", req:{},
+        out:{ title:"Riding It Out", desc:"Miserable but not dangerous. Back on light duty by nightfall. Everyone checks their packs a little more carefully going forward.", scene:'images/scenes/result_story_food_poison_rest.png', fx:{morale:-15}, special:'crewHealth', log:"Food poisoning — crew member resting without medical treatment.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'story_fight', cat:'\u{1F624} CREW MOMENT', title:"It Got Physical",
+    minDay:22, weight:3, crewStory:true,
+    desc:"You heard it before you saw it: a shove, something hitting a wall, then sudden silence. By the time you get there both crew members are standing apart, breathing hard, not looking at each other. Nobody is seriously hurt. The reason turns out to be something small. It always does.",
+    scene:'images/scenes/story_fight.png',
+    choices:[
+      { text:"\u{1F3A4} Separate them and conduct individual debriefs", req:{},
+        out:{ title:"Contained", desc:"You talk to each alone. The real issue surfaces — it has nothing to do with what they were arguing about. By morning they are not friends, but they are professional. For now.", scene:'images/scenes/result_story_fight_contained.png', fx:{morale:-20}, log:"Physical altercation between crew. Debriefed and separated. Situation contained.", tone:'bad' }},
+      { text:"\u{1F4E2} Address it directly with everyone present", req:{},
+        out:{ title:"In the Open", desc:"It is uncomfortable. It is necessary. The thing that needed saying gets said. There is residual tension but the pressure has a valve now.", scene:'images/scenes/result_story_fight_open.png', fx:{morale:-12}, log:"Crew altercation addressed in group setting. Tension reduced.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_claustrophobia', cat:'\u{1F630} CREW MOMENT', title:"Can Not Breathe in Here",
+    minDay:16, weight:4, crewStory:true,
+    desc:"Your crew member requests the inner airlock door be opened — not the outer one, just the vestibule. They need five minutes in a slightly larger space. They say they are fine. You notice they have been pacing for 90 minutes and their O2 consumption is elevated. They are not fine.",
+    scene:'images/scenes/story_claustrophobia.png',
+    choices:[
+      { text:"\u{1F489} Medic provides support — anti-anxiety protocol (1 med kit)", req:{medKits:1},
+        out:{ title:"Managed Episode", desc:"Your medical officer handles it quietly and professionally. The episode passes. Your crew member is embarrassed. Your medical officer tells them there is nothing to be embarrassed about. That helps, a little.", scene:'images/scenes/result_story_claustro_treated.png', fx:{medKits:-1,morale:-8,oxygen:-5}, log:"Crew claustrophobia episode. Medical support provided.", tone:'alert' }},
+      { text:"\u{1F6AA} Give them space — open the vestibule for 20 minutes", req:{},
+        out:{ title:"Twenty Minutes", desc:"You open the vestibule and make an excuse to be elsewhere. It takes 20 minutes. When they come back they do not mention it. Neither do you.", scene:'images/scenes/result_story_claustro_space.png', fx:{morale:-15,oxygen:-10}, log:"Crew member needed space. Vestibule opened. Episode resolved.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_dropped_tool', cat:'\u{1F527} CREW MOMENT', title:"Gone",
+    minDay:8, weight:4, crewStory:true,
+    desc:"During an exterior EVA, your engineer watches a specialized coupling wrench bounce off the hull and drift in a lazy arc onto the lunar surface. In low gravity it travels 15 meters before coming to rest. They watch through their visor. Nobody says anything on comms for a full seven seconds.",
+    scene:'images/scenes/story_dropped_tool.png',
+    choices:[
+      { text:"\u{1F50D} Send them back out to retrieve it", req:{},
+        out:{ title:"Retrieved", desc:"It takes another 40 minutes and an extended EVA window. The tool is recovered. Your engineer triple-checks their tether for the rest of the mission.", scene:'images/scenes/result_story_tool_retrieved.png', fx:{power:-8,oxygen:-8,morale:-8}, log:"EVA tool dropped and recovered. Extended EVA completed.", tone:'alert' }},
+      { text:"\u{1F614} Write it off — replacement will cost us", req:{},
+        out:{ title:"One Less Kit", desc:"Too far, EVA window too tight. One repair kit written off as a replacement for the lost component. Your engineer does not let it go for days.", scene:'images/scenes/result_story_tool_lost.png', fx:{repairKits:-1,morale:-12}, log:"EVA tool lost on surface. Repair kit written off as replacement.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'story_nightmare', cat:'\u{1F634} CREW MOMENT', title:"Something Is Wrong With the Sleep",
+    minDay:14, weight:4, crewStory:true,
+    desc:"One of your crew has been sitting in the common area alone before shift. You have noticed it three times this week. This morning you find them again, staring at nothing. When you sit down they tell you they have been having the same dream every night since day eight. They do not say what the dream is. You do not push.",
+    scene:'images/scenes/story_nightmare.png',
+    choices:[
+      { text:"\u{1F489} Medical officer prescribes sleep support (1 med kit)", req:{medKits:1},
+        out:{ title:"Medicated Rest", desc:"Two nights of proper sleep makes a visible difference. They come to breakfast on the third morning looking like themselves. Whatever the dream was, it is quieter now.", scene:'images/scenes/result_story_nightmare_medicated.png', fx:{medKits:-1,morale:-5}, log:"Crew member experiencing sleep disturbance. Medical support provided.", tone:'alert' }},
+      { text:"\u{1F4AC} Just talk — no treatment, just presence", req:{},
+        out:{ title:"Just Present", desc:"You sit with them for an hour before shift. You do not fix anything. They do not need you to. The dreams continue, but they face them a little less alone.", scene:'images/scenes/result_story_nightmare_talk.png', fx:{morale:-10}, log:"Crew member recurring dreams. Informal support provided.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_motion_sick', cat:'\u{1F922} CREW MOMENT', title:"Rover Sick",
+    minDay:7, weight:4, crewStory:true,
+    desc:"The rough ejecta field is producing short irregular jolts that nobody accounted for. Your crew member goes pale around kilometre 40. By kilometre 60 you have stopped twice. It is not their fault. The frequency is specifically calibrated to ruin a person's day.",
+    scene:'images/scenes/story_motion_sick.png',
+    choices:[
+      { text:"\u{1F489} Anti-nausea medication from the medical kit (1 med kit)", req:{medKits:1},
+        out:{ title:"Medicated and Mobile", desc:"Within 45 minutes your crew member is functional, if slightly drowsy. You lose an hour total. Much better than the alternative.", scene:'images/scenes/result_story_motion_sick_meds.png', fx:{medKits:-1,morale:-5}, log:"Crew member motion sickness. Treated with medication.", tone:'alert' }},
+      { text:"\u{1F422} Slow down and take the longer route around", req:{},
+        out:{ title:"The Long Way Around", desc:"Slower speed, smoother ride. Your crew member recovers by the time you are through the worst of it. You lose time and power but gain a functioning crew member.", scene:'images/scenes/result_story_motion_sick_detour.png', fx:{power:-12,morale:-8}, log:"Route adjusted to avoid rough terrain. Time lost.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_valve_left_open', cat:'\u{1FAB4} CREW MOMENT', title:"The Open Valve",
+    minDay:9, weight:4, crewStory:true,
+    desc:"Post-EVA systems check flags an anomaly: an O2 line junction is not fully closed. It has been that way for approximately 90 minutes. Your crew member stares at the readout. I closed it, they say. I know I closed it. You do not doubt them. You cannot explain the reading any other way.",
+    scene:'images/scenes/story_valve_open.png',
+    choices:[
+      { text:"\u{1F50D} Review the EVA camera footage together", req:{},
+        out:{ title:"It Was Slightly Closed", desc:"The footage shows it: a valve turned to 85% rather than 100%. An honest mistake in a bulky glove. You implement a two-person valve confirmation protocol going forward.", scene:'images/scenes/result_story_valve_reviewed.png', fx:{oxygen:-15,morale:-8}, log:"O2 valve not fully closed post-EVA. Footage reviewed. Protocol updated.", tone:'alert' }},
+      { text:"\u{1F4CB} Log it and implement a new checklist", req:{},
+        out:{ title:"Protocol Updated", desc:"New rule: two people confirm every valve after every EVA. Your crew member writes the checklist themselves and checks it with the focus of someone who knows exactly what happens when you do not.", scene:'images/scenes/result_story_valve_checklist.png', fx:{oxygen:-18,morale:-5}, log:"EVA valve incident. Checklist updated. O2 loss noted.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_sunblind', cat:'\u{1F441}\uFE0F CREW MOMENT', title:"Do Not Look Directly",
+    minDay:6, weight:4, crewStory:true,
+    desc:"Solar glare reflecting off a fresh impact basin caught your crew member without their visor positioned. It was two seconds, maybe three. They reported it immediately. Your medical officer confirms temporary photokeratitis — retinal sunburn. Light duty only for 48 hours. They feel terrible about it.",
+    scene:'images/scenes/story_sunblind.png',
+    choices:[
+      { text:"\u{1F489} Full treatment and monitored rest (1 med kit)", req:{medKits:1},
+        out:{ title:"Treated and Resting", desc:"Pain management, light-filtering goggles, and 48 hours of desk duty. Your crew member recovers fully. Your medical officer adds a glare-risk protocol to the pre-EVA checklist.", scene:'images/scenes/result_story_sunblind_treated.png', fx:{medKits:-1,morale:-10}, log:"Crew member suffered photokeratitis from solar glare. Treated. Full recovery expected.", tone:'alert' }},
+      { text:"\u{1F97D} Rest and light filtering — no kit spent", req:{},
+        out:{ title:"Riding It Out", desc:"Protective goggles and reduced light exposure. It heals on its own, slowly. Two days of reduced effectiveness from that crew station.", scene:'images/scenes/result_story_sunblind_rest.png', fx:{morale:-12}, special:'crewHealth', log:"Crew member photokeratitis — resting without medical treatment.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'story_the_overshare', cat:'\u{1F4AC} CREW MOMENT', title:"The Long Night Shift Conversation",
+    minDay:28, weight:4, crewStory:true,
+    desc:"It happens on a quiet night shift. Your crew member starts talking and does not stop. About why they almost did not come. About the person they left behind. About what they are afraid of — not dying in space, but returning to Earth and finding out nothing waited for them. You listen for three hours.",
+    scene:'images/scenes/story_overshare.png',
+    choices:[
+      { text:"\u{1F91D} Stay with them for the whole conversation", req:{},
+        out:{ title:"Heard", desc:"You make it to morning having solved nothing and understood everything. They never bring it up again, but you notice they carry themselves slightly differently. You decide that is good.", scene:'images/scenes/result_story_overshare_heard.png', fx:{morale:-12}, log:"Extended crew conversation during night watch. Noted privately.", tone:'alert' }},
+      { text:"\u{1F4CB} Redirect to mission focus when it gets too heavy", req:{},
+        out:{ title:"Professionally Managed", desc:"You cut it off kindly but firmly around hour two. The right call for mission readiness. Probably the wrong call for them. You watch more carefully going forward.", scene:'images/scenes/result_story_overshare_redirect.png', fx:{morale:-18}, log:"Crew distress during night shift. Conversation redirected to mission focus.", tone:'bad' }}
+    ]
+  },
+  {
+    id:'story_lost_memento', cat:'\u{1F494} CREW MOMENT', title:"It Is Gone",
+    minDay:30, weight:3, crewStory:true,
+    desc:"During a weight rebalancing one small personal item did not make the cut. A photograph. A folded note. Something brought 384,000km from home. It went out with the non-essential mass. Your crew member finds out at the next inventory check and sits very quietly for a long time.",
+    scene:'images/scenes/story_lost_memento.png',
+    choices:[
+      { text:"\u{1F310} Contact mission control to have it digitally transmitted", req:{},
+        out:{ title:"A Facsimile", desc:"Mission control scans the original and transmits it. It is a low-resolution file on a screen, not the real thing. Your crew member looks at it for a long time before saying: thank you, that helps. You think they mean it.", scene:'images/scenes/result_story_memento_transmitted.png', fx:{morale:-15,credits:-50}, log:"Personal item lost during rebalancing. Digital copy transmitted.", tone:'alert' }},
+      { text:"\u{1F910} Acknowledge the loss — there is nothing to be done", req:{},
+        out:{ title:"Some Things Cannot Be Fixed", desc:"You sit next to them and do not say anything useful. There is nothing useful to say. They know that too. The silence is honest.", scene:'images/scenes/result_story_memento_lost.png', fx:{morale:-22}, log:"Personal item lost during rebalancing. No recovery possible.", tone:'bad' }}
+    ]
+  },
+
+  // ── BITTERSWEET ────────────────────────────────────────
+  {
+    id:'story_the_confession', cat:'\u{1F48A} CREW MOMENT', title:"I Should Have Said Something Earlier",
+    minDay:13, weight:4, crewStory:true,
+    desc:"Your crew member pulls you aside at shift change. They have been hiding a minor injury for five days — a deep tissue bruise absorbed quietly rather than worry anyone. It was fine. It is less fine now. Your medical officer is calm about it but gives you a very specific look over their shoulder.",
+    scene:'images/scenes/story_confession.png',
+    choices:[
+      { text:"\u{1F489} Treat it properly and address the hiding (1 med kit)", req:{medKits:1},
+        out:{ title:"Treated and Honest", desc:"Treatment first, conversation second. You make clear — without blame — that hidden injuries put everyone at risk. The crew starts checking on each other more visibly after that.", scene:'images/scenes/result_story_confession_treated.png', fx:{medKits:-1,morale:10}, log:"Hidden injury disclosed and treated. Crew self-monitoring improved.", tone:'good' }},
+      { text:"\u{1F489} Just treat it — the fact they came forward is what matters (1 med kit)", req:{medKits:1},
+        out:{ title:"No Lecture Needed", desc:"You treat it and say nothing more about the hiding. They already know. Sometimes the right response is just to fix the thing and move forward.", scene:'images/scenes/result_story_confession_quiet.png', fx:{medKits:-1,morale:8}, log:"Hidden injury disclosed and treated. No further discussion.", tone:'good' }}
+    ]
+  },
+  {
+    id:'story_standoff', cat:'\u{1F624} CREW MOMENT', title:"Neither of Them Would Move",
+    minDay:20, weight:4, crewStory:true,
+    desc:"Two crew members have been assigned a joint task. Neither will go first. The task is not getting done. You have been informed by a third crew member who described it as completely immovable and honestly kind of impressive. The repair needed is real. The standoff is also, in its own way, impressive.",
+    scene:'images/scenes/story_standoff.png',
+    choices:[
+      { text:"\u{1F3A4} Mediate — get them to talk through the actual issue", req:{},
+        out:{ title:"The Real Issue", desc:"It takes an hour. The actual problem has nothing to do with the task. Once it gets named the standoff dissolves. One of them even hands the other a tool without being asked.", scene:'images/scenes/result_story_standoff_mediated.png', fx:{morale:8,food:-5}, log:"Crew standoff resolved through mediation. Task completed. Tension addressed.", tone:'good' }},
+      { text:"\u{1F4CB} Assign them separately and handle the repair yourself", req:{},
+        out:{ title:"Workaround Implemented", desc:"You separate them and fix the component yourself in 25 minutes. Neither of them feels great about how it resolved. The thing is fixed though.", scene:'images/scenes/result_story_standoff_workaround.png', fx:{morale:-5}, log:"Crew standoff bypassed. Task completed by commander. Tension unresolved.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_homesickness', cat:'\u{1F494} CREW MOMENT', title:"A Quiet Day",
+    minDay:24, weight:4, crewStory:true,
+    desc:"Your crew member is present. They do everything asked of them. They do not complain. They just go very quiet and stay that way for an entire day. Nobody pushes. By evening they are back — not completely, but enough. You do not put anything in the log.",
+    scene:'images/scenes/story_homesickness.png',
+    choices:[
+      { text:"\u{1F30D} Check in gently at end of shift", req:{},
+        out:{ title:"Still Here", desc:"I am okay, they say, and you can tell they almost mean it. Close enough. Tomorrow will be different. You have learned not to ask for more than that.", scene:'images/scenes/result_story_homesick_checkin.png', fx:{morale:5}, log:"Crew member difficult day. Informal check-in conducted.", tone:'good' }},
+      { text:"\u{1F910} Give them space — they will come back when ready", req:{},
+        out:{ title:"Space Given", desc:"By morning they have come back on their own. You never know exactly what brought them back. It is enough.", scene:'images/scenes/result_story_homesick_space.png', fx:{morale:-5}, log:"Crew member given space during difficult day. No intervention.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'story_near_miss_eva', cat:'\u{1F468}\u200D\u{1F680} CREW MOMENT', title:"One Meter",
+    minDay:18, weight:4, crewStory:true,
+    desc:"Your crew member is returning from a surface EVA when one foot breaks through a thin regolith crust at the edge of an unmapped lava tube entrance. They catch themselves on the rover handrail. The hole is about four meters deep. One meter of horizontal movement is the difference between a story and a catastrophe.",
+    scene:'images/scenes/story_near_miss_eva.png',
+    choices:[
+      { text:"\u{1F4CB} Full incident report — map the area and update mission control", req:{},
+        out:{ title:"Mapped and Reported", desc:"You spend 40 minutes documenting the lava tube entrance. Mission control thanks you. Your crew member cycles through the airlock and sits down and breathes for a while. You give them time.", scene:'images/scenes/result_story_near_miss_reported.png', fx:{morale:8,food:-5}, log:"Near-miss EVA incident. Unmapped lava tube entrance documented and reported.", tone:'good' }},
+      { text:"\u{1F4AC} Check on them first — the report can wait", req:{},
+        out:{ title:"People Before Paperwork", desc:"The report gets filed three hours later. Your crew member is fine physically. They come back to the common area holding their hands very still and say: I need five minutes. You give them thirty.", scene:'images/scenes/result_story_near_miss_checkin.png', fx:{morale:5}, log:"Near-miss EVA incident. Crew member checked on. Report filed later.", tone:'good' }}
+    ]
   }
 ];
 
@@ -2163,6 +2530,7 @@ function resetState() {
     waypointIdx: 0,
     resupplyDroneFailed: false,
     pendingMiniGame: null,
+    lastCrewStoryDay: -20,  // tracks last crew story day for spacing
     active: false
   };
 }
@@ -2669,9 +3037,11 @@ function tryEvent() {
     if (S.recentEvents.includes(ev.id)) return false;
     if (ev.minDay && S.day < ev.minDay) return false;
     if (ev.maxDay && S.day > ev.maxDay) return false;
+    // Crew story throttle — minimum 12 days between crew story events
+    if (ev.crewStory && (S.day - S.lastCrewStoryDay) < 12) return false;
     // Conditional events
     if (ev.id === 'night_crisis' && !S.inNight) return false;
-    if (ev.id === 'solar_flare' && S.inNight) return false;   // pointless during lunar night
+    if (ev.id === 'solar_flare' && S.inNight) return false;
     if (ev.id === 'resupply_failure' && S.resupplyDroneFailed) return false;
     // Only show repair events if that system is actually broken
     if (ev.id === 'bmu_repair_offer' && !S.bmuFailed) return false;
@@ -2690,6 +3060,7 @@ function tryEvent() {
   for (const ev of eligible) { r -= (ev.weight || 5); if (r <= 0) { chosen = ev; break; } }
 
   if (!chosen.repeatable) S.usedEvents.add(chosen.id);
+  if (chosen.crewStory) S.lastCrewStoryDay = S.day;
   S.recentEvents = [chosen.id, ...S.recentEvents].slice(0, 4);
   showEvent(chosen);
   return true;
