@@ -864,6 +864,79 @@ button { cursor: pointer; }
   .hud-val { font-size: .8rem; }
   .act-btn { font-size: .52rem; }
 }
+
+/* ── GEOLOGICAL SURVEY ───────────────────────────────── */
+.survey-viewport {
+  width: 100%; max-width: 380px; height: 260px;
+  background: var(--panel2); border: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.survey-column {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: 120px; display: flex; flex-direction: column;
+}
+.survey-layer {
+  width: 100%; height: 52px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  gap: .45rem; font-family: var(--ui); font-size: .55rem;
+  letter-spacing: .08em; color: rgba(255,255,255,.9);
+  border-top: 1px solid rgba(255,255,255,.12); position: relative;
+}
+.survey-target {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: 132px; pointer-events: none; z-index: 10;
+  border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
+  box-shadow: 0 0 14px rgba(0,200,255,.45), inset 0 0 18px rgba(0,200,255,.06);
+}
+.survey-ruler {
+  position: absolute; left: 6px; top: 0; bottom: 0; width: 26px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  pointer-events: none; padding: 4px 0;
+}
+.survey-ruler-tick { font-family: var(--mono); font-size: .5rem; color: var(--dim); }
+.layer-icon { font-size: 1.15rem; }
+.layer-name { line-height: 1.2; text-align: center; }
+
+.drill-btn {
+  width: 100%; max-width: 380px; padding: 1rem;
+  background: var(--warn); color: var(--bg); border: none;
+  font-family: var(--ui); font-size: .85rem; letter-spacing: .2em;
+  cursor: pointer; transition: all .1s; text-transform: uppercase;
+}
+.drill-btn:active { transform: scale(.97); }
+.drill-btn:disabled { background: var(--border); color: var(--dim); cursor: not-allowed; }
+.drill-btn.locked { background: var(--green); box-shadow: 0 0 20px rgba(0,255,157,.5); }
+
+.sample-tray {
+  width: 100%; max-width: 380px; display: flex; gap: .45rem;
+  flex-wrap: wrap; min-height: 46px; padding: .45rem;
+  background: var(--panel2); border: 1px solid var(--border);
+}
+.sample-chip {
+  display: flex; align-items: center; gap: .3rem;
+  padding: .28rem .55rem; border-radius: 2px;
+  font-size: .78rem; font-family: var(--mono);
+  animation: chipPop .2s ease;
+}
+@keyframes chipPop { 0%{transform:scale(.5);opacity:0} 100%{transform:scale(1);opacity:1} }
+
+.survey-speed-row {
+  width: 100%; max-width: 380px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: .32rem .5rem; background: var(--panel);
+  border: 1px solid var(--border);
+  font-family: var(--ui); font-size: .57rem; letter-spacing: .1em; color: var(--dim);
+}
+.speed-pips { display: flex; gap: 3px; }
+.speed-pip { width: 10px; height: 10px; border-radius: 1px; background: var(--border); transition: background .12s; }
+.speed-pip.active { background: var(--warn); }
+.speed-pip.fast   { background: var(--danger); }
+
+@media (max-width: 560px) {
+  .survey-viewport { height: 220px; }
+  .survey-layer { height: 44px; font-size: .5rem; }
+  .drill-btn { padding: .85rem; font-size: .78rem; }
+}
 </style>
 </head>
 <body>
@@ -1197,7 +1270,7 @@ button { cursor: pointer; }
     <button class="act-btn" id="act-charge">⚡ CHARGE</button>
     <button class="act-btn" id="act-rations">🍱 RATIONS</button>
     <button class="act-btn" id="act-rest">💤 REST</button>
-    <button class="act-btn" id="act-cell">🔋 CELL</button>
+    <button class="act-btn" id="act-cell">🔋 POWER CELL</button>
     <button class="act-btn" id="act-inv">📦 INVENTORY</button>
     <button class="act-btn" id="act-crew">👥 CREW</button>
     <button class="act-btn red" id="act-abort">⚠️ ABORT</button>
@@ -1518,6 +1591,64 @@ button { cursor: pointer; }
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════
+     SCREEN 15: MINI-GAME — GEOLOGICAL SURVEY
+═══════════════════════════════════════════════════════ -->
+<div id="screen-mg-survey" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="minigame-wrap">
+    <div class="mg-title">🔬 CORE SURVEY</div>
+    <div class="mg-subtitle">GEOLOGICAL DRILL SAMPLING PROTOCOL</div>
+    <div class="mg-instruction">
+      Layers scroll upward through the target zone. Press <strong>LOCK SAMPLE</strong> when the layer you want is inside the cyan bracket. Three drill attempts — avoid the void pockets.
+    </div>
+
+    <div class="mg-status-bar" style="width:100%;max-width:380px">
+      <span class="mg-round">ATTEMPT <span id="mg-survey-attempt">1</span> / 3</span>
+      <span class="mg-phase-label" id="mg-survey-phase">READY</span>
+      <span class="mg-score" id="mg-survey-score">0 pts</span>
+    </div>
+
+    <!-- Scrolling drill viewport -->
+    <div class="survey-viewport" id="survey-viewport">
+      <!-- Ruler ticks -->
+      <div class="survey-ruler" id="survey-ruler"></div>
+      <!-- Scrolling layer column -->
+      <div class="survey-column" id="survey-column"></div>
+      <!-- Fixed target zone bracket -->
+      <div class="survey-target" id="survey-target"></div>
+    </div>
+
+    <!-- Speed indicator -->
+    <div class="survey-speed-row">
+      <span>DRILL SPEED</span>
+      <div class="speed-pips" id="survey-speed-pips">
+        <div class="speed-pip" id="spip-0"></div>
+        <div class="speed-pip" id="spip-1"></div>
+        <div class="speed-pip" id="spip-2"></div>
+        <div class="speed-pip" id="spip-3"></div>
+        <div class="speed-pip" id="spip-4"></div>
+      </div>
+      <span id="survey-speed-label">SLOW</span>
+    </div>
+
+    <!-- Lock sample button -->
+    <button class="drill-btn" id="btn-survey-lock">⬇ LOCK SAMPLE</button>
+
+    <!-- Sample tray showing collected cores -->
+    <div style="width:100%;max-width:380px;font-family:var(--ui);font-size:.55rem;letter-spacing:.18em;color:var(--dim);margin-top:.25rem">
+      CORE SAMPLES COLLECTED
+    </div>
+    <div class="sample-tray" id="survey-tray"></div>
+
+    <div class="mg-result-msg" id="mg-survey-result"></div>
+    <button class="btn btn-primary" id="btn-mg-survey-done" style="display:none;width:100%;max-width:380px">
+      CONTINUE →
+    </button>
+  </div>
+</div>
+
 <script>
 /* ═══════════════════════════════════════════════════════
    LUNAR TRAIL — All game logic in one self-contained script
@@ -1785,8 +1916,8 @@ const EVENTS = [
     desc:"Your science officer grabs your arm. A dark opening in the crater wall ahead — 8 meters wide. A lava tube. Untouched. Possibly running parallel to your route for kilometers. Also a perfect natural shelter.",
     scene:'images/scenes/event_lava_tube.png',
     choices:[
-      { text:"🔬 Send science officer in with sample kit (4 hours, EVA consumables)", req:{},
-        out:{ title:"Lava Tube Surveyed", desc:"The science officer returns grinning, holding ancient volcanic rock. Mission control is thrilled. The crew's morale surges — this is why you came.", scene:'images/scenes/result_tube_survey.png', fx:{morale:25,food:-8,oxygen:-10}, log:"Lava tube surveyed. Scientific discovery!", tone:'good' }},
+      { text:"🔬 Send science officer in with sample kit — launch geological survey", req:{},
+        out:{ title:"Survey Protocol Initiated", desc:"The science officer suits up and moves to the drill controls. Time to find out what's down there.", scene:'images/scenes/result_tube_survey.png', fx:{food:-5,oxygen:-8}, special:'launchSurvey', log:"Geological survey launched. Results pending.", tone:'alert' }},
       { text:"🛡️ Use tube as shelter — camp inside, protected from cosmic rays", req:{},
         out:{ title:"Natural Shelter", desc:"You drive into the tube and camp. The crew sleeps better than they have in weeks — protected, stable temperature, no cosmic ray flux.", scene:'images/scenes/result_tube_shelter.png', fx:{morale:20,power:10}, log:"Camped in lava tube. Best sleep in weeks.", tone:'good' }},
       { text:"🚗 Log it and keep moving — mission schedule matters", req:{},
@@ -1802,6 +1933,17 @@ const EVENTS = [
         out:{ title:"Cache Recovered", desc:"The cache is intact. Six ration boxes, two oxygen canisters, and a repair kit — all vacuum-sealed and perfect.", scene:'images/scenes/result_cache_success.png', fx:{foodBoxes:6,oxygenCanisters:2,repairKits:1,morale:15}, log:"Supply cache recovered. Significant resupply.", tone:'good' }},
       { text:"🚗 Skip it — 24km round trip isn't worth it", req:{},
         out:{ title:"Cache Skipped", desc:"You stay the course. Three days later, you wish you hadn't.", scene:'images/scenes/result_cache_skipped.png', fx:{morale:-5}, log:"Skipped supply cache. Staying on direct route.", tone:'alert' }}
+    ]
+  },
+  {
+    id:'geo_survey_opportunity', cat:'🔬 SCIENCE OPPORTUNITY', title:"Promising Geological Formation", minDay:5, weight:7, repeatable:true,
+    desc:"Your science officer has been watching the terrain readings for the last hour. There's an anomalous subsurface density signature directly ahead — the kind that indicates layered geological strata worth sampling. It'll cost a few hours and some EVA supplies, but if there's ice or impact glass down there, it's worth knowing.",
+    scene:'images/scenes/event_geo_survey.png',
+    choices:[
+      { text:"🔬 Stop and conduct a core drill survey — launch geological survey protocol", req:{},
+        out:{ title:"Survey Protocol Initiated", desc:"The drill deploys and the science officer takes the controls. Whatever's down there, you're about to find out.", scene:'images/scenes/result_geo_survey_start.png', fx:{food:-5,oxygen:-8}, special:'launchSurvey', log:"Geological survey launched.", tone:'alert' }},
+      { text:"🚗 Log it and keep moving — schedule is too tight", req:{},
+        out:{ title:"Formation Logged", desc:"Coordinates logged and transmitted to mission control. They'll add it to the orbital survey database. Your science officer marks it on the map without a word.", scene:'images/scenes/result_geo_skipped.png', fx:{morale:-8}, log:"Geological formation logged. Survey skipped.", tone:'alert' }}
     ]
   },
   {
@@ -2554,31 +2696,62 @@ function tryEvent() {
 }
 
 // ── CREW NAME INJECTION ───────────────────────────────────
-// Replaces role placeholders with actual crew names in event text
+// Single-pass replacement using a map of patterns → replacements.
+// Each pattern matches the role phrase and a negative lookahead ensures
+// we don't inject if the name is already sitting right after the phrase.
 function injectCrewNames(text) {
   if (!S.crew || S.crew.length < 4) return text;
-  const engineer = S.crew[1].name;
-  const scientist = S.crew[2].name;
-  const medic     = S.crew[3].name;
-  const commander = S.crew[0].name;
+  const eng = S.crew[1].name;
+  const sci = S.crew[2].name;
+  const med = S.crew[3].name;
+  const cmd = S.crew[0].name;
+
+  // Build escape helper so names with regex chars don't break patterns
+  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  // Each entry: [pattern-string, replacement-function]
+  // Negative lookahead (?! name) prevents re-injection on already-replaced text
+  const rules = [
+    // Possessive "your X" forms — keep "your X Name"
+    [`your engineer(?!\\s+${esc(eng)})`, `your engineer ${eng}`],
+    [`your science officer(?!\\s+${esc(sci)})`, `your science officer ${sci}`],
+    [`your medical officer(?!\\s+${esc(med)})`, `your medical officer ${med}`],
+    [`your medic(?!\\s+${esc(med)})`, `your medic ${med}`],
+    [`your commander(?!\\s+${esc(cmd)})`, `your commander ${cmd}`],
+    // "The X" forms — replace with just the name
+    [`the engineer(?!\\s+${esc(eng)})`, `${eng}`],
+    [`the science officer(?!\\s+${esc(sci)})`, `${sci}`],
+    [`the medical officer(?!\\s+${esc(med)})`, `${med}`],
+    // Bare role at start of sentence or mid-sentence — append name
+    [`\\bengineer(?!\\s+${esc(eng)})\\b`, `engineer ${eng}`],
+    [`\\bscience officer(?!\\s+${esc(sci)})`, `science officer ${sci}`],
+    [`\\bmedical officer(?!\\s+${esc(med)})`, `medical officer ${med}`],
+  ];
+
+  let result = text;
+  for (const [pat, rep] of rules) {
+    result = result.replace(new RegExp(pat, 'gi'), rep);
+  }
+  return result;
+}
+
+// Capitalize first letter of every sentence in event text
+function capitalizeSentences(text) {
   return text
-    .replace(/\byour engineer\b/gi,          `your engineer ${engineer}`)
-    .replace(/\bthe engineer\b/gi,           `${engineer}`)
-    .replace(/\byour science officer\b/gi,   `your science officer ${scientist}`)
-    .replace(/\bthe science officer\b/gi,    `${scientist}`)
-    .replace(/\byour medical officer\b/gi,   `your medical officer ${medic}`)
-    .replace(/\bthe medical officer\b/gi,    `${medic}`)
-    .replace(/\byour medic\b/gi,             `your medic ${medic}`)
-    .replace(/\byour commander\b/gi,         `your commander ${commander}`)
-    .replace(/\bscience officer\b/gi,        `science officer ${scientist}`)
-    .replace(/\bengineers?\b(?! ${engineer})/gi, m => m.toLowerCase().startsWith('engineer') ? `engineer ${engineer}` : m)
-    .replace(/\bmedical officer\b/gi,        `medical officer ${medic}`);
+    // After period/exclamation/question + space(s)
+    .replace(/(^|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase())
+    // After em-dash at start of sentence
+    .replace(/(^|—\s*)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase());
+}
+
+function processEventText(text) {
+  return capitalizeSentences(injectCrewNames(text));
 }
 
 function showEvent(ev) {
   $('ev-cat').textContent   = ev.cat;
   $('ev-title').textContent = ev.title;
-  $('ev-desc').textContent  = injectCrewNames(ev.desc);
+  $('ev-desc').textContent  = processEventText(ev.desc);
   setImg($('ev-img'), $('ev-img-label'), $('ev-img-path'), ev.scene, ev.title);
 
   const choices = $('ev-choices');
@@ -2586,7 +2759,7 @@ function showEvent(ev) {
   ev.choices.forEach((ch) => {
     const btn = document.createElement('button');
     btn.className = 'choice-btn';
-    btn.textContent = injectCrewNames(ch.text);
+    btn.textContent = processEventText(ch.text);
     const canAfford = Object.entries(ch.req || {}).every(([k, v]) => (S[k] || 0) >= v);
     if (!canAfford) { btn.disabled = true; btn.textContent += '  [INSUFFICIENT RESOURCES]'; }
     btn.addEventListener('click', () => resolveEvent(ch));
@@ -2629,7 +2802,7 @@ function resolveEvent(choice) {
 
   // Show result screen
   $('res-title').textContent = out.title;
-  $('res-desc').textContent  = injectCrewNames(out.desc);
+  $('res-desc').textContent  = processEventText(out.desc);
   setImg($('res-img'), $('res-img-label'), $('res-img-path'), out.scene, out.title);
 
   const box = $('res-changes');
@@ -2744,6 +2917,9 @@ function applySpecial(effect, changes) {
   if (effect === 'launchAntenna') {
     S.pendingMiniGame = 'antenna';
   }
+  if (effect === 'launchSurvey') {
+    S.pendingMiniGame = 'survey';
+  }
 }
 
 function continueFromResult() {
@@ -2768,6 +2944,13 @@ function continueFromResult() {
       showScreen('screen-game');
     };
     startAntennaGame('antenna_event', mgOnFinish);
+    return;
+  }
+
+  if (S.pendingMiniGame === 'survey') {
+    S.pendingMiniGame = null;
+    mgReturnScreen = 'screen-game';
+    startSurveyGame();
     return;
   }
 
@@ -3398,7 +3581,339 @@ function launchAntennaGame(onFinishCallback) {
   startAntennaGame('nav_blackout', onFinishCallback);
 }
 
+// ═══════════════════════════════════════════════════════
+//  GEOLOGICAL SURVEY MINI-GAME
+//  Layers scroll through a target window. Player taps
+//  LOCK SAMPLE to extract whichever layer is centred.
+//  3 attempts. Speed increases each attempt.
+// ═══════════════════════════════════════════════════════
+
+const GEO_LAYERS = [
+  { id:'dust',      icon:'🟫', name:'Regolith Dust',   color:'#3d2b1a', pts:0,   bad:false, desc:'Common surface dust. No scientific value.' },
+  { id:'basalt',    icon:'🪨', name:'Basalt',           color:'#2a2a3a', pts:10,  bad:false, desc:'Volcanic basalt. Minor geological interest.' },
+  { id:'anortho',   icon:'🤍', name:'Anorthosite',      color:'#334455', pts:20,  bad:false, desc:'Ancient highland rock. Good science!' },
+  { id:'glass',     icon:'💎', name:'Impact Glass',     color:'#1a3a2a', pts:35,  bad:false, desc:'Silica glass from ancient impacts. Excellent find.' },
+  { id:'volcanic',  icon:'🟠', name:'Volcanic Ash',     color:'#3a2a1a', pts:15,  bad:false, desc:'Volcanic deposit. Tells us about lunar history.' },
+  { id:'ice',       icon:'🧊', name:'Ice Deposit',      color:'#1a2a3a', pts:50,  bad:false, desc:'Subsurface ice! Huge scientific and resource value.' },
+  { id:'breccia',   icon:'🟤', name:'Regolith Breccia', color:'#2a1a2a', pts:12,  bad:false, desc:'Compressed regolith. Modest value.' },
+  { id:'void',      icon:'⬛', name:'Void Pocket',      color:'#0a0a0a', pts:-20, bad:true,  desc:'Empty pocket — drill bit damaged!' },
+];
+
+const GEO_LAYER_H = 52; // px per layer
+const GEO_VIEWPORT_H = 260;
+const GEO_TARGET_H = 56; // height of target zone
+
+let mgSurvey = {
+  attempt: 1,
+  maxAttempts: 3,
+  score: 0,
+  samples: [],        // { layer, pts }
+  scrollY: 0,         // current scroll offset in px
+  speedPx: 0,         // px/second
+  rafId: null,
+  lastTs: 0,
+  phase: 'idle',      // 'idle' | 'scrolling' | 'locked' | 'done'
+  layerOrder: [],     // array of layer objects, repeated to fill
+  speedLevels: [],    // px/s per attempt
+  targetTopY: 0,      // y position of target zone top in viewport
+};
+
+function buildLayerSequence(seed) {
+  // Build a randomised repeating sequence of ~24 layers
+  const pool = [...GEO_LAYERS];
+  const seq = [];
+  // Ensure at least one void and one ice in first 20
+  seq.push(GEO_LAYERS.find(l => l.id === 'void'));
+  seq.push(GEO_LAYERS.find(l => l.id === 'ice'));
+  for (let i = 0; i < 22; i++) {
+    seq.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+  // Shuffle
+  for (let i = seq.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [seq[i], seq[j]] = [seq[j], seq[i]];
+  }
+  return seq;
+}
+
+function startSurveyGame() {
+  // Speed levels: increases each attempt
+  const speedBase = { tourist:45, astronaut:65, commander:90 }[S.difficulty] || 65;
+  mgSurvey.speedLevels = [speedBase, speedBase * 1.55, speedBase * 2.2];
+
+  mgSurvey.attempt  = 1;
+  mgSurvey.score    = 0;
+  mgSurvey.samples  = [];
+  mgSurvey.phase    = 'idle';
+  mgSurvey.scrollY  = 0;
+  mgSurvey.layerOrder = buildLayerSequence();
+
+  // Target zone sits at vertical centre of viewport
+  mgSurvey.targetTopY = Math.round((GEO_VIEWPORT_H - GEO_TARGET_H) / 2);
+
+  if (mgSurvey.rafId) { cancelAnimationFrame(mgSurvey.rafId); mgSurvey.rafId = null; }
+
+  renderSurveyStatic();
+  resetSurveyUI();
+  showScreen('screen-mg-survey');
+}
+
+function renderSurveyStatic() {
+  // Position the target zone bracket
+  const target = $('survey-target');
+  target.style.top    = mgSurvey.targetTopY + 'px';
+  target.style.height = GEO_TARGET_H + 'px';
+
+  // Ruler ticks
+  const ruler = $('survey-ruler');
+  ruler.innerHTML = '';
+  for (let d = 0; d <= 5; d++) {
+    const t = document.createElement('div');
+    t.className = 'survey-ruler-tick';
+    t.textContent = (d * 20) + 'm';
+    ruler.appendChild(t);
+  }
+}
+
+function resetSurveyUI() {
+  $('mg-survey-attempt').textContent = mgSurvey.attempt;
+  $('mg-survey-phase').textContent   = 'READY';
+  $('mg-survey-score').textContent   = mgSurvey.score + ' pts';
+  $('survey-tray').innerHTML         = '';
+  $('mg-survey-result').textContent  = '';
+  $('mg-survey-result').className    = 'mg-result-msg';
+  $('btn-mg-survey-done').style.display = 'none';
+  $('btn-survey-lock').disabled = false;
+  $('btn-survey-lock').className = 'drill-btn';
+  $('btn-survey-lock').textContent = '⬇ LOCK SAMPLE';
+  updateSurveySpeedUI(0);
+  renderSurveyColumn();
+}
+
+function renderSurveyColumn() {
+  const col = $('survey-column');
+  if (!col) return;
+  col.innerHTML = '';
+
+  const totalLayers = mgSurvey.layerOrder.length;
+  col.style.height = (totalLayers * GEO_LAYER_H) + 'px';
+  col.style.top = (-mgSurvey.scrollY) + 'px';
+
+  mgSurvey.layerOrder.forEach((layer, i) => {
+    const div = document.createElement('div');
+    div.className = 'survey-layer';
+    div.style.background = layer.color + 'cc';
+    div.innerHTML = `<span class="layer-icon">${layer.icon}</span><span class="layer-name">${layer.name}</span>`;
+    col.appendChild(div);
+  });
+}
+
+function startSurveyAttempt() {
+  mgSurvey.phase   = 'scrolling';
+  mgSurvey.scrollY = 0;
+  mgSurvey.layerOrder = buildLayerSequence();
+  mgSurvey.speedPx = mgSurvey.speedLevels[mgSurvey.attempt - 1];
+
+  $('mg-survey-phase').textContent = 'DRILLING...';
+  $('btn-survey-lock').disabled = false;
+  $('btn-survey-lock').className = 'drill-btn';
+  $('btn-survey-lock').textContent = '⬇ LOCK SAMPLE';
+  renderSurveyColumn();
+
+  mgSurvey.lastTs = performance.now();
+  mgSurvey.rafId  = requestAnimationFrame(surveyLoop);
+}
+
+function surveyLoop(ts) {
+  if (mgSurvey.phase !== 'scrolling') return;
+
+  const dt = Math.min((ts - mgSurvey.lastTs) / 1000, 0.1);
+  mgSurvey.lastTs = ts;
+
+  mgSurvey.scrollY += mgSurvey.speedPx * dt;
+
+  const totalH = mgSurvey.layerOrder.length * GEO_LAYER_H;
+  if (mgSurvey.scrollY >= totalH - GEO_VIEWPORT_H) {
+    mgSurvey.scrollY = 0; // loop
+  }
+
+  // Update column position
+  const col = $('survey-column');
+  if (col) col.style.top = (-mgSurvey.scrollY) + 'px';
+
+  // Update speed pips
+  const speedFrac = (mgSurvey.attempt - 1) / (mgSurvey.maxAttempts - 1);
+  updateSurveySpeedUI(speedFrac);
+
+  mgSurvey.rafId = requestAnimationFrame(surveyLoop);
+}
+
+function updateSurveySpeedUI(frac) {
+  const pips = 5;
+  const active = Math.round(frac * pips);
+  const isFast = frac > 0.65;
+  for (let i = 0; i < pips; i++) {
+    const pip = $('spip-' + i);
+    if (!pip) continue;
+    pip.className = 'speed-pip' + (i < active ? (isFast ? ' fast' : ' active') : '');
+  }
+  const labels = ['SLOW', 'SLOW', 'MEDIUM', 'FAST', 'FAST'];
+  const lbl = $('survey-speed-label');
+  if (lbl) lbl.textContent = labels[Math.min(active, labels.length - 1)];
+}
+
+function lockSurveyLayer() {
+  if (mgSurvey.phase !== 'scrolling') return;
+  mgSurvey.phase = 'locked';
+
+  if (mgSurvey.rafId) { cancelAnimationFrame(mgSurvey.rafId); mgSurvey.rafId = null; }
+  $('btn-survey-lock').disabled = true;
+
+  // Determine which layer centre is closest to the target zone centre
+  const targetCentreY = mgSurvey.targetTopY + GEO_TARGET_H / 2;
+  // Layer top in viewport = (layerIdx * GEO_LAYER_H) - scrollY
+  let bestLayer = null, bestDist = Infinity;
+  mgSurvey.layerOrder.forEach((layer, i) => {
+    const layerCentreInViewport = (i * GEO_LAYER_H + GEO_LAYER_H / 2) - mgSurvey.scrollY;
+    const dist = Math.abs(layerCentreInViewport - targetCentreY);
+    if (dist < bestDist) { bestDist = dist; bestLayer = layer; }
+  });
+
+  if (!bestLayer) bestLayer = GEO_LAYERS[0];
+
+  // Flash the matched layer
+  const col = $('survey-column');
+  if (col) {
+    const idx = mgSurvey.layerOrder.indexOf(bestLayer);
+    const layerEl = col.children[idx];
+    if (layerEl) {
+      layerEl.style.outline = `3px solid ${bestLayer.bad ? 'var(--danger)' : 'var(--green)'}`;
+      layerEl.style.zIndex = '5';
+    }
+  }
+
+  // Record sample
+  const ptsDelta = bestLayer.pts;
+  mgSurvey.score = Math.max(-50, mgSurvey.score + ptsDelta);
+  mgSurvey.samples.push(bestLayer);
+
+  // Add chip to tray
+  addSurveyChip(bestLayer);
+
+  // Update score display
+  $('mg-survey-score').textContent = mgSurvey.score + ' pts';
+
+  // Show brief feedback
+  const feedback = bestLayer.bad
+    ? `💥 VOID POCKET — ${bestLayer.desc}`
+    : `✓ ${bestLayer.name} — ${bestLayer.desc}`;
+  $('mg-survey-phase').textContent = bestLayer.bad ? '⚠️ VOID HIT' : '✓ SAMPLE LOCKED';
+
+  const resultEl = $('mg-survey-result');
+  resultEl.textContent = feedback;
+  resultEl.className = 'mg-result-msg ' + (bestLayer.bad ? 'bad' : bestLayer.pts >= 35 ? 'good' : 'ok');
+
+  setTimeout(() => {
+    if (mgSurvey.attempt >= mgSurvey.maxAttempts) {
+      endSurveyGame();
+    } else {
+      mgSurvey.attempt++;
+      $('mg-survey-attempt').textContent = mgSurvey.attempt;
+      $('mg-survey-result').textContent  = '';
+      $('mg-survey-result').className    = 'mg-result-msg';
+      $('mg-survey-phase').textContent   = 'NEXT ATTEMPT...';
+      $('btn-survey-lock').disabled = false;
+      $('btn-survey-lock').className = 'drill-btn';
+      // Start next attempt after short delay
+      setTimeout(() => startSurveyAttempt(), 800);
+    }
+  }, 1400);
+}
+
+function addSurveyChip(layer) {
+  const tray = $('survey-tray');
+  if (!tray) return;
+  const chip = document.createElement('div');
+  chip.className = 'sample-chip';
+  chip.style.background = layer.color + 'dd';
+  chip.style.color = layer.bad ? 'var(--danger)' : layer.pts >= 35 ? 'var(--green)' : 'var(--text)';
+  chip.style.border = `1px solid ${layer.bad ? 'var(--danger)' : layer.pts > 0 ? 'var(--border)' : 'var(--dim)'}`;
+  chip.innerHTML = `${layer.icon} ${layer.name}`;
+  tray.appendChild(chip);
+}
+
+function endSurveyGame() {
+  mgSurvey.phase = 'done';
+
+  // Determine reward tier
+  let powerGain = 0, moraleMod = 0, oxygenGain = 0, creditsGain = 0;
+  let resultText = '';
+  let resultCls  = 'ok';
+
+  const hasIce   = mgSurvey.samples.some(s => s.id === 'ice');
+  const hasVoid  = mgSurvey.samples.some(s => s.id === 'void');
+  const goodSamples = mgSurvey.samples.filter(s => s.pts >= 20).length;
+
+  if (mgSurvey.score >= 70 || hasIce) {
+    resultText = hasIce
+      ? '🧊 ICE DEPOSIT CONFIRMED — Mission control is ecstatic. Significant O₂ and morale bonus.'
+      : '🏆 EXCEPTIONAL CORE SAMPLE — Three valuable layers recovered. Mission control congratulates the crew.';
+    moraleMod = 30; oxygenGain = hasIce ? 25 : 0; creditsGain = 300;
+    resultCls = 'good';
+  } else if (mgSurvey.score >= 30 || goodSamples >= 1) {
+    resultText = '✓ SOLID SAMPLE RECOVERY — Some useful geology retrieved. Mission control approves.';
+    moraleMod = 12; creditsGain = 150;
+    resultCls = 'good';
+  } else if (mgSurvey.score > 0) {
+    resultText = 'Minimal geology recovered. Mostly dust and common basalt. Not a great drill site.';
+    moraleMod = 0; creditsGain = 50;
+    resultCls = 'ok';
+  } else {
+    resultText = hasVoid
+      ? '⚠️ DRILL DAMAGED by void pocket. Wasted time, damaged equipment.'
+      : 'Survey returned nothing of value. The crew is disappointed.';
+    moraleMod = -10; powerGain = hasVoid ? -10 : 0;
+    resultCls = 'bad';
+  }
+
+  $('mg-survey-result').textContent = resultText;
+  $('mg-survey-result').className = 'mg-result-msg ' + resultCls;
+  $('mg-survey-phase').textContent = resultCls === 'good' ? '✓ SURVEY COMPLETE' : resultCls === 'bad' ? '✗ POOR RESULTS' : '~ SURVEY DONE';
+  $('btn-survey-lock').disabled = true;
+  $('btn-mg-survey-done').style.display = 'block';
+
+  // Store results for apply on CONTINUE
+  mgSurvey.pendingReward = { powerGain, moraleMod, oxygenGain, creditsGain };
+}
+
+function surveyGameDone() {
+  const r = mgSurvey.pendingReward || {};
+  if (r.powerGain  ) S.power   = Math.min(100, S.power + r.powerGain);
+  if (r.moraleMod  ) S.morale  = Math.max(0, Math.min(100, S.morale + r.moraleMod));
+  if (r.oxygenGain ) S.oxygen  = Math.min(100, S.oxygen + r.oxygenGain);
+  if (r.creditsGain) S.credits += r.creditsGain;
+
+  if (r.moraleMod > 0)   addLog(`Geological survey complete. Morale +${r.moraleMod}.`, 'good');
+  if (r.oxygenGain > 0)  addLog(`Ice deposit confirmed. O₂ reserves +${r.oxygenGain}%.`, 'good');
+  if (r.creditsGain > 0) addLog(`Survey data sold to mission control. +$${r.creditsGain} credits.`, 'good');
+  if (r.moraleMod < 0)   addLog('Survey returned poor results.', 'bad');
+
+  refreshGameUI();
+  clearInlineLog();
+  showScreen(mgReturnScreen);
+}
+
 // ── BUTTON WIRING ─────────────────────────────────────────
+// Survey game
+$('btn-survey-lock').addEventListener('click', () => {
+  if (mgSurvey.phase === 'idle') {
+    startSurveyAttempt();
+  } else if (mgSurvey.phase === 'scrolling') {
+    lockSurveyLayer();
+  }
+});
+$('btn-mg-survey-done').addEventListener('click', surveyGameDone);
+
 // Mini-game done buttons
 $('btn-mg-cells-start').addEventListener('click', () => {
   $('btn-mg-cells-start').style.display = 'none';
