@@ -100,10 +100,11 @@ html, body {
   object-fit: cover;
   image-rendering: pixelated;
   display: none;
+  z-index: 2;
 }
 .scene-box img.loaded { display: block; }
-.scene-box .placeholder { font-size: .75rem; color: var(--dim); }
-.scene-box .filepath { font-size: .6rem; color: var(--dim); opacity: .6; }
+.scene-box .placeholder { font-size: .75rem; color: var(--dim); position: relative; z-index: 1; }
+.scene-box .filepath { font-size: .6rem; color: var(--dim); opacity: .6; position: relative; z-index: 1; }
 
 /* ─── TITLE SCREEN ──────────────────────────────────── */
 #screen-title .content {
@@ -1633,8 +1634,11 @@ button { cursor: pointer; }
       <span id="survey-speed-label">SLOW</span>
     </div>
 
-    <!-- Lock sample button -->
-    <button class="drill-btn" id="btn-survey-lock">⬇ LOCK SAMPLE</button>
+    <!-- Start / Lock button — shows START initially, switches to LOCK SAMPLE when drilling -->
+    <button class="btn btn-primary" id="btn-survey-start" style="width:100%;max-width:380px">
+      ▶ START DRILLING
+    </button>
+    <button class="drill-btn" id="btn-survey-lock" style="display:none">⬇ LOCK SAMPLE</button>
 
     <!-- Sample tray showing collected cores -->
     <div style="width:100%;max-width:380px;font-family:var(--ui);font-size:.55rem;letter-spacing:.18em;color:var(--dim);margin-top:.25rem">
@@ -1642,7 +1646,11 @@ button { cursor: pointer; }
     </div>
     <div class="sample-tray" id="survey-tray"></div>
 
-    <div class="mg-result-msg" id="mg-survey-result"></div>
+    <!-- Per-attempt result — shown after each lock, cleared before next -->
+    <div class="mg-result-msg" id="mg-survey-attempt-result" style="min-height:2.5rem"></div>
+
+    <!-- Final result — only shown when all attempts are done -->
+    <div class="mg-result-msg" id="mg-survey-result" style="margin-top:.5rem;min-height:2.5rem"></div>
     <button class="btn btn-primary" id="btn-mg-survey-done" style="display:none;width:100%;max-width:380px">
       CONTINUE →
     </button>
@@ -1937,7 +1945,7 @@ const EVENTS = [
     ]
   },
   {
-    id:'geo_survey_opportunity', cat:'🔬 SCIENCE OPPORTUNITY', title:"Promising Geological Formation", minDay:5, weight:7, repeatable:true,
+    id:'geo_survey_opportunity', cat:'🔬 SCIENCE OPPORTUNITY', title:"Promising Geological Formation", minDay:5, weight:18, repeatable:true,
     desc:"Your science officer has been watching the terrain readings for the last hour. There's an anomalous subsurface density signature directly ahead — the kind that indicates layered geological strata worth sampling. It'll cost a few hours and some EVA supplies, but if there's ice or impact glass down there, it's worth knowing.",
     scene:'images/scenes/event_geo_survey.png',
     choices:[
@@ -1959,7 +1967,7 @@ const EVENTS = [
     ]
   },
   {
-    id:'antenna_alignment_event', cat:'📡 COMMS EMERGENCY', title:"Antenna Array Misaligned", minDay:6, weight:12, repeatable:true,
+    id:'antenna_alignment_event', cat:'📡 COMMS EMERGENCY', title:"Antenna Array Misaligned", minDay:6, weight:20, repeatable:true,
     desc:"A proximity alert from the navigation system flags an issue with the primary comms array. Vibration from the last stretch of rough terrain has knocked the antenna off its calibrated bearing. Mission control can't reach you — and you can't reach them. You'll need to manually realign the array using the azimuth and elevation controls.",
     scene:'images/scenes/event_antenna.png',
     choices:[
@@ -3067,9 +3075,10 @@ function tryEvent() {
 }
 
 // ── CREW NAME INJECTION ───────────────────────────────────
-// Single-pass replacement using a map of patterns → replacements.
-// Each pattern matches the role phrase and a negative lookahead ensures
-// we don't inject if the name is already sitting right after the phrase.
+// Uses a single combined regex pass so no rule can ever match
+// text that was produced by a previous substitution.
+// Patterns are sorted longest-first so "medical officer" is
+// always matched before the shorter "medic" can fire inside it.
 function injectCrewNames(text) {
   if (!S.crew || S.crew.length < 4) return text;
   const eng = S.crew[1].name;
@@ -3077,33 +3086,53 @@ function injectCrewNames(text) {
   const med = S.crew[3].name;
   const cmd = S.crew[0].name;
 
-  // Build escape helper so names with regex chars don't break patterns
-  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-  // Each entry: [pattern-string, replacement-function]
-  // Negative lookahead (?! name) prevents re-injection on already-replaced text
+  // Each entry: [regex-string, replacement]
+  // Sorted longest phrase first — critical to prevent substring matches.
+  // Possessive "your X" → "your X Name"
+  // Definite "the X"   → just "Name"
+  // Bare "X"           → "X Name"
   const rules = [
-    // Possessive "your X" forms — keep "your X Name"
-    [`your engineer(?!\\s+${esc(eng)})`, `your engineer ${eng}`],
-    [`your science officer(?!\\s+${esc(sci)})`, `your science officer ${sci}`],
-    [`your medical officer(?!\\s+${esc(med)})`, `your medical officer ${med}`],
-    [`your medic(?!\\s+${esc(med)})`, `your medic ${med}`],
-    [`your commander(?!\\s+${esc(cmd)})`, `your commander ${cmd}`],
-    // "The X" forms — replace with just the name
-    [`the engineer(?!\\s+${esc(eng)})`, `${eng}`],
-    [`the science officer(?!\\s+${esc(sci)})`, `${sci}`],
-    [`the medical officer(?!\\s+${esc(med)})`, `${med}`],
-    // Bare role at start of sentence or mid-sentence — append name
-    [`\\bengineer(?!\\s+${esc(eng)})\\b`, `engineer ${eng}`],
-    [`\\bscience officer(?!\\s+${esc(sci)})`, `science officer ${sci}`],
-    [`\\bmedical officer(?!\\s+${esc(med)})`, `medical officer ${med}`],
+    // ── longest phrases first ──────────────────────────────
+    [`your medical officer`, `your medical officer ${med}`],
+    [`your science officer`, `your science officer ${sci}`],
+    [`the medical officer`,  `${med}`],
+    [`the science officer`,  `${sci}`],
+    [`medical officer`,      `medical officer ${med}`],
+    [`science officer`,      `science officer ${sci}`],
+    // ── shorter phrases after all multi-word variants ──────
+    [`your engineer`,        `your engineer ${eng}`],
+    [`the engineer`,         `${eng}`],
+    [`your commander`,       `your commander ${cmd}`],
+    [`your medic`,           `your medic ${med}`],
+    [`\\bengineer\\b`,       `engineer ${eng}`],
   ];
 
-  let result = text;
-  for (const [pat, rep] of rules) {
-    result = result.replace(new RegExp(pat, 'gi'), rep);
-  }
-  return result;
+  // Build one combined alternation regex from all patterns.
+  // The regex engine will always try alternatives left-to-right, so
+  // "medical officer" is tried before "medic" and "officer" individually.
+  // Wrap each term in a group that uses a negative lookahead to skip
+  // if the crew name is already the next word (prevents double-injection
+  // on repeated processEventText calls, e.g. result screens).
+  const esc   = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = rules.map(([pat, rep]) => {
+    const escapedRep = esc(rep.split(' ').pop()); // last word = the name
+    return `(${pat})(?!\\s+${escapedRep})`;
+  });
+  const combined = new RegExp(parts.join('|'), 'gi');
+
+  return text.replace(combined, match => {
+    const lower = match.toLowerCase().trimEnd();
+    for (const [pat, rep] of rules) {
+      if (lower === pat.toLowerCase() || new RegExp('^' + pat + '$', 'i').test(match.trimEnd())) {
+        // Preserve original capitalisation of first character
+        const firstChar = match[0];
+        const isUpper   = firstChar === firstChar.toUpperCase() && firstChar !== firstChar.toLowerCase();
+        const result    = isUpper ? rep.charAt(0).toUpperCase() + rep.slice(1) : rep;
+        return result;
+      }
+    }
+    return match;
+  });
 }
 
 // Capitalize first letter of every sentence in event text
@@ -3402,7 +3431,7 @@ function mgFinish(powerGain, moraleMod, savedKit) {
     S.morale = Math.max(0, Math.min(100, S.morale + moraleMod));
   }
   if (savedKit) {
-    addLog('Cell installed perfectly — repair kit conserved.', 'good');
+    addLog('Cell installed perfectly — power cell conserved.', 'good');
   }
   refreshGameUI();
   clearInlineLog();
@@ -3595,7 +3624,7 @@ function onRoundComplete(success) {
       // All 3 rounds done perfectly — kit saved!
       mgCells.savedKit = true;
       showCellsResult(
-        `SEQUENCE COMPLETE — ALL ${mgCells.maxRound} ROUNDS FLAWLESS.\n+${mgCells.powerGained}% power restored. Repair kit conserved.`,
+        `SEQUENCE COMPLETE — ALL ${mgCells.maxRound} ROUNDS FLAWLESS.\n+${mgCells.powerGained}% power restored. Power cell conserved.`,
         'good'
       );
       endCellGame();
@@ -4051,12 +4080,16 @@ function resetSurveyUI() {
   $('mg-survey-phase').textContent   = 'READY';
   $('mg-survey-score').textContent   = mgSurvey.score + ' pts';
   $('survey-tray').innerHTML         = '';
+  $('mg-survey-attempt-result').textContent  = '';
+  $('mg-survey-attempt-result').className    = 'mg-result-msg';
   $('mg-survey-result').textContent  = '';
   $('mg-survey-result').className    = 'mg-result-msg';
   $('btn-mg-survey-done').style.display = 'none';
-  $('btn-survey-lock').disabled = false;
-  $('btn-survey-lock').className = 'drill-btn';
-  $('btn-survey-lock').textContent = '⬇ LOCK SAMPLE';
+  // Show start button, hide lock button
+  $('btn-survey-start').style.display = 'block';
+  $('btn-survey-start').textContent   = '▶ START DRILLING';
+  $('btn-survey-lock').style.display  = 'none';
+  $('btn-survey-lock').disabled       = true;
   updateSurveySpeedUI(0);
   renderSurveyColumn();
 }
@@ -4086,9 +4119,14 @@ function startSurveyAttempt() {
   mgSurvey.speedPx = mgSurvey.speedLevels[mgSurvey.attempt - 1];
 
   $('mg-survey-phase').textContent = 'DRILLING...';
-  $('btn-survey-lock').disabled = false;
-  $('btn-survey-lock').className = 'drill-btn';
-  $('btn-survey-lock').textContent = '⬇ LOCK SAMPLE';
+  $('mg-survey-attempt-result').textContent = '';
+  $('mg-survey-attempt-result').className   = 'mg-result-msg';
+  // Hide start, show lock
+  $('btn-survey-start').style.display = 'none';
+  $('btn-survey-lock').style.display  = 'block';
+  $('btn-survey-lock').disabled       = false;
+  $('btn-survey-lock').className      = 'drill-btn';
+  $('btn-survey-lock').textContent    = '⬇ LOCK SAMPLE';
   renderSurveyColumn();
 
   mgSurvey.lastTs = performance.now();
@@ -4142,14 +4180,12 @@ function lockSurveyLayer() {
 
   // Determine which layer centre is closest to the target zone centre
   const targetCentreY = mgSurvey.targetTopY + GEO_TARGET_H / 2;
-  // Layer top in viewport = (layerIdx * GEO_LAYER_H) - scrollY
   let bestLayer = null, bestDist = Infinity;
   mgSurvey.layerOrder.forEach((layer, i) => {
     const layerCentreInViewport = (i * GEO_LAYER_H + GEO_LAYER_H / 2) - mgSurvey.scrollY;
     const dist = Math.abs(layerCentreInViewport - targetCentreY);
     if (dist < bestDist) { bestDist = dist; bestLayer = layer; }
   });
-
   if (!bestLayer) bestLayer = GEO_LAYERS[0];
 
   // Flash the matched layer
@@ -4164,41 +4200,35 @@ function lockSurveyLayer() {
   }
 
   // Record sample
-  const ptsDelta = bestLayer.pts;
-  mgSurvey.score = Math.max(-50, mgSurvey.score + ptsDelta);
+  mgSurvey.score = Math.max(-50, mgSurvey.score + bestLayer.pts);
   mgSurvey.samples.push(bestLayer);
-
-  // Add chip to tray
   addSurveyChip(bestLayer);
-
-  // Update score display
   $('mg-survey-score').textContent = mgSurvey.score + ' pts';
 
-  // Show brief feedback
+  // Show per-attempt feedback in the attempt result area
   const feedback = bestLayer.bad
     ? `💥 VOID POCKET — ${bestLayer.desc}`
     : `✓ ${bestLayer.name} — ${bestLayer.desc}`;
   $('mg-survey-phase').textContent = bestLayer.bad ? '⚠️ VOID HIT' : '✓ SAMPLE LOCKED';
+  const attemptEl = $('mg-survey-attempt-result');
+  attemptEl.textContent = feedback;
+  attemptEl.className = 'mg-result-msg ' + (bestLayer.bad ? 'bad' : bestLayer.pts >= 35 ? 'good' : 'ok');
 
-  const resultEl = $('mg-survey-result');
-  resultEl.textContent = feedback;
-  resultEl.className = 'mg-result-msg ' + (bestLayer.bad ? 'bad' : bestLayer.pts >= 35 ? 'good' : 'ok');
+  // Hide the lock button
+  $('btn-survey-lock').style.display = 'none';
 
-  setTimeout(() => {
-    if (mgSurvey.attempt >= mgSurvey.maxAttempts) {
-      endSurveyGame();
-    } else {
-      mgSurvey.attempt++;
-      $('mg-survey-attempt').textContent = mgSurvey.attempt;
-      $('mg-survey-result').textContent  = '';
-      $('mg-survey-result').className    = 'mg-result-msg';
-      $('mg-survey-phase').textContent   = 'NEXT ATTEMPT...';
-      $('btn-survey-lock').disabled = false;
-      $('btn-survey-lock').className = 'drill-btn';
-      // Start next attempt after short delay
-      setTimeout(() => startSurveyAttempt(), 800);
-    }
-  }, 1400);
+  if (mgSurvey.attempt >= mgSurvey.maxAttempts) {
+    // All attempts done — show final results
+    endSurveyGame();
+  } else {
+    // Pause — show NEXT ATTEMPT start button
+    mgSurvey.attempt++;
+    $('mg-survey-attempt').textContent = mgSurvey.attempt;
+    $('mg-survey-phase').textContent   = bestLayer.bad ? '⚠️ VOID HIT — READY FOR NEXT' : '✓ LOCKED — READY FOR NEXT';
+    const startBtn = $('btn-survey-start');
+    startBtn.textContent   = `▶ START ATTEMPT ${mgSurvey.attempt}`;
+    startBtn.style.display = 'block';
+  }
 }
 
 function addSurveyChip(layer) {
@@ -4276,12 +4306,11 @@ function surveyGameDone() {
 
 // ── BUTTON WIRING ─────────────────────────────────────────
 // Survey game
+$('btn-survey-start').addEventListener('click', () => {
+  startSurveyAttempt();
+});
 $('btn-survey-lock').addEventListener('click', () => {
-  if (mgSurvey.phase === 'idle') {
-    startSurveyAttempt();
-  } else if (mgSurvey.phase === 'scrolling') {
-    lockSurveyLayer();
-  }
+  if (mgSurvey.phase === 'scrolling') lockSurveyLayer();
 });
 $('btn-mg-survey-done').addEventListener('click', surveyGameDone);
 
