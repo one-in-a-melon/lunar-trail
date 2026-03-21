@@ -319,7 +319,7 @@ button { cursor: pointer; }
 }
 .game-scene-box img {
   position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; image-rendering: pixelated; display: none;
+  object-fit: cover; image-rendering: pixelated; display: none; z-index: 2;
 }
 .game-scene-box img.loaded { display: block; }
 .terrain-note {
@@ -1523,7 +1523,7 @@ button { cursor: pointer; }
     <div class="mg-title">📡 ANTENNA ALIGN</div>
     <div class="mg-subtitle">EMERGENCY COMMS LOCK PROTOCOL</div>
     <div class="mg-instruction" id="mg-antenna-instruction">
-      Adjust both sliders until the signal peaks. Hold both in the green zone to lock the transmission.
+      Drag the slider to sweep the antenna across the sky. When the signal peaks and turns green, hold it steady — the transmission will lock automatically.
     </div>
 
     <!-- Signal meter -->
@@ -1540,21 +1540,14 @@ button { cursor: pointer; }
       </div>
     </div>
 
-    <!-- Sliders -->
-    <div class="sliders-area">
-      <div class="slider-col">
-        <div class="slider-col-label">AZIMUTH (AZ)</div>
+    <!-- Single slider -->
+    <div class="sliders-area" style="max-width:420px;width:100%">
+      <div class="slider-col" style="flex:1">
+        <div class="slider-col-label">ANTENNA BEARING</div>
         <div class="slider-track" id="mg-slider-az">
           <div class="slider-thumb" id="mg-thumb-az"></div>
         </div>
         <div class="slider-val" id="mg-az-val">0°</div>
-      </div>
-      <div class="slider-col">
-        <div class="slider-col-label">ELEVATION (EL)</div>
-        <div class="slider-track" id="mg-slider-el">
-          <div class="slider-thumb" id="mg-thumb-el"></div>
-        </div>
-        <div class="slider-val" id="mg-el-val">0°</div>
       </div>
     </div>
 
@@ -1580,7 +1573,7 @@ button { cursor: pointer; }
       <div style="flex:1;text-align:center">
         <div class="mg-phase-label" id="mg-antenna-phase">SEARCHING...</div>
         <div style="font-size:.75rem;color:var(--dim);margin-top:.3rem" id="mg-antenna-hint">
-          Both sliders must be in the green zone simultaneously
+          Hold the slider in the green zone to lock
         </div>
       </div>
     </div>
@@ -1876,7 +1869,7 @@ const EVENTS = [
       { text:"🎙️ Hold a formal crew meeting — air grievances, new protocols", req:{},
         out:{ title:"Tension Cleared", desc:"It's uncomfortable. Things are said. Eventually something shifts. They're professionals again. A weight lifts from the cabin.", scene:'images/scenes/result_crew_talk.png', fx:{morale:20,food:-5}, log:"Crew meeting held. Conflict addressed.", tone:'good' }},
       { text:"🎮 Deploy morale pack — games, extra rations, music from the data drive", req:{},
-        out:{ title:"Morale Pack Deployed", desc:"Mission Control packed a comfort kit for exactly this scenario. Board games. A curated playlist. Double rations for one night. Works better than therapy.", scene:'images/scenes/result_morale_pack.png', fx:{morale:30,food:-10}, log:"Morale pack deployed. Crew bonding.", tone:'good' }},
+        out:{ title:"Morale Pack Deployed", desc:"Mission Control packed a comfort kit for exactly this scenario. Board games. A curated playlist. Double rations for one night. A little camaraderie goes a long way.", scene:'images/scenes/result_morale_pack.png', fx:{morale:30,food:-10}, log:"Morale pack deployed. Crew bonding.", tone:'good' }},
       { text:"😑 Ignore it — they'll sort themselves out", req:{},
         out:{ title:"Conflict Festers", desc:"Bad call. By end of week, the friction has spread. Small mistakes start happening. Morale in free fall.", scene:'images/scenes/result_conflict_ignored.png', fx:{morale:-30,food:-5}, log:"Conflict ignored. Spreading through crew.", tone:'bad' }}
     ]
@@ -2116,7 +2109,7 @@ const EVENTS = [
       { text:"🚗 Push through at speed — risk it", req:{},
         out:{ title:"Pushing Through", desc:"You take the ejecta at half-speed. A few hard jolts. One alarming bang from the undercarriage that turns out to be nothing. You're through.", scene:'images/scenes/result_terrain_pushed.png', fx:{power:-8,morale:-5}, log:"Pushed through rough terrain. Minor impacts.", tone:'alert' }},
       { text:"🗺️ Find a detour route around the worst of it", req:{},
-        out:{ title:"Detour Taken", desc:"A 60km detour around the worst section. You lose some time but save the rover.", scene:'images/scenes/result_terrain_detour.png', fx:{power:-20,food:-10,morale:-8}, special:'distancePenalty', log:"Detoured around ejecta field.", tone:'alert' }}
+        out:{ title:"Detour Taken", desc:"A wide detour around the worst section. You lose some time but save the rover.", scene:'images/scenes/result_terrain_detour.png', fx:{power:-20,food:-10,morale:-8}, special:'distancePenalty', log:"Detoured around ejecta field.", tone:'alert' }}
     ]
   },
   {
@@ -2539,6 +2532,8 @@ function resetState() {
     resupplyDroneFailed: false,
     pendingMiniGame: null,
     lastCrewStoryDay: -20,  // tracks last crew story day for spacing
+    miniGameSchedule: [],   // pre-scheduled mini-game trigger days
+    miniGamesFired: [],     // which scheduled slots have fired
     active: false
   };
 }
@@ -2610,6 +2605,20 @@ function launchMission() {
   // Safety minimums
   if (S.foodBoxes === 0)         { S.foodBoxes = 5;         addLog("Mission control added minimum food.", 'alert'); }
   if (S.oxygenCanisters === 0)   { S.oxygenCanisters = 3;   addLog("Mission control added minimum oxygen.", 'alert'); }
+
+  // Pre-schedule 3 guaranteed mini-game triggers spread across the journey.
+  // Estimated journey: ~90 days. Spread across three roughly-equal thirds.
+  // Each slot picks a random day within its window, min gap of 15 days between.
+  // Available games are randomized per playthrough for variety.
+  const allGames = ['cells', 'antenna', 'survey'];
+  // Shuffle so the player gets different games each run
+  const shuffled = allGames.sort(() => Math.random() - 0.5);
+  const windows = [[10, 28], [32, 55], [58, 80]]; // [minDay, maxDay] per slot
+  S.miniGameSchedule = windows.map((w, i) => ({
+    day:  w[0] + Math.floor(Math.random() * (w[1] - w[0])),
+    game: shuffled[i],
+    fired: false
+  }));
 
   S.active = true;
   refreshGameUI();
@@ -2866,9 +2875,67 @@ function advanceTime(days) {
   // Destination check
   if (S.kmLeft <= 0) { refreshGameUI(); triggerVictory(); return; }
 
+  // Check for pre-scheduled guaranteed mini-game triggers
+  const scheduledGame = S.miniGameSchedule.find(s => !s.fired && S.day >= s.day);
+  if (scheduledGame) {
+    scheduledGame.fired = true;
+    refreshGameUI();
+    triggerScheduledMiniGame(scheduledGame.game);
+    return;
+  }
+
   // Event check
   const evFired = tryEvent();
   if (!evFired) { refreshGameUI(); checkGameOver(); }
+}
+
+function triggerScheduledMiniGame(game) {
+  // Fires a guaranteed mini-game as a standalone event with a brief intro screen.
+  // Sets pendingMiniGame so continueFromResult launches it.
+  const intros = {
+    cells:   { cat:'⚡ POWER MANAGEMENT', title:'Cell Calibration Required',
+               desc:'The power management system is flagging a calibration fault on the primary cell array. Your engineer needs to run the installation sequence manually — it requires precise timing to balance the cells correctly.',
+               log:'Power cell calibration required.', scene:'images/scenes/event_battery_drain.png' },
+    antenna: { cat:'📡 COMMS ALERT', title:'Antenna Bearing Drifted',
+               desc:'The primary comms antenna has drifted off its calibrated bearing — vibration from the last terrain stretch most likely. Mission control is attempting contact but getting nothing. You\'ll need to realign it manually using the azimuth control.',
+               log:'Antenna realignment required.', scene:'images/scenes/event_antenna.png' },
+    survey:  { cat:'🔬 SCIENCE WINDOW', title:'Anomalous Terrain Signature',
+               desc:'Your science officer is pointing at the terrain density readout. There\'s a subsurface anomaly directly ahead that won\'t be accessible again — you\'re crossing right over it. If there\'s anything worth finding down there, now\'s the time.',
+               log:'Geological survey opportunity.', scene:'images/scenes/event_geo_survey.png' }
+  };
+
+  const intro = intros[game];
+  S.pendingMiniGame = game;
+
+  // Show a simple event screen with one choice that continues to the mini-game
+  $('ev-cat').textContent   = intro.cat;
+  $('ev-title').textContent = intro.title;
+  $('ev-desc').textContent  = processEventText(intro.desc);
+  setImg($('ev-img'), $('ev-img-label'), $('ev-img-path'), intro.scene, intro.title);
+  addLog(intro.log, 'alert');
+
+  const choices = $('ev-choices');
+  choices.innerHTML = '';
+  const btn = document.createElement('button');
+  btn.className = 'choice-btn';
+  btn.textContent = game === 'cells'   ? '⚡ Run calibration sequence'
+                  : game === 'antenna' ? '📡 Begin manual realignment'
+                  :                     '🔬 Deploy drill — run core survey';
+  btn.addEventListener('click', () => {
+    // Go to result screen briefly then continueFromResult launches the game
+    $('res-title').textContent = 'Initiating...';
+    $('res-desc').textContent  = game === 'cells'   ? 'Calibration interface loading. Follow the sequence carefully.'
+                                : game === 'antenna' ? 'Alignment interface active. Drag the slider to find the signal peak.'
+                                :                     'Drill deployed. Lock the sample when the target layer is in the bracket.';
+    $('res-changes').innerHTML = '<div class="change neu">Mini-game launching on continue.</div>';
+    setImg($('res-img'), $('res-img-label'), $('res-img-path'), intro.scene, intro.title);
+    refreshGameUI();
+    showScreen('screen-result');
+  });
+  choices.appendChild(btn);
+
+  refreshGameUI();
+  showScreen('screen-event');
 }
 
 function checkNight() {
@@ -3325,7 +3392,14 @@ function applySpecial(effect, changes) {
 function continueFromResult() {
   if (S.kmLeft <= 0) { triggerVictory(); return; }
 
-  // Check for pending mini-game triggered by an event outcome
+  // Check for pending mini-game triggered by an event outcome or scheduled trigger
+  if (S.pendingMiniGame === 'cells') {
+    S.pendingMiniGame = null;
+    mgReturnScreen = 'screen-game';
+    launchCellGame();
+    return;
+  }
+
   if (S.pendingMiniGame === 'antenna') {
     S.pendingMiniGame = null;
     mgReturnScreen = 'screen-game';
@@ -3715,20 +3789,18 @@ document.querySelectorAll('.cell-slot').forEach(el => {
 
 // ── ANTENNA ALIGNMENT GAME ────────────────────────────
 let mgAntenna = {
-  azPos: 0.1,   // 0–1 normalized position
-  elPos: 0.1,
+  azPos: 0.1,   // 0–1 normalized position of the single slider
   azZone: 0,    // center of sweet spot (0–1)
-  elZone: 0,
-  zoneWidth: 0.14,
+  zoneWidth: 0,
   driftSpeed: 0,
   lockPct: 0,
-  lockRequired: 0,  // seconds needed
+  lockRequired: 0,
   timeLeft: 0,
   totalTime: 0,
-  phase: 'playing',  // 'playing' | 'done'
+  phase: 'playing',
   rafId: null,
   lastTs: 0,
-  dragging: null,  // 'az' | 'el' | null
+  dragging: null,
   waveOffset: 0,
   onFinish: null
 };
@@ -3736,39 +3808,36 @@ let mgAntenna = {
 function startAntennaGame(context, onFinish) {
   mgAntenna.onFinish = onFinish || null;
 
-  // Difficulty settings
+  // Single-slider difficulty — wider zone since there's only one axis
   const settings = {
-    tourist:   { time: 45, lockRequired: 3,  zoneWidth: 0.18, driftSpeed: 0.006 },
-    astronaut: { time: 35, lockRequired: 5,  zoneWidth: 0.13, driftSpeed: 0.010 },
-    commander: { time: 28, lockRequired: 8,  zoneWidth: 0.10, driftSpeed: 0.016 }
+    tourist:   { time: 45, lockRequired: 3,  zoneWidth: 0.20, driftSpeed: 0.005 },
+    astronaut: { time: 38, lockRequired: 5,  zoneWidth: 0.15, driftSpeed: 0.009 },
+    commander: { time: 30, lockRequired: 7,  zoneWidth: 0.11, driftSpeed: 0.014 }
   };
   const cfg = settings[S.difficulty] || settings.astronaut;
 
-  mgAntenna.azPos = 0.1 + Math.random() * 0.3;
-  mgAntenna.elPos = 0.1 + Math.random() * 0.3;
-  mgAntenna.azZone = 0.25 + Math.random() * 0.5;
-  mgAntenna.elZone = 0.25 + Math.random() * 0.5;
-  mgAntenna.zoneWidth = cfg.zoneWidth;
+  mgAntenna.azPos      = 0.05 + Math.random() * 0.25;
+  mgAntenna.azZone     = 0.25 + Math.random() * 0.5;
+  mgAntenna.zoneWidth  = cfg.zoneWidth;
   mgAntenna.driftSpeed = cfg.driftSpeed;
   mgAntenna.lockRequired = cfg.lockRequired;
-  mgAntenna.timeLeft = cfg.time;
-  mgAntenna.totalTime = cfg.time;
-  mgAntenna.lockPct = 0;
-  mgAntenna.phase = 'playing';
+  mgAntenna.timeLeft   = cfg.time;
+  mgAntenna.totalTime  = cfg.time;
+  mgAntenna.lockPct    = 0;
+  mgAntenna.phase      = 'playing';
   mgAntenna.waveOffset = 0;
-  mgAntenna.dragging = null;
+  mgAntenna.dragging   = null;
 
   // Reset UI
   $('mg-antenna-result').textContent = '';
   $('mg-antenna-result').className = 'mg-result-msg';
   $('btn-mg-antenna-done').style.display = 'none';
   $('mg-antenna-phase').textContent = 'SEARCHING...';
-  $('mg-antenna-hint').textContent = 'Both sliders must be in the green zone simultaneously';
+  $('mg-antenna-hint').textContent  = 'Hold the slider in the green zone to lock';
 
   updateAntennaSliders();
   showScreen('screen-mg-antenna');
 
-  // Start game loop
   if (mgAntenna.rafId) cancelAnimationFrame(mgAntenna.rafId);
   mgAntenna.lastTs = performance.now();
   mgAntenna.rafId = requestAnimationFrame(antennaLoop);
@@ -3777,37 +3846,29 @@ function startAntennaGame(context, onFinish) {
 function antennaLoop(ts) {
   if (mgAntenna.phase !== 'playing') return;
 
-  const dt = Math.min((ts - mgAntenna.lastTs) / 1000, 0.1); // seconds, capped
+  const dt = Math.min((ts - mgAntenna.lastTs) / 1000, 0.1);
   mgAntenna.lastTs = ts;
 
-  // Drift sweet spots slowly
-  mgAntenna.azZone += mgAntenna.driftSpeed * Math.sin(ts * 0.0008);
-  mgAntenna.elZone += mgAntenna.driftSpeed * Math.cos(ts * 0.0011);
+  // Drift the sweet spot slowly
+  mgAntenna.azZone += mgAntenna.driftSpeed * Math.sin(ts * 0.0009);
   mgAntenna.azZone = Math.max(0.1, Math.min(0.9, mgAntenna.azZone));
-  mgAntenna.elZone = Math.max(0.1, Math.min(0.9, mgAntenna.elZone));
 
   // Timer
   mgAntenna.timeLeft = Math.max(0, mgAntenna.timeLeft - dt);
   updateAntennaTimerRing();
 
-  // Check if both sliders in zone
+  // Single-axis zone check
   const azIn = Math.abs(mgAntenna.azPos - mgAntenna.azZone) < mgAntenna.zoneWidth / 2;
-  const elIn = Math.abs(mgAntenna.elPos - mgAntenna.elZone) < mgAntenna.zoneWidth / 2;
-  const bothIn = azIn && elIn;
 
-  // Update lock bar
-  if (bothIn) {
+  // Lock bar fills while in zone, pauses when out (doesn't reset)
+  if (azIn) {
     mgAntenna.lockPct = Math.min(100, mgAntenna.lockPct + dt * (100 / mgAntenna.lockRequired));
   }
-  // Lock bar doesn't decrease when out of zone — just pauses
 
-  // Update signal strength
-  const azDist = Math.abs(mgAntenna.azPos - mgAntenna.azZone);
-  const elDist = Math.abs(mgAntenna.elPos - mgAntenna.elZone);
+  // Signal strength — based only on distance from the single sweet spot
+  const azDist  = Math.abs(mgAntenna.azPos - mgAntenna.azZone);
   const maxDist = mgAntenna.zoneWidth * 3;
-  const azSig = Math.max(0, 1 - azDist / maxDist);
-  const elSig = Math.max(0, 1 - elDist / maxDist);
-  const signal = Math.round(azSig * elSig * 100);
+  const signal  = Math.round(Math.max(0, 1 - azDist / maxDist) * 100);
 
   // Waveform
   mgAntenna.waveOffset += dt * 80;
@@ -3816,41 +3877,23 @@ function antennaLoop(ts) {
   // Update UI
   $('mg-antenna-signal-val').textContent = signal + '%';
   $('mg-antenna-signal-bar').style.width = signal + '%';
-  $('mg-antenna-lock-bar').style.width = mgAntenna.lockPct + '%';
-  $('mg-antenna-lock-pct').textContent = Math.round(mgAntenna.lockPct) + '%';
+  $('mg-antenna-lock-bar').style.width   = mgAntenna.lockPct + '%';
+  $('mg-antenna-lock-pct').textContent   = Math.round(mgAntenna.lockPct) + '%';
 
   const lockEl = $('mg-antenna-lock-bar');
-  if (mgAntenna.lockPct >= 100) {
-    lockEl.classList.add('locked');
-  } else {
-    lockEl.classList.remove('locked');
-  }
+  lockEl.classList.toggle('locked', mgAntenna.lockPct >= 100);
 
-  // Update thumb zone styling
   $('mg-thumb-az').classList.toggle('in-zone', azIn);
-  $('mg-thumb-el').classList.toggle('in-zone', elIn);
 
   // Phase label
-  if (mgAntenna.lockPct >= 100) {
-    $('mg-antenna-phase').textContent = '🔒 LOCKED!';
-  } else if (bothIn) {
-    $('mg-antenna-phase').textContent = '🟢 HOLD STEADY...';
-  } else if (signal > 40) {
-    $('mg-antenna-phase').textContent = '🟡 GETTING CLOSER';
-  } else {
-    $('mg-antenna-phase').textContent = 'SEARCHING...';
-  }
+  if      (mgAntenna.lockPct >= 100) $('mg-antenna-phase').textContent = '🔒 LOCKED!';
+  else if (azIn)                     $('mg-antenna-phase').textContent = '🟢 HOLD STEADY...';
+  else if (signal > 40)              $('mg-antenna-phase').textContent = '🟡 GETTING CLOSER';
+  else                               $('mg-antenna-phase').textContent = 'SEARCHING...';
 
-  // Check win/lose
-  if (mgAntenna.lockPct >= 100) {
-    antennaGameEnd('lock');
-    return;
-  }
-  if (mgAntenna.timeLeft <= 0) {
-    const outcome = mgAntenna.lockPct >= 40 ? 'partial' : 'fail';
-    antennaGameEnd(outcome);
-    return;
-  }
+  // Auto-win when lock fills — no button required
+  if (mgAntenna.lockPct >= 100) { antennaGameEnd('lock'); return; }
+  if (mgAntenna.timeLeft <= 0)  { antennaGameEnd(mgAntenna.lockPct >= 40 ? 'partial' : 'fail'); return; }
 
   mgAntenna.rafId = requestAnimationFrame(antennaLoop);
 }
@@ -3893,17 +3936,14 @@ function updateAntennaTimerRing() {
 }
 
 function updateAntennaSliders() {
-  const setThumb = (id, pos) => {
-    const track = $('mg-slider-' + id);
-    const thumb = $('mg-thumb-' + id);
-    if (!track || !thumb) return;
-    const w = track.offsetWidth || 300;
-    thumb.style.left = Math.round(pos * w) + 'px';
-  };
-  setThumb('az', mgAntenna.azPos);
-  setThumb('el', mgAntenna.elPos);
-  $('mg-az-val').textContent = Math.round(mgAntenna.azPos * 360) + '°';
-  $('mg-el-val').textContent = Math.round(mgAntenna.elPos * 90) + '°';
+  const track = $('mg-slider-az');
+  const thumb = $('mg-thumb-az');
+  if (track && thumb) {
+    const w = track.offsetWidth || 380;
+    thumb.style.left = Math.round(mgAntenna.azPos * w) + 'px';
+  }
+  const valEl = $('mg-az-val');
+  if (valEl) valEl.textContent = Math.round(mgAntenna.azPos * 360) + '°';
 }
 
 function antennaGameEnd(outcome) {
@@ -3923,7 +3963,6 @@ function antennaGameEnd(outcome) {
   $('btn-mg-antenna-done').dataset.outcome = outcome;
 }
 
-// Slider drag handling — works for both mouse and touch
 function initSliderDrag(axisId) {
   const track = $('mg-slider-' + axisId);
   if (!track) return;
@@ -3935,23 +3974,14 @@ function initSliderDrag(axisId) {
 
   function onMove(clientX) {
     if (mgAntenna.phase !== 'playing') return;
-    const pos = getPos(clientX);
-    if (axisId === 'az') mgAntenna.azPos = pos;
-    else mgAntenna.elPos = pos;
+    mgAntenna.azPos = getPos(clientX);
     updateAntennaSliders();
   }
 
   // Mouse
-  track.addEventListener('mousedown', e => {
-    mgAntenna.dragging = axisId;
-    onMove(e.clientX);
-  });
-  document.addEventListener('mousemove', e => {
-    if (mgAntenna.dragging === axisId) onMove(e.clientX);
-  });
-  document.addEventListener('mouseup', () => {
-    if (mgAntenna.dragging === axisId) mgAntenna.dragging = null;
-  });
+  track.addEventListener('mousedown', e => { mgAntenna.dragging = axisId; onMove(e.clientX); });
+  document.addEventListener('mousemove', e => { if (mgAntenna.dragging === axisId) onMove(e.clientX); });
+  document.addEventListener('mouseup',   () => { if (mgAntenna.dragging === axisId) mgAntenna.dragging = null; });
 
   // Touch
   track.addEventListener('touchstart', e => {
@@ -4326,19 +4356,26 @@ $('btn-mg-antenna-done').addEventListener('click', () => {
   mgAntennaFinish(outcome);
 });
 
-// Init antenna sliders
+// Init antenna slider (single axis)
 initSliderDrag('az');
-initSliderDrag('el');
 
-// Title screen image — wire onload so it shows when ready
+// Wire ALL images that have a static src in HTML — they need .loaded added
+// just like setImg() does for dynamically-set images.
+// This covers: title, victory, game-over (when src is set), traveling scene.
 (function() {
-  const titleImg = $('img-title');
-  if (titleImg) {
-    titleImg.onload  = () => titleImg.classList.add('loaded');
-    titleImg.onerror = () => titleImg.classList.remove('loaded');
+  const wireImg = (img) => {
+    if (!img) return;
+    img.onload  = () => img.classList.add('loaded');
+    img.onerror = () => img.classList.remove('loaded');
     // If already cached and loaded before JS ran, add class immediately
-    if (titleImg.complete && titleImg.naturalWidth > 0) titleImg.classList.add('loaded');
-  }
+    if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+  };
+  // Title screen
+  wireImg($('img-title'));
+  // Victory screen — has static src set in HTML
+  wireImg($('vic-img'));
+  // Game scene — starts with empty src, but wire anyway for setGameScene calls
+  wireImg($('game-scene-img'));
 })();
 
 // Title
