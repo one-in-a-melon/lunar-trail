@@ -814,6 +814,7 @@ button { cursor: pointer; }
 .lock-bar-track {
   height: 14px; background: rgba(255,255,255,.07);
   border: 1px solid var(--border); overflow: hidden;
+  position: relative;
 }
 .lock-bar-fill {
   height: 100%; width: 0%;
@@ -1523,7 +1524,7 @@ button { cursor: pointer; }
     <div class="mg-title">📡 ANTENNA ALIGN</div>
     <div class="mg-subtitle">EMERGENCY COMMS LOCK PROTOCOL</div>
     <div class="mg-instruction" id="mg-antenna-instruction">
-      Drag the slider to sweep the antenna across the sky. When the signal peaks and turns green, hold it steady — the transmission will lock automatically.
+      Drag the slider to sweep the antenna until the signal peaks. Hold it steady — the lock bar fills automatically. When it reaches 33% and 66%, the sweet spot shifts and you'll need to re-tune. Reach 100% to lock the transmission.
     </div>
 
     <!-- Signal meter -->
@@ -1559,6 +1560,9 @@ button { cursor: pointer; }
       </div>
       <div class="lock-bar-track">
         <div class="lock-bar-fill" id="mg-antenna-lock-bar"></div>
+        <!-- Stage markers at 33% and 66% -->
+        <div style="position:absolute;top:0;left:33%;width:2px;height:100%;background:rgba(255,255,255,.25);pointer-events:none"></div>
+        <div style="position:absolute;top:0;left:66%;width:2px;height:100%;background:rgba(255,255,255,.25);pointer-events:none"></div>
       </div>
     </div>
 
@@ -3789,12 +3793,13 @@ document.querySelectorAll('.cell-slot').forEach(el => {
 
 // ── ANTENNA ALIGNMENT GAME ────────────────────────────
 let mgAntenna = {
-  azPos: 0.1,   // 0–1 normalized position of the single slider
-  azZone: 0,    // center of sweet spot (0–1)
+  azPos: 0.1,       // 0–1 current slider position
+  azZone: 0,        // center of current sweet spot (0–1)
   zoneWidth: 0,
-  driftSpeed: 0,
-  lockPct: 0,
-  lockRequired: 0,
+  lockPct: 0,       // 0–100 continuous across all three stages
+  stage: 1,         // 1, 2, or 3
+  stageThresholds: [33, 66, 100], // lockPct values that trigger next sweet spot
+  lockRequired: 0,  // seconds to fill each third (33 pts worth)
   timeLeft: 0,
   totalTime: 0,
   phase: 'playing',
@@ -3805,42 +3810,54 @@ let mgAntenna = {
   onFinish: null
 };
 
+function pickNewAntennaZone(excludePos) {
+  // Pick a new sweet spot that isn't too close to the current slider position
+  // so the player has to actually move to find it
+  let newZone;
+  let attempts = 0;
+  do {
+    newZone = 0.1 + Math.random() * 0.8;
+    attempts++;
+  } while (Math.abs(newZone - excludePos) < 0.25 && attempts < 20);
+  return newZone;
+}
+
 function startAntennaGame(context, onFinish) {
   mgAntenna.onFinish = onFinish || null;
 
-  // Single-slider difficulty — wider zone since there's only one axis
+  // Generous settings — the game is meant to be completable, not punishing
   const settings = {
-    tourist:   { time: 45, lockRequired: 3,  zoneWidth: 0.20, driftSpeed: 0.005 },
-    astronaut: { time: 38, lockRequired: 5,  zoneWidth: 0.15, driftSpeed: 0.009 },
-    commander: { time: 30, lockRequired: 7,  zoneWidth: 0.11, driftSpeed: 0.014 }
+    tourist:   { time: 60, lockRequired: 2.5, zoneWidth: 0.22 },
+    astronaut: { time: 55, lockRequired: 3.0, zoneWidth: 0.18 },
+    commander: { time: 50, lockRequired: 3.5, zoneWidth: 0.15 }
   };
   const cfg = settings[S.difficulty] || settings.astronaut;
 
-  mgAntenna.azPos      = 0.05 + Math.random() * 0.25;
-  mgAntenna.azZone     = 0.25 + Math.random() * 0.5;
-  mgAntenna.zoneWidth  = cfg.zoneWidth;
-  mgAntenna.driftSpeed = cfg.driftSpeed;
+  mgAntenna.azPos        = 0.05 + Math.random() * 0.2;  // start near left edge
+  mgAntenna.azZone       = pickNewAntennaZone(mgAntenna.azPos);
+  mgAntenna.zoneWidth    = cfg.zoneWidth;
   mgAntenna.lockRequired = cfg.lockRequired;
-  mgAntenna.timeLeft   = cfg.time;
-  mgAntenna.totalTime  = cfg.time;
-  mgAntenna.lockPct    = 0;
-  mgAntenna.phase      = 'playing';
-  mgAntenna.waveOffset = 0;
-  mgAntenna.dragging   = null;
+  mgAntenna.timeLeft     = cfg.time;
+  mgAntenna.totalTime    = cfg.time;
+  mgAntenna.lockPct      = 0;
+  mgAntenna.stage        = 1;
+  mgAntenna.phase        = 'playing';
+  mgAntenna.waveOffset   = 0;
+  mgAntenna.dragging     = null;
 
   // Reset UI
   $('mg-antenna-result').textContent = '';
-  $('mg-antenna-result').className = 'mg-result-msg';
+  $('mg-antenna-result').className   = 'mg-result-msg';
   $('btn-mg-antenna-done').style.display = 'none';
-  $('mg-antenna-phase').textContent = 'SEARCHING...';
-  $('mg-antenna-hint').textContent  = 'Hold the slider in the green zone to lock';
+  $('mg-antenna-phase').textContent  = 'SEARCHING...';
+  $('mg-antenna-hint').textContent   = 'Drag the slider to find the signal — hold it steady to lock';
 
   updateAntennaSliders();
   showScreen('screen-mg-antenna');
 
   if (mgAntenna.rafId) cancelAnimationFrame(mgAntenna.rafId);
   mgAntenna.lastTs = performance.now();
-  mgAntenna.rafId = requestAnimationFrame(antennaLoop);
+  mgAntenna.rafId  = requestAnimationFrame(antennaLoop);
 }
 
 function antennaLoop(ts) {
@@ -3849,23 +3866,34 @@ function antennaLoop(ts) {
   const dt = Math.min((ts - mgAntenna.lastTs) / 1000, 0.1);
   mgAntenna.lastTs = ts;
 
-  // Drift the sweet spot slowly
-  mgAntenna.azZone += mgAntenna.driftSpeed * Math.sin(ts * 0.0009);
-  mgAntenna.azZone = Math.max(0.1, Math.min(0.9, mgAntenna.azZone));
-
   // Timer
   mgAntenna.timeLeft = Math.max(0, mgAntenna.timeLeft - dt);
   updateAntennaTimerRing();
 
-  // Single-axis zone check
+  // Zone check — sweet spot is static until a stage threshold is crossed
   const azIn = Math.abs(mgAntenna.azPos - mgAntenna.azZone) < mgAntenna.zoneWidth / 2;
 
-  // Lock bar fills while in zone, pauses when out (doesn't reset)
+  // Lock bar fills continuously while in zone (across all three stages)
   if (azIn) {
-    mgAntenna.lockPct = Math.min(100, mgAntenna.lockPct + dt * (100 / mgAntenna.lockRequired));
+    mgAntenna.lockPct = Math.min(100, mgAntenna.lockPct + dt * (100 / (mgAntenna.lockRequired * 3)));
   }
 
-  // Signal strength — based only on distance from the single sweet spot
+  // Check stage thresholds — shift sweet spot at 33% and 66%
+  const threshold = mgAntenna.stageThresholds[mgAntenna.stage - 1];
+  if (mgAntenna.lockPct >= threshold && mgAntenna.stage < 3) {
+    mgAntenna.stage++;
+    mgAntenna.azZone = pickNewAntennaZone(mgAntenna.azPos);
+    // Brief visual flash on the hint
+    $('mg-antenna-hint').textContent = mgAntenna.stage === 2
+      ? '📡 SIGNAL ACQUIRED — FINE TUNING...'
+      : '📡 ALMOST THERE — FINAL ADJUSTMENT';
+    setTimeout(() => {
+      if (mgAntenna.phase === 'playing')
+        $('mg-antenna-hint').textContent = 'Hold the slider in the green zone to lock';
+    }, 1200);
+  }
+
+  // Signal strength — proximity to current sweet spot
   const azDist  = Math.abs(mgAntenna.azPos - mgAntenna.azZone);
   const maxDist = mgAntenna.zoneWidth * 3;
   const signal  = Math.round(Math.max(0, 1 - azDist / maxDist) * 100);
@@ -3882,7 +3910,6 @@ function antennaLoop(ts) {
 
   const lockEl = $('mg-antenna-lock-bar');
   lockEl.classList.toggle('locked', mgAntenna.lockPct >= 100);
-
   $('mg-thumb-az').classList.toggle('in-zone', azIn);
 
   // Phase label
@@ -3891,9 +3918,10 @@ function antennaLoop(ts) {
   else if (signal > 40)              $('mg-antenna-phase').textContent = '🟡 GETTING CLOSER';
   else                               $('mg-antenna-phase').textContent = 'SEARCHING...';
 
-  // Auto-win when lock fills — no button required
+  // Win when lock fills to 100% — auto-locks, no button needed
   if (mgAntenna.lockPct >= 100) { antennaGameEnd('lock'); return; }
-  if (mgAntenna.timeLeft <= 0)  { antennaGameEnd(mgAntenna.lockPct >= 40 ? 'partial' : 'fail'); return; }
+  // Timeout — partial if meaningful progress made (>33%), otherwise fail
+  if (mgAntenna.timeLeft <= 0)  { antennaGameEnd(mgAntenna.lockPct >= 33 ? 'partial' : 'fail'); return; }
 
   mgAntenna.rafId = requestAnimationFrame(antennaLoop);
 }
