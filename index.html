@@ -867,7 +867,190 @@ button { cursor: pointer; }
   .act-btn { font-size: .52rem; }
 }
 
-/* ── CREW DEATH SCREENS ──────────────────────────────── */
+/* ── EXPERIENCE SELECTION SCREEN ────────────────────── */
+.exp-choice-wrap {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1.25rem; padding: 2.5rem 2rem; max-width: 480px;
+  width: calc(100% - 2rem); text-align: center;
+}
+.exp-choice-title {
+  font-family: var(--display); font-size: 2.2rem; color: var(--accent);
+  line-height: 1.1;
+}
+.exp-choice-sub {
+  font-size: .9rem; color: var(--dim); line-height: 1.6;
+}
+.exp-btn {
+  width: 100%; padding: 1.1rem 1.5rem;
+  font-family: var(--ui); font-size: .8rem; letter-spacing: .15em;
+  border: 1px solid var(--border); background: var(--panel2);
+  color: var(--text); cursor: pointer; transition: all .13s;
+  text-align: left; display: flex; flex-direction: column; gap: .3rem;
+}
+.exp-btn:hover { border-color: var(--accent); background: rgba(0,200,255,.06); }
+.exp-btn .exp-btn-title { color: var(--accent); font-size: .85rem; }
+.exp-btn .exp-btn-desc  { color: var(--dim); font-size: .75rem; letter-spacing: .08em; font-family: var(--mono); }
+
+/* ── TUTORIAL TOOLTIP OVERLAY ────────────────────────── */
+.tutorial-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  pointer-events: none;
+  display: none;
+}
+.tutorial-overlay.active { display: block; }
+
+/* Dark backdrop with hole cut-out effect via box-shadow */
+.tutorial-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(2,4,8,.82);
+  pointer-events: all;
+}
+
+.tutorial-tooltip {
+  position: absolute;
+  max-width: 300px; width: calc(100% - 2rem);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 30px rgba(0,200,255,.25);
+  padding: 1rem 1.1rem;
+  pointer-events: all;
+  z-index: 10;
+}
+.tutorial-step-label {
+  font-family: var(--ui); font-size: .55rem; letter-spacing: .2em;
+  color: var(--accent); margin-bottom: .35rem;
+}
+.tutorial-tip-title {
+  font-family: var(--display); font-size: 1.4rem; color: var(--bright);
+  margin-bottom: .4rem; line-height: 1.1;
+}
+.tutorial-tip-body {
+  font-size: .85rem; line-height: 1.65; color: var(--text);
+}
+.tutorial-tip-body strong { color: var(--warn); }
+.tutorial-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: .85rem; gap: .5rem;
+}
+.tutorial-dot-row {
+  display: flex; gap: 5px; align-items: center;
+}
+.tutorial-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border); transition: background .2s;
+}
+.tutorial-dot.active { background: var(--accent); }
+.tutorial-next-btn {
+  font-family: var(--ui); font-size: .65rem; letter-spacing: .15em;
+  padding: .45rem .9rem; background: var(--accent); color: var(--bg);
+  border: none; cursor: pointer; flex-shrink: 0;
+}
+.tutorial-next-btn:hover { background: var(--bright); }
+
+/* Highlight pulse on targeted elements */
+.tutorial-highlight {
+  outline: 2px solid var(--accent) !important;
+  box-shadow: 0 0 0 4px rgba(0,200,255,.25) !important;
+  position: relative; z-index: 490 !important;
+}
+
+/* "?" replay button on game screen */
+.tutorial-replay-btn {
+  position: absolute; top: .4rem; right: .4rem; z-index: 50;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--panel); border: 1px solid var(--border);
+  color: var(--dim); font-family: var(--ui); font-size: .7rem;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .13s;
+}
+.tutorial-replay-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── RATIONS MODAL ────────────────────────────────────── */
+.rations-modal-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(2,4,8,.85);
+  display: none; align-items: center; justify-content: center;
+}
+.rations-modal-overlay.open { display: flex; }
+.rations-modal {
+  background: var(--panel); border: 1px solid var(--border);
+  box-shadow: 0 0 40px rgba(0,200,255,.12);
+  padding: 1.5rem; max-width: 420px; width: calc(100% - 2rem);
+}
+.rations-modal-title {
+  font-family: var(--ui); font-size: .8rem; letter-spacing: .22em;
+  color: var(--accent); margin-bottom: 1rem; text-align: center;
+}
+.ration-option {
+  padding: .85rem 1rem; margin-bottom: .5rem;
+  border: 1px solid var(--border); background: var(--panel2);
+  cursor: pointer; transition: all .12s;
+}
+.ration-option:hover   { border-color: var(--accent); }
+.ration-option.active  { border-color: var(--warn); background: rgba(255,204,0,.06); }
+.ration-option-header  {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: .3rem;
+}
+.ration-option-name {
+  font-family: var(--ui); font-size: .75rem; letter-spacing: .15em;
+  color: var(--text);
+}
+.ration-option.active .ration-option-name { color: var(--warn); }
+.ration-option-badge {
+  font-family: var(--ui); font-size: .55rem; letter-spacing: .1em;
+  padding: .15rem .4rem; border: 1px solid var(--warn); color: var(--warn);
+  display: none;
+}
+.ration-option.active .ration-option-badge { display: inline; }
+.ration-option-effect {
+  font-size: .8rem; color: var(--dim); line-height: 1.5; font-family: var(--mono);
+}
+.ration-modal-close {
+  width: 100%; margin-top: .5rem; padding: .7rem;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--dim); font-family: var(--ui); font-size: .65rem;
+  letter-spacing: .15em; cursor: pointer;
+}
+.ration-modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── RATION MODE INDICATOR (near Food bar) ───────────── */
+.ration-mode-indicator {
+  font-family: var(--ui); font-size: .5rem; letter-spacing: .12em;
+  color: var(--warn); padding: .1rem .35rem;
+  border: 1px solid rgba(255,204,0,.35);
+  background: rgba(255,204,0,.06);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* ── SURVEY TARGET ZONE IMPROVEMENTS ─────────────────── */
+.survey-target {
+  border-top: 3px solid var(--accent) !important;
+  border-bottom: 3px solid var(--accent) !important;
+  box-shadow: 0 0 0 1px rgba(0,200,255,.3),
+              0 0 20px rgba(0,200,255,.5),
+              inset 0 0 30px rgba(0,200,255,.1) !important;
+  animation: targetPulse 1.8s ease-in-out infinite;
+}
+.survey-target-label {
+  position: absolute; right: calc(50% - 66px);
+  font-family: var(--ui); font-size: .42rem; letter-spacing: .15em;
+  color: var(--accent); background: rgba(2,4,8,.85);
+  padding: 1px 4px; white-space: nowrap;
+  top: -1.1rem;
+}
+@keyframes targetPulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(0,200,255,.3), 0 0 20px rgba(0,200,255,.5), inset 0 0 30px rgba(0,200,255,.1); }
+  50%       { box-shadow: 0 0 0 1px rgba(0,200,255,.5), 0 0 35px rgba(0,200,255,.8), inset 0 0 40px rgba(0,200,255,.18); }
+}
+
+/* ── SURVEY RESULT LAYOUT FIX ────────────────────────── */
+.survey-results-area {
+  width: 100%; max-width: 380px;
+  display: flex; flex-direction: column; gap: .6rem;
+}
+
 .death-wrap {
   position: relative; z-index: 10;
   background: rgba(2,4,8,.99); border: 1px solid rgba(255,51,68,.4);
@@ -1257,13 +1440,74 @@ button { cursor: pointer; }
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     SCREEN 7: MAIN GAME
+     SCREEN 6b: EXPERIENCE SELECTION
 ═══════════════════════════════════════════════════════ -->
+<div id="screen-experience" class="screen">
+  <div class="stars"></div>
+  <div class="scanlines"></div>
+  <div class="exp-choice-wrap">
+    <div class="exp-choice-title">One Quick Question</div>
+    <div class="exp-choice-sub">This helps us know whether to walk you through the basics before you launch.</div>
+    <button class="exp-btn" id="btn-exp-first">
+      <span class="exp-btn-title">🌕 It's my first time playing</span>
+      <span class="exp-btn-desc">Show me a quick tutorial before I launch</span>
+    </button>
+    <button class="exp-btn" id="btn-exp-veteran">
+      <span class="exp-btn-title">🚀 I've played before</span>
+      <span class="exp-btn-desc">Skip the tutorial and launch the mission</span>
+    </button>
+  </div>
+</div>
+
+<!-- ── RATIONS MODAL (overlaid on game screen) ────────── -->
+<div class="rations-modal-overlay" id="rations-modal-overlay">
+  <div class="rations-modal">
+    <div class="rations-modal-title">🍱 FOOD RATION SETTING</div>
+    <div id="ration-opt-meager" class="ration-option" data-mode="meager">
+      <div class="ration-option-header">
+        <span class="ration-option-name">MEAGER RATIONS</span>
+        <span class="ration-option-badge">ACTIVE</span>
+      </div>
+      <div class="ration-option-effect">Food lasts roughly 2× longer than normal. Morale drops slowly over time — the crew is hungry and they know it. Best used when food supplies are dangerously low.</div>
+    </div>
+    <div id="ration-opt-standard" class="ration-option" data-mode="standard">
+      <div class="ration-option-header">
+        <span class="ration-option-name">STANDARD RATIONS</span>
+        <span class="ration-option-badge">ACTIVE</span>
+      </div>
+      <div class="ration-option-effect">Balanced consumption. No morale effect. This is the default setting and the right choice for most of the mission.</div>
+    </div>
+    <div id="ration-opt-filling" class="ration-option" data-mode="filling">
+      <div class="ration-option-header">
+        <span class="ration-option-name">FILLING RATIONS</span>
+        <span class="ration-option-badge">ACTIVE</span>
+      </div>
+      <div class="ration-option-effect">Food burns 50% faster, but morale climbs gradually over time. Use this to recover crew morale quickly — just make sure you have enough food to afford it.</div>
+    </div>
+    <button class="ration-modal-close" id="btn-rations-close">CLOSE</button>
+  </div>
+</div>
+
+<!-- ── TUTORIAL OVERLAY (overlaid on game screen) ─────── -->
+<div class="tutorial-overlay" id="tutorial-overlay">
+  <div class="tutorial-backdrop" id="tutorial-backdrop"></div>
+  <div class="tutorial-tooltip" id="tutorial-tooltip">
+    <div class="tutorial-step-label" id="tut-step-label">STEP 1 OF 6</div>
+    <div class="tutorial-tip-title" id="tut-title">—</div>
+    <div class="tutorial-tip-body" id="tut-body">—</div>
+    <div class="tutorial-nav">
+      <div class="tutorial-dot-row" id="tut-dots"></div>
+      <button class="tutorial-next-btn" id="btn-tut-next">NEXT →</button>
+    </div>
+  </div>
+</div>
+
+
 <div id="screen-game" class="screen">
   <div class="scanlines"></div>
 
   <!-- HUD -->
-  <div class="hud">
+  <div class="hud" style="position:relative">
     <div class="hud-block">
       <span class="hud-lbl">LOCATION</span>
       <span class="hud-val" id="hud-location">Tranquility Base</span>
@@ -1280,6 +1524,7 @@ button { cursor: pointer; }
       <span class="hud-lbl">LUNAR PHASE</span>
       <span class="hud-val" id="hud-phase">☀️ DAY</span>
     </div>
+    <button class="tutorial-replay-btn" id="btn-tutorial-replay" title="Show tutorial">?</button>
   </div>
 
   <!-- Resource bars - 2x2 grid -->
@@ -1301,6 +1546,7 @@ button { cursor: pointer; }
       <span class="res-lbl">FOOD</span>
       <div class="res-track"><div class="res-fill fill-food" id="bar-food"></div></div>
       <span class="res-pct" id="pct-food">100%</span>
+      <span class="ration-mode-indicator" id="ration-mode-indicator">STANDARD</span>
     </div>
     <div class="res-item">
       <span class="res-icon">😤</span>
@@ -1697,8 +1943,10 @@ button { cursor: pointer; }
       <div class="survey-ruler" id="survey-ruler"></div>
       <!-- Scrolling layer column -->
       <div class="survey-column" id="survey-column"></div>
-      <!-- Fixed target zone bracket -->
-      <div class="survey-target" id="survey-target"></div>
+      <!-- Fixed target zone bracket with visible label -->
+      <div class="survey-target" id="survey-target">
+        <div class="survey-target-label">▶ TARGET ZONE ◀</div>
+      </div>
     </div>
 
     <!-- Speed indicator -->
@@ -1726,14 +1974,14 @@ button { cursor: pointer; }
     </div>
     <div class="sample-tray" id="survey-tray"></div>
 
-    <!-- Per-attempt result — shown after each lock, cleared before next -->
-    <div class="mg-result-msg" id="mg-survey-attempt-result" style="min-height:2.5rem"></div>
-
-    <!-- Final result — only shown when all attempts are done -->
-    <div class="mg-result-msg" id="mg-survey-result" style="margin-top:.5rem;min-height:2.5rem"></div>
-    <button class="btn btn-primary" id="btn-mg-survey-done" style="display:none;width:100%;max-width:380px">
-      CONTINUE →
-    </button>
+    <!-- Results area — each element has its own space, no overlap -->
+    <div class="survey-results-area">
+      <div class="mg-result-msg" id="mg-survey-attempt-result"></div>
+      <div class="mg-result-msg" id="mg-survey-result"></div>
+      <button class="btn btn-primary" id="btn-mg-survey-done" style="display:none;width:100%">
+        CONTINUE →
+      </button>
+    </div>
   </div>
 </div>
 
@@ -2690,6 +2938,7 @@ function goLoadout() {
 }
 
 function goDifficulty() { showScreen('screen-difficulty'); }
+function goExperience() { showScreen('screen-experience'); }
 
 // ── LOADOUT LOGIC ─────────────────────────────────────────
 function refreshLoadoutUI() {
@@ -2759,7 +3008,7 @@ function launchMission() {
   S.active = true;
   refreshGameUI();
   setGameScene('images/scenes/traveling.png', 'TRAVELING');
-  showScreen('screen-game');
+  // Screen is shown by experience selection flow
 
   addLog("Mission commenced. Drive safe out there.", 'good');
   addLog(`Destination: Shackleton Station — ${TOTAL_KM}km south.`, '');
@@ -2788,6 +3037,7 @@ function refreshGameUI() {
   $('inv-cr').textContent   = S.credits;
 
   renderCrew();
+  updateRationIndicator();
   $('terrain-note').textContent = TERRAIN[Math.floor(Math.random() * TERRAIN.length)];
 }
 
@@ -2910,11 +3160,7 @@ function actCharge() {
 
 function actRations() {
   if (!S.active) return;
-  clearInlineLog();
-  const order = ['meager','standard','filling'];
-  const idx   = order.indexOf(S.rationMode);
-  S.rationMode = order[(idx + 1) % order.length];
-  addLog('Ration mode: ' + RATIONS[S.rationMode].label + '.', 'alert');
+  openRationsModal();
 }
 
 function actRest() {
@@ -4779,7 +5025,189 @@ function onMemorialContinue() {
   showScreen('screen-result');
 }
 
+// ── EXPERIENCE SELECTION ──────────────────────────────────
+
+// ═══════════════════════════════════════════════════════
+//  TUTORIAL SYSTEM
+// ═══════════════════════════════════════════════════════
+
+const TUTORIAL_STEPS = [
+  {
+    title: 'Your Four Resources',
+    body: 'The bars at the top show <strong>Power</strong> (rover battery), <strong>O₂</strong> (air supply), <strong>Food</strong>, and <strong>Morale</strong>. If any of these hit zero, the mission ends. Keep all four above zero.',
+    target: 'res-bar-grid',
+    position: 'below'
+  },
+  {
+    title: 'Your Actions',
+    body: '<strong>Drive</strong> covers distance but drains Power and Food. <strong>Charge</strong> restores Power (requires stopping). <strong>Rest</strong> recovers Morale. Each action costs one mission day — every choice matters.',
+    target: 'action-bar',
+    position: 'above'
+  },
+  {
+    title: 'Food Rations',
+    body: 'Tap <strong>RATIONS</strong> to choose how much the crew eats. <strong>Meager</strong> stretches food but slowly hurts Morale. <strong>Filling</strong> costs more food but boosts Morale. Switch between them to balance your supply.',
+    target: 'act-rations',
+    position: 'above'
+  },
+  {
+    title: 'Power Cell Button',
+    body: 'Tap <strong>POWER CELL</strong> to launch the cell calibration game. Play it well and you restore up to 45% power — and keep the cell in reserve. Waiting for auto-activation only gives 30%. Proactive is always better.',
+    target: 'act-cell',
+    position: 'above'
+  },
+  {
+    title: 'Lunar Night',
+    body: 'Every 28 days, the moon enters a <strong>14-day night</strong>. Solar charging goes offline completely. Power drains faster from the cold. <strong>Charge fully before night arrives</strong> — the LUNAR PHASE indicator in the top bar tells you where you are in the cycle.',
+    target: 'hud-phase',
+    position: 'below'
+  },
+  {
+    title: 'Crises Will Happen',
+    body: 'Random events interrupt your journey — equipment failures, crew conflicts, radiation storms. You will be given 2–3 choices. There is rarely a perfect answer. Read carefully, manage your supplies, and trust your crew.',
+    target: null,
+    position: 'center'
+  }
+];
+
+let tutStep = 0;
+let tutActive = false;
+
+function startTutorial() {
+  tutStep = 0;
+  tutActive = true;
+  $('tutorial-overlay').classList.add('active');
+  renderTutStep();
+}
+
+function renderTutStep() {
+  const step = TUTORIAL_STEPS[tutStep];
+  const total = TUTORIAL_STEPS.length;
+
+  $('tut-step-label').textContent = `STEP ${tutStep + 1} OF ${total}`;
+  $('tut-title').textContent = step.title;
+  $('tut-body').innerHTML = step.body;
+
+  // Dots
+  const dots = $('tut-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'tutorial-dot' + (i === tutStep ? ' active' : '');
+    dots.appendChild(d);
+  }
+
+  // Last step
+  $('btn-tut-next').textContent = tutStep === total - 1 ? 'GOT IT ✓' : 'NEXT →';
+
+  // Remove previous highlights
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+
+  // Position tooltip and highlight target
+  const tooltip = $('tutorial-tooltip');
+  tooltip.style.cssText = ''; // reset
+
+  if (step.target) {
+    const targetEl = $(step.target) || document.querySelector('.' + step.target);
+    if (targetEl) {
+      targetEl.classList.add('tutorial-highlight');
+      const rect = targetEl.getBoundingClientRect();
+      const ttW = Math.min(300, window.innerWidth - 32);
+
+      if (step.position === 'below') {
+        tooltip.style.top  = (rect.bottom + 10) + 'px';
+        tooltip.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - ttW - 8)) + 'px';
+        tooltip.style.width = ttW + 'px';
+      } else {
+        tooltip.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+        tooltip.style.left   = Math.max(8, Math.min(rect.left, window.innerWidth - ttW - 8)) + 'px';
+        tooltip.style.width  = ttW + 'px';
+      }
+    }
+  } else {
+    // Center
+    tooltip.style.top  = '50%';
+    tooltip.style.left = '50%';
+    tooltip.style.transform = 'translate(-50%, -50%)';
+    tooltip.style.width = '300px';
+  }
+}
+
+function advanceTutorial() {
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+  tutStep++;
+  if (tutStep >= TUTORIAL_STEPS.length) {
+    closeTutorial();
+  } else {
+    renderTutStep();
+  }
+}
+
+function closeTutorial() {
+  tutActive = false;
+  $('tutorial-overlay').classList.remove('active');
+  document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));
+}
+
+// ═══════════════════════════════════════════════════════
+//  RATIONS MODAL
+// ═══════════════════════════════════════════════════════
+
+function openRationsModal() {
+  // Highlight the current active mode
+  ['meager','standard','filling'].forEach(mode => {
+    const el = $('ration-opt-' + mode);
+    if (el) el.classList.toggle('active', S.rationMode === mode);
+  });
+  $('rations-modal-overlay').classList.add('open');
+}
+
+function closeRationsModal() {
+  $('rations-modal-overlay').classList.remove('open');
+}
+
+function setRationMode(mode) {
+  S.rationMode = mode;
+  updateRationIndicator();
+  addLog('Ration mode: ' + RATIONS[mode].label + '.', 'alert');
+  closeRationsModal();
+}
+
+function updateRationIndicator() {
+  const el = $('ration-mode-indicator');
+  if (!el) return;
+  const labels = { meager:'MEAGER', standard:'STANDARD', filling:'FILLING' };
+  el.textContent = labels[S.rationMode] || 'STANDARD';
+  el.style.color = S.rationMode === 'meager' ? 'var(--danger)' : S.rationMode === 'filling' ? 'var(--green)' : 'var(--warn)';
+  el.style.borderColor = S.rationMode === 'meager' ? 'rgba(255,51,68,.4)' : S.rationMode === 'filling' ? 'rgba(0,255,157,.4)' : 'rgba(255,204,0,.35)';
+  el.style.background = S.rationMode === 'meager' ? 'rgba(255,51,68,.05)' : S.rationMode === 'filling' ? 'rgba(0,255,157,.05)' : 'rgba(255,204,0,.06)';
+}
+
 // ── BUTTON WIRING ─────────────────────────────────────────
+// Experience selection
+$('btn-exp-first').addEventListener('click', () => {
+  showScreen('screen-game');
+  setTimeout(startTutorial, 600);
+});
+$('btn-exp-veteran').addEventListener('click', () => {
+  // Launch directly — mission already launched, just show game
+  showScreen('screen-game');
+});
+
+// Tutorial
+$('btn-tut-next').addEventListener('click', advanceTutorial);
+$('btn-tutorial-replay').addEventListener('click', () => { if (S.active) startTutorial(); });
+$('tutorial-backdrop').addEventListener('click', () => { if (tutActive) closeTutorial(); });
+
+// Rations modal
+document.querySelectorAll('.ration-option').forEach(opt => {
+  opt.addEventListener('click', () => setRationMode(opt.dataset.mode));
+});
+$('btn-rations-close').addEventListener('click', closeRationsModal);
+$('rations-modal-overlay').addEventListener('click', e => {
+  if (e.target === $('rations-modal-overlay')) closeRationsModal();
+});
+
 // Death / memorial screens
 $('btn-death-continue').addEventListener('click', onDeathContinue);
 $('btn-memorial-continue').addEventListener('click', onMemorialContinue);
@@ -4848,7 +5276,7 @@ $('btn-loadout-next').addEventListener('click', goDifficulty);
 
 // Difficulty
 $('btn-diff-back').addEventListener('click', () => showScreen('screen-loadout'));
-$('btn-launch').addEventListener('click', launchMission);
+$('btn-launch').addEventListener('click', () => { launchMission(); goExperience(); });
 
 // Game actions
 $('act-drive').addEventListener('click',   actDrive);
