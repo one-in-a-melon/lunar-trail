@@ -957,12 +957,12 @@ button { cursor: pointer; }
 
 /* "?" replay button on game screen */
 .tutorial-replay-btn {
-  position: absolute; top: .4rem; right: .4rem; z-index: 50;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: var(--panel); border: 1px solid var(--border);
-  color: var(--dim); font-family: var(--ui); font-size: .7rem;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--dim); font-family: var(--ui); font-size: .65rem;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all .13s;
+  transition: all .13s; flex-shrink: 0; margin-left: auto;
+  align-self: center;
 }
 .tutorial-replay-btn:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -1022,27 +1022,6 @@ button { cursor: pointer; }
   border: 1px solid rgba(255,204,0,.35);
   background: rgba(255,204,0,.06);
   white-space: nowrap; flex-shrink: 0;
-}
-
-/* ── SURVEY TARGET ZONE IMPROVEMENTS ─────────────────── */
-.survey-target {
-  border-top: 3px solid var(--accent) !important;
-  border-bottom: 3px solid var(--accent) !important;
-  box-shadow: 0 0 0 1px rgba(0,200,255,.3),
-              0 0 20px rgba(0,200,255,.5),
-              inset 0 0 30px rgba(0,200,255,.1) !important;
-  animation: targetPulse 1.8s ease-in-out infinite;
-}
-.survey-target-label {
-  position: absolute; right: calc(50% - 66px);
-  font-family: var(--ui); font-size: .42rem; letter-spacing: .15em;
-  color: var(--accent); background: rgba(2,4,8,.85);
-  padding: 1px 4px; white-space: nowrap;
-  top: -1.1rem;
-}
-@keyframes targetPulse {
-  0%, 100% { box-shadow: 0 0 0 1px rgba(0,200,255,.3), 0 0 20px rgba(0,200,255,.5), inset 0 0 30px rgba(0,200,255,.1); }
-  50%       { box-shadow: 0 0 0 1px rgba(0,200,255,.5), 0 0 35px rgba(0,200,255,.8), inset 0 0 40px rgba(0,200,255,.18); }
 }
 
 /* ── SURVEY RESULT LAYOUT FIX ────────────────────────── */
@@ -1134,47 +1113,96 @@ button { cursor: pointer; }
   .memorial-name { font-size: 1.6rem; }
 }
 
-.survey-viewport {
-  width: 100%; max-width: 380px; height: 260px;
+/* ── DEPTH GAUGE SURVEY GAME ─────────────────────────── */
+.gauge-wrap {
+  width: 100%; max-width: 380px;
+  display: flex; gap: 1rem; align-items: stretch;
+}
+/* Vertical gauge meter */
+.gauge-meter {
+  width: 64px; flex-shrink: 0;
   background: var(--panel2); border: 1px solid var(--border);
-  position: relative; overflow: hidden;
+  position: relative; height: 320px; overflow: hidden;
 }
-.survey-column {
-  position: absolute; left: 50%; transform: translateX(-50%);
-  width: 120px; display: flex; flex-direction: column;
+/* Green zone — position and height set by JS */
+.gauge-zone {
+  position: absolute; left: 0; right: 0;
+  background: rgba(0,255,157,.18);
+  border-top: 2px solid var(--green);
+  border-bottom: 2px solid var(--green);
+  box-shadow: inset 0 0 12px rgba(0,255,157,.12);
+  pointer-events: none; z-index: 2;
+  animation: zoneGlow 1.6s ease-in-out infinite;
 }
-.survey-layer {
-  width: 100%; height: 52px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  gap: .45rem; font-family: var(--ui); font-size: .55rem;
-  letter-spacing: .08em; color: rgba(255,255,255,.9);
-  border-top: 1px solid rgba(255,255,255,.12); position: relative;
+@keyframes zoneGlow {
+  0%,100% { box-shadow: inset 0 0 12px rgba(0,255,157,.12), 0 0 8px rgba(0,255,157,.2); }
+  50%      { box-shadow: inset 0 0 20px rgba(0,255,157,.22), 0 0 16px rgba(0,255,157,.4); }
 }
-.survey-target {
-  position: absolute; left: 50%; transform: translateX(-50%);
-  width: 132px; pointer-events: none; z-index: 10;
-  border-top: 2px solid var(--accent); border-bottom: 2px solid var(--accent);
-  box-shadow: 0 0 14px rgba(0,200,255,.45), inset 0 0 18px rgba(0,200,255,.06);
+/* Needle — a horizontal bar that sweeps up/down */
+.gauge-needle {
+  position: absolute; left: 4px; right: 4px; height: 4px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent), 0 0 4px var(--bright);
+  z-index: 5; border-radius: 2px;
+  transition: background .1s, box-shadow .1s;
 }
-.survey-ruler {
-  position: absolute; left: 6px; top: 0; bottom: 0; width: 26px;
+.gauge-needle.in-zone {
+  background: var(--green);
+  box-shadow: 0 0 14px var(--green), 0 0 6px #fff;
+}
+/* Depth ruler on the left of the meter */
+.gauge-ruler {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 22px;
   display: flex; flex-direction: column; justify-content: space-between;
-  pointer-events: none; padding: 4px 0;
+  padding: 2px 0; pointer-events: none;
 }
-.survey-ruler-tick { font-family: var(--mono); font-size: .5rem; color: var(--dim); }
-.layer-icon { font-size: 1.15rem; }
-.layer-name { line-height: 1.2; text-align: center; }
-
-.drill-btn {
-  width: 100%; max-width: 380px; padding: 1rem;
+.gauge-ruler-tick {
+  font-family: var(--mono); font-size: .42rem; color: var(--dim);
+  padding-left: 2px; line-height: 1;
+}
+/* Layer info panel beside the gauge */
+.gauge-info {
+  flex: 1; display: flex; flex-direction: column; gap: .5rem;
+  justify-content: flex-start;
+}
+.gauge-depth-display {
+  font-family: var(--display); font-size: 1.8rem; color: var(--accent);
+  line-height: 1; letter-spacing: .04em;
+}
+.gauge-depth-label {
+  font-family: var(--ui); font-size: .5rem; letter-spacing: .18em;
+  color: var(--dim); margin-top: -.2rem;
+}
+.gauge-layer-box {
+  background: var(--panel2); border: 1px solid var(--border);
+  padding: .6rem .7rem; min-height: 72px;
+  display: flex; flex-direction: column; justify-content: center; gap: .25rem;
+}
+.gauge-layer-icon { font-size: 1.5rem; line-height: 1; }
+.gauge-layer-name {
+  font-family: var(--ui); font-size: .65rem; letter-spacing: .12em;
+  color: var(--text);
+}
+.gauge-layer-desc {
+  font-size: .72rem; color: var(--dim); line-height: 1.4;
+}
+.gauge-layer-pts {
+  font-family: var(--ui); font-size: .6rem; letter-spacing: .1em;
+}
+/* Drill button — large, thumb-friendly */
+.drill-tap-btn {
+  width: 100%; max-width: 380px; padding: 1.1rem;
   background: var(--warn); color: var(--bg); border: none;
-  font-family: var(--ui); font-size: .85rem; letter-spacing: .2em;
-  cursor: pointer; transition: all .1s; text-transform: uppercase;
+  font-family: var(--ui); font-size: .9rem; letter-spacing: .22em;
+  cursor: pointer; text-transform: uppercase;
+  transition: background .1s, transform .08s;
+  user-select: none; -webkit-user-select: none;
 }
-.drill-btn:active { transform: scale(.97); }
-.drill-btn:disabled { background: var(--border); color: var(--dim); cursor: not-allowed; }
-.drill-btn.locked { background: var(--green); box-shadow: 0 0 20px rgba(0,255,157,.5); }
-
+.drill-tap-btn:active   { transform: scale(.97); }
+.drill-tap-btn:disabled { background: var(--border); color: var(--dim); cursor: not-allowed; }
+.drill-tap-btn.success  { background: var(--green); box-shadow: 0 0 20px rgba(0,255,157,.5); }
+.drill-tap-btn.fail     { background: var(--danger); }
+/* Sample tray */
 .sample-tray {
   width: 100%; max-width: 380px; display: flex; gap: .45rem;
   flex-wrap: wrap; min-height: 46px; padding: .45rem;
@@ -1188,22 +1216,9 @@ button { cursor: pointer; }
 }
 @keyframes chipPop { 0%{transform:scale(.5);opacity:0} 100%{transform:scale(1);opacity:1} }
 
-.survey-speed-row {
-  width: 100%; max-width: 380px;
-  display: flex; justify-content: space-between; align-items: center;
-  padding: .32rem .5rem; background: var(--panel);
-  border: 1px solid var(--border);
-  font-family: var(--ui); font-size: .57rem; letter-spacing: .1em; color: var(--dim);
-}
-.speed-pips { display: flex; gap: 3px; }
-.speed-pip { width: 10px; height: 10px; border-radius: 1px; background: var(--border); transition: background .12s; }
-.speed-pip.active { background: var(--warn); }
-.speed-pip.fast   { background: var(--danger); }
-
 @media (max-width: 560px) {
-  .survey-viewport { height: 220px; }
-  .survey-layer { height: 44px; font-size: .5rem; }
-  .drill-btn { padding: .85rem; font-size: .78rem; }
+  .gauge-meter { height: 260px; }
+  .drill-tap-btn { padding: .95rem; font-size: .8rem; }
 }
 </style>
 </head>
@@ -1507,7 +1522,7 @@ button { cursor: pointer; }
   <div class="scanlines"></div>
 
   <!-- HUD -->
-  <div class="hud" style="position:relative">
+  <div class="hud">
     <div class="hud-block">
       <span class="hud-lbl">LOCATION</span>
       <span class="hud-val" id="hud-location">Tranquility Base</span>
@@ -1919,7 +1934,7 @@ button { cursor: pointer; }
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     SCREEN 15: MINI-GAME — GEOLOGICAL SURVEY
+     SCREEN 15: MINI-GAME — GEOLOGICAL SURVEY (Depth Gauge Tap)
 ═══════════════════════════════════════════════════════ -->
 <div id="screen-mg-survey" class="screen">
   <div class="stars"></div>
@@ -1928,7 +1943,7 @@ button { cursor: pointer; }
     <div class="mg-title">🔬 CORE SURVEY</div>
     <div class="mg-subtitle">GEOLOGICAL DRILL SAMPLING PROTOCOL</div>
     <div class="mg-instruction">
-      Layers scroll upward through the target zone. Press <strong>LOCK SAMPLE</strong> when the layer you want is inside the cyan bracket. Three drill attempts — avoid the void pockets.
+      Watch the needle sweep up and down the gauge. Tap <strong>DRILL</strong> when the needle is inside the <span style="color:var(--green)">green zone</span> to lock that sample. Three attempts — needle gets faster each time.
     </div>
 
     <div class="mg-status-bar" style="width:100%;max-width:380px">
@@ -1937,44 +1952,41 @@ button { cursor: pointer; }
       <span class="mg-score" id="mg-survey-score">0 pts</span>
     </div>
 
-    <!-- Scrolling drill viewport -->
-    <div class="survey-viewport" id="survey-viewport">
-      <!-- Ruler ticks -->
-      <div class="survey-ruler" id="survey-ruler"></div>
-      <!-- Scrolling layer column -->
-      <div class="survey-column" id="survey-column"></div>
-      <!-- Fixed target zone bracket with visible label -->
-      <div class="survey-target" id="survey-target">
-        <div class="survey-target-label">▶ TARGET ZONE ◀</div>
+    <!-- Depth gauge + layer info side by side -->
+    <div class="gauge-wrap">
+      <!-- Left: vertical pressure gauge -->
+      <div class="gauge-meter" id="gauge-meter">
+        <div class="gauge-ruler" id="gauge-ruler"></div>
+        <div class="gauge-zone" id="gauge-zone"></div>
+        <div class="gauge-needle" id="gauge-needle"></div>
+      </div>
+      <!-- Right: current layer info -->
+      <div class="gauge-info">
+        <div>
+          <div class="gauge-depth-display" id="gauge-depth-display">0m</div>
+          <div class="gauge-depth-label">DRILL DEPTH</div>
+        </div>
+        <div class="gauge-layer-box" id="gauge-layer-box">
+          <div class="gauge-layer-icon" id="gauge-layer-icon">🟫</div>
+          <div class="gauge-layer-name" id="gauge-layer-name">Regolith Dust</div>
+          <div class="gauge-layer-desc" id="gauge-layer-desc">Common surface dust. No scientific value.</div>
+          <div class="gauge-layer-pts" id="gauge-layer-pts" style="color:var(--dim)">0 pts</div>
+        </div>
       </div>
     </div>
 
-    <!-- Speed indicator -->
-    <div class="survey-speed-row">
-      <span>DRILL SPEED</span>
-      <div class="speed-pips" id="survey-speed-pips">
-        <div class="speed-pip" id="spip-0"></div>
-        <div class="speed-pip" id="spip-1"></div>
-        <div class="speed-pip" id="spip-2"></div>
-        <div class="speed-pip" id="spip-3"></div>
-        <div class="speed-pip" id="spip-4"></div>
-      </div>
-      <span id="survey-speed-label">SLOW</span>
-    </div>
-
-    <!-- Start / Lock button — shows START initially, switches to LOCK SAMPLE when drilling -->
-    <button class="btn btn-primary" id="btn-survey-start" style="width:100%;max-width:380px">
-      ▶ START DRILLING
+    <!-- Big drill tap button -->
+    <button class="drill-tap-btn" id="btn-survey-drill" disabled>
+      TAP TO DRILL ↓
     </button>
-    <button class="drill-btn" id="btn-survey-lock" style="display:none">⬇ LOCK SAMPLE</button>
 
-    <!-- Sample tray showing collected cores -->
-    <div style="width:100%;max-width:380px;font-family:var(--ui);font-size:.55rem;letter-spacing:.18em;color:var(--dim);margin-top:.25rem">
+    <!-- Sample tray -->
+    <div style="width:100%;max-width:380px;font-family:var(--ui);font-size:.55rem;letter-spacing:.18em;color:var(--dim);margin-top:.1rem">
       CORE SAMPLES COLLECTED
     </div>
     <div class="sample-tray" id="survey-tray"></div>
 
-    <!-- Results area — each element has its own space, no overlap -->
+    <!-- Results area -->
     <div class="survey-results-area">
       <div class="mg-result-msg" id="mg-survey-attempt-result"></div>
       <div class="mg-result-msg" id="mg-survey-result"></div>
@@ -3535,10 +3547,19 @@ function tryEvent() {
 // always matched before the shorter "medic" can fire inside it.
 function injectCrewNames(text) {
   if (!S.crew || S.crew.length < 4) return text;
-  const eng = S.crew[1].name;
-  const sci = S.crew[2].name;
-  const med = S.crew[3].name;
-  const cmd = S.crew[0].name;
+  const engName = S.crew[1].name;
+  const sciName = S.crew[2].name;
+  const medName = S.crew[3].name;
+  const cmdName = S.crew[0].name;
+
+  // If a crew member is dead, their name gets "'s ghost" appended.
+  // This preserves full narrative continuity while acknowledging the death
+  // with dark humour — "your engineer's ghost fixed the filtration system."
+  const ghost = (idx, name) => S.crew[idx] && !S.crew[idx].alive ? `${name}'s ghost` : name;
+  const eng = ghost(1, engName);
+  const sci = ghost(2, sciName);
+  const med = ghost(3, medName);
+  const cmd = ghost(0, cmdName); // commander never dies but handle defensively
 
   // Each entry: [regex-string, replacement]
   // Sorted longest phrase first — critical to prevent substring matches.
@@ -3564,12 +3585,10 @@ function injectCrewNames(text) {
   // Build one combined alternation regex from all patterns.
   // The regex engine will always try alternatives left-to-right, so
   // "medical officer" is tried before "medic" and "officer" individually.
-  // Wrap each term in a group that uses a negative lookahead to skip
-  // if the crew name is already the next word (prevents double-injection
-  // on repeated processEventText calls, e.g. result screens).
+  // Negative lookahead prevents double-injection on already-substituted text.
   const esc   = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const parts = rules.map(([pat, rep]) => {
-    const escapedRep = esc(rep.split(' ').pop()); // last word = the name
+    const escapedRep = esc(rep.split(' ').pop()); // last word = the name (or "ghost")
     return `(${pat})(?!\\s+${escapedRep})`;
   });
   const combined = new RegExp(parts.join('|'), 'gi');
@@ -4444,80 +4463,97 @@ const GEO_LAYERS = [
   { id:'void',      icon:'⬛', name:'Void Pocket',      color:'#0a0a0a', pts:-20, bad:true,  desc:'Empty pocket — drill bit damaged!' },
 ];
 
-const GEO_LAYER_H = 52; // px per layer
-const GEO_VIEWPORT_H = 260;
-const GEO_TARGET_H = 56; // height of target zone
+// ── DEPTH GAUGE SURVEY GAME ───────────────────────────────
+// Mechanic: a needle sweeps up/down a vertical gauge.
+// The green zone is fixed. Player taps DRILL when needle is inside it.
+// Three attempts, needle speeds up each round.
+// The layer shown in the info panel updates live as the needle moves.
+
+const GAUGE_H       = 320; // px — matches CSS .gauge-meter height
+const GAUGE_ZONE_H  = 72;  // px — height of the green zone
+const GAUGE_ZONE_TOP = Math.round((GAUGE_H - GAUGE_ZONE_H) / 2); // centred vertically
+
+// Each layer maps to a depth band on the gauge (0 = top = shallow, GAUGE_H = bottom = deep)
+// Assign each layer a depth band based on pts — more valuable = deeper
+const LAYER_DEPTHS = [
+  { minPct:0.00, maxPct:0.18, layer: GEO_LAYERS.find(l=>l.id==='dust')     },
+  { minPct:0.15, maxPct:0.32, layer: GEO_LAYERS.find(l=>l.id==='basalt')   },
+  { minPct:0.28, maxPct:0.44, layer: GEO_LAYERS.find(l=>l.id==='breccia')  },
+  { minPct:0.40, maxPct:0.56, layer: GEO_LAYERS.find(l=>l.id==='volcanic') },
+  { minPct:0.52, maxPct:0.68, layer: GEO_LAYERS.find(l=>l.id==='anortho')  },
+  { minPct:0.64, maxPct:0.80, layer: GEO_LAYERS.find(l=>l.id==='glass')    },
+  { minPct:0.76, maxPct:0.90, layer: GEO_LAYERS.find(l=>l.id==='void')     },
+  { minPct:0.88, maxPct:1.00, layer: GEO_LAYERS.find(l=>l.id==='ice')      },
+];
 
 let mgSurvey = {
-  attempt: 1,
+  attempt:     1,
   maxAttempts: 3,
-  score: 0,
-  samples: [],        // { layer, pts }
-  scrollY: 0,         // current scroll offset in px
-  speedPx: 0,         // px/second
-  rafId: null,
-  lastTs: 0,
-  phase: 'idle',      // 'idle' | 'scrolling' | 'locked' | 'done'
-  layerOrder: [],     // array of layer objects, repeated to fill
-  speedLevels: [],    // px/s per attempt
-  targetTopY: 0,      // y position of target zone top in viewport
+  score:       0,
+  samples:     [],
+  phase:       'idle',    // 'idle' | 'sweeping' | 'locked' | 'done'
+  needleY:     0,         // 0..1 normalised position (0=top, 1=bottom)
+  direction:   1,         // 1=moving down, -1=moving up
+  speedPx:     0,         // px per second
+  speedLevels: [],
+  rafId:       null,
+  lastTs:      0,
+  pendingReward: null,
 };
 
-function buildLayerSequence(seed) {
-  // Build a randomised repeating sequence of ~24 layers
-  const pool = [...GEO_LAYERS];
-  const seq = [];
-  // Ensure at least one void and one ice in first 20
-  seq.push(GEO_LAYERS.find(l => l.id === 'void'));
-  seq.push(GEO_LAYERS.find(l => l.id === 'ice'));
-  for (let i = 0; i < 22; i++) {
-    seq.push(pool[Math.floor(Math.random() * pool.length)]);
+function layerAtDepth(normY) {
+  // Returns the GEO_LAYERS entry for the given normalised depth (0..1)
+  for (const band of LAYER_DEPTHS) {
+    if (normY >= band.minPct && normY <= band.maxPct) return band.layer;
   }
-  // Shuffle
-  for (let i = seq.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [seq[i], seq[j]] = [seq[j], seq[i]];
+  // Fallback — interpolate to nearest band centre
+  let best = LAYER_DEPTHS[0], bestDist = Infinity;
+  for (const band of LAYER_DEPTHS) {
+    const mid = (band.minPct + band.maxPct) / 2;
+    const d = Math.abs(normY - mid);
+    if (d < bestDist) { bestDist = d; best = band; }
   }
-  return seq;
+  return best.layer;
 }
 
 function startSurveyGame() {
-  // Speed levels: increases each attempt
-  const speedBase = { tourist:45, astronaut:65, commander:90 }[S.difficulty] || 65;
-  mgSurvey.speedLevels = [speedBase, speedBase * 1.55, speedBase * 2.2];
+  const speedBase = { tourist:90, astronaut:140, commander:200 }[S.difficulty] || 140;
+  mgSurvey.speedLevels = [speedBase, speedBase * 1.6, speedBase * 2.4];
 
-  mgSurvey.attempt  = 1;
-  mgSurvey.score    = 0;
-  mgSurvey.samples  = [];
-  mgSurvey.phase    = 'idle';
-  mgSurvey.scrollY  = 0;
-  mgSurvey.layerOrder = buildLayerSequence();
-
-  // Target zone sits at vertical centre of viewport
-  mgSurvey.targetTopY = Math.round((GEO_VIEWPORT_H - GEO_TARGET_H) / 2);
+  mgSurvey.attempt    = 1;
+  mgSurvey.score      = 0;
+  mgSurvey.samples    = [];
+  mgSurvey.phase      = 'idle';
+  mgSurvey.needleY    = 0;
+  mgSurvey.direction  = 1;
+  mgSurvey.pendingReward = null;
 
   if (mgSurvey.rafId) { cancelAnimationFrame(mgSurvey.rafId); mgSurvey.rafId = null; }
 
-  renderSurveyStatic();
+  buildGaugeRuler();
+  positionGaugeZone();
   resetSurveyUI();
   showScreen('screen-mg-survey');
 }
 
-function renderSurveyStatic() {
-  // Position the target zone bracket
-  const target = $('survey-target');
-  target.style.top    = mgSurvey.targetTopY + 'px';
-  target.style.height = GEO_TARGET_H + 'px';
-
-  // Ruler ticks
-  const ruler = $('survey-ruler');
+function buildGaugeRuler() {
+  const ruler = $('gauge-ruler');
+  if (!ruler) return;
   ruler.innerHTML = '';
-  for (let d = 0; d <= 5; d++) {
+  // 5 ticks from 0m to 100m
+  for (let i = 0; i <= 4; i++) {
     const t = document.createElement('div');
-    t.className = 'survey-ruler-tick';
-    t.textContent = (d * 20) + 'm';
+    t.className = 'gauge-ruler-tick';
+    t.textContent = (i * 25) + 'm';
     ruler.appendChild(t);
   }
+}
+
+function positionGaugeZone() {
+  const zone = $('gauge-zone');
+  if (!zone) return;
+  zone.style.top    = GAUGE_ZONE_TOP + 'px';
+  zone.style.height = GAUGE_ZONE_H + 'px';
 }
 
 function resetSurveyUI() {
@@ -4525,157 +4561,174 @@ function resetSurveyUI() {
   $('mg-survey-phase').textContent   = 'READY';
   $('mg-survey-score').textContent   = mgSurvey.score + ' pts';
   $('survey-tray').innerHTML         = '';
-  $('mg-survey-attempt-result').textContent  = '';
-  $('mg-survey-attempt-result').className    = 'mg-result-msg';
+  $('mg-survey-attempt-result').textContent = '';
+  $('mg-survey-attempt-result').className   = 'mg-result-msg';
   $('mg-survey-result').textContent  = '';
   $('mg-survey-result').className    = 'mg-result-msg';
   $('btn-mg-survey-done').style.display = 'none';
-  // Show start button, hide lock button
-  $('btn-survey-start').style.display = 'block';
-  $('btn-survey-start').textContent   = '▶ START DRILLING';
-  $('btn-survey-lock').style.display  = 'none';
-  $('btn-survey-lock').disabled       = true;
-  updateSurveySpeedUI(0);
-  renderSurveyColumn();
+
+  const drillBtn = $('btn-survey-drill');
+  drillBtn.textContent = '▶ START DRILLING';
+  drillBtn.disabled    = false;
+  drillBtn.className   = 'drill-tap-btn';
+
+  // Reset needle to top
+  const needle = $('gauge-needle');
+  if (needle) needle.style.top = '0px';
+  updateGaugeLayerDisplay(0);
 }
 
-function renderSurveyColumn() {
-  const col = $('survey-column');
-  if (!col) return;
-  col.innerHTML = '';
+function updateGaugeLayerDisplay(normY) {
+  const layer = layerAtDepth(normY);
+  const depthM = Math.round(normY * 100);
+  const depthEl = $('gauge-depth-display');
+  const iconEl  = $('gauge-layer-icon');
+  const nameEl  = $('gauge-layer-name');
+  const descEl  = $('gauge-layer-desc');
+  const ptsEl   = $('gauge-layer-pts');
 
-  const totalLayers = mgSurvey.layerOrder.length;
-  col.style.height = (totalLayers * GEO_LAYER_H) + 'px';
-  col.style.top = (-mgSurvey.scrollY) + 'px';
+  if (depthEl) depthEl.textContent = depthM + 'm';
+  if (iconEl)  iconEl.textContent  = layer.icon;
+  if (nameEl)  nameEl.textContent  = layer.name;
+  if (descEl)  descEl.textContent  = layer.desc;
+  if (ptsEl) {
+    ptsEl.textContent = layer.bad ? '⚠ VOID — AVOID' : (layer.pts > 0 ? '+' + layer.pts + ' pts' : '0 pts');
+    ptsEl.style.color = layer.bad ? 'var(--danger)' : layer.pts >= 35 ? 'var(--green)' : layer.pts > 0 ? 'var(--warn)' : 'var(--dim)';
+  }
 
-  mgSurvey.layerOrder.forEach((layer, i) => {
-    const div = document.createElement('div');
-    div.className = 'survey-layer';
-    div.style.background = layer.color + 'cc';
-    div.innerHTML = `<span class="layer-icon">${layer.icon}</span><span class="layer-name">${layer.name}</span>`;
-    col.appendChild(div);
-  });
+  // Highlight the layer box when in the green zone
+  const inZone = isNeedleInZone(normY);
+  const box = $('gauge-layer-box');
+  if (box) {
+    box.style.borderColor = inZone ? (layer.bad ? 'var(--danger)' : 'var(--green)') : 'var(--border)';
+    box.style.background  = inZone ? (layer.bad ? 'rgba(255,51,68,.08)' : 'rgba(0,255,157,.07)') : 'var(--panel2)';
+  }
+}
+
+function isNeedleInZone(normY) {
+  const needlePx = normY * GAUGE_H;
+  return needlePx >= GAUGE_ZONE_TOP && needlePx <= (GAUGE_ZONE_TOP + GAUGE_ZONE_H);
 }
 
 function startSurveyAttempt() {
-  mgSurvey.phase   = 'scrolling';
-  mgSurvey.scrollY = 0;
-  mgSurvey.layerOrder = buildLayerSequence();
-  mgSurvey.speedPx = mgSurvey.speedLevels[mgSurvey.attempt - 1];
+  mgSurvey.phase    = 'sweeping';
+  mgSurvey.needleY  = 0;
+  mgSurvey.direction = 1;
+  mgSurvey.speedPx  = mgSurvey.speedLevels[mgSurvey.attempt - 1];
 
   $('mg-survey-phase').textContent = 'DRILLING...';
   $('mg-survey-attempt-result').textContent = '';
   $('mg-survey-attempt-result').className   = 'mg-result-msg';
-  // Hide start, show lock
-  $('btn-survey-start').style.display = 'none';
-  $('btn-survey-lock').style.display  = 'block';
-  $('btn-survey-lock').disabled       = false;
-  $('btn-survey-lock').className      = 'drill-btn';
-  $('btn-survey-lock').textContent    = '⬇ LOCK SAMPLE';
-  renderSurveyColumn();
+
+  const drillBtn = $('btn-survey-drill');
+  drillBtn.textContent = '⬇ DRILL HERE';
+  drillBtn.disabled    = false;
+  drillBtn.className   = 'drill-tap-btn';
 
   mgSurvey.lastTs = performance.now();
   mgSurvey.rafId  = requestAnimationFrame(surveyLoop);
 }
 
 function surveyLoop(ts) {
-  if (mgSurvey.phase !== 'scrolling') return;
+  if (mgSurvey.phase !== 'sweeping') return;
 
   const dt = Math.min((ts - mgSurvey.lastTs) / 1000, 0.1);
   mgSurvey.lastTs = ts;
 
-  mgSurvey.scrollY += mgSurvey.speedPx * dt;
+  // Move needle
+  mgSurvey.needleY += (mgSurvey.speedPx / GAUGE_H) * mgSurvey.direction * dt;
 
-  const totalH = mgSurvey.layerOrder.length * GEO_LAYER_H;
-  if (mgSurvey.scrollY >= totalH - GEO_VIEWPORT_H) {
-    mgSurvey.scrollY = 0; // loop
+  // Bounce at top and bottom
+  if (mgSurvey.needleY >= 1) { mgSurvey.needleY = 1; mgSurvey.direction = -1; }
+  if (mgSurvey.needleY <= 0) { mgSurvey.needleY = 0; mgSurvey.direction =  1; }
+
+  // Update needle DOM position
+  const needle = $('gauge-needle');
+  if (needle) {
+    const px = Math.round(mgSurvey.needleY * GAUGE_H);
+    needle.style.top = px + 'px';
+    needle.classList.toggle('in-zone', isNeedleInZone(mgSurvey.needleY));
   }
 
-  // Update column position
-  const col = $('survey-column');
-  if (col) col.style.top = (-mgSurvey.scrollY) + 'px';
-
-  // Update speed pips
-  const speedFrac = (mgSurvey.attempt - 1) / (mgSurvey.maxAttempts - 1);
-  updateSurveySpeedUI(speedFrac);
+  // Live-update layer info panel
+  updateGaugeLayerDisplay(mgSurvey.needleY);
 
   mgSurvey.rafId = requestAnimationFrame(surveyLoop);
 }
 
-function updateSurveySpeedUI(frac) {
-  const pips = 5;
-  const active = Math.round(frac * pips);
-  const isFast = frac > 0.65;
-  for (let i = 0; i < pips; i++) {
-    const pip = $('spip-' + i);
-    if (!pip) continue;
-    pip.className = 'speed-pip' + (i < active ? (isFast ? ' fast' : ' active') : '');
+function drillTap() {
+  if (mgSurvey.phase === 'idle') {
+    // First tap starts the attempt
+    startSurveyAttempt();
+    return;
   }
-  const labels = ['SLOW', 'SLOW', 'MEDIUM', 'FAST', 'FAST'];
-  const lbl = $('survey-speed-label');
-  if (lbl) lbl.textContent = labels[Math.min(active, labels.length - 1)];
-}
+  if (mgSurvey.phase !== 'sweeping') return;
 
-function lockSurveyLayer() {
-  if (mgSurvey.phase !== 'scrolling') return;
+  // Lock — stop the needle and read the current layer
   mgSurvey.phase = 'locked';
-
   if (mgSurvey.rafId) { cancelAnimationFrame(mgSurvey.rafId); mgSurvey.rafId = null; }
-  $('btn-survey-lock').disabled = true;
 
-  // Determine which layer centre is closest to the target zone centre
-  const targetCentreY = mgSurvey.targetTopY + GEO_TARGET_H / 2;
-  let bestLayer = null, bestDist = Infinity;
-  mgSurvey.layerOrder.forEach((layer, i) => {
-    const layerCentreInViewport = (i * GEO_LAYER_H + GEO_LAYER_H / 2) - mgSurvey.scrollY;
-    const dist = Math.abs(layerCentreInViewport - targetCentreY);
-    if (dist < bestDist) { bestDist = dist; bestLayer = layer; }
-  });
-  if (!bestLayer) bestLayer = GEO_LAYERS[0];
+  const inZone = isNeedleInZone(mgSurvey.needleY);
+  const layer  = layerAtDepth(mgSurvey.needleY);
 
-  // Flash the matched layer
-  const col = $('survey-column');
-  if (col) {
-    const idx = mgSurvey.layerOrder.indexOf(bestLayer);
-    const layerEl = col.children[idx];
-    if (layerEl) {
-      layerEl.style.outline = `3px solid ${bestLayer.bad ? 'var(--danger)' : 'var(--green)'}`;
-      layerEl.style.zIndex = '5';
-    }
-  }
+  // Visual feedback on needle
+  const needle = $('gauge-needle');
+  if (needle) needle.classList.toggle('in-zone', inZone && !layer.bad);
 
-  // Record sample
-  mgSurvey.score = Math.max(-50, mgSurvey.score + bestLayer.pts);
-  mgSurvey.samples.push(bestLayer);
-  addSurveyChip(bestLayer);
+  // Disable drill button during feedback pause
+  const drillBtn = $('btn-survey-drill');
+  drillBtn.disabled  = true;
+  drillBtn.className = 'drill-tap-btn ' + (inZone && !layer.bad ? 'success' : inZone && layer.bad ? 'fail' : 'fail');
+
+  // Score
+  const ptsGained = inZone ? layer.pts : 0;  // only score if needle was IN the zone
+  mgSurvey.score   = Math.max(-50, mgSurvey.score + ptsGained);
+  mgSurvey.samples.push(inZone ? layer : GEO_LAYERS.find(l=>l.id==='dust')); // missed = dust
+  addSurveyChip(inZone ? layer : GEO_LAYERS.find(l=>l.id==='dust'));
   $('mg-survey-score').textContent = mgSurvey.score + ' pts';
 
-  // Show per-attempt feedback in the attempt result area
-  const feedback = bestLayer.bad
-    ? `💥 VOID POCKET — ${bestLayer.desc}`
-    : `✓ ${bestLayer.name} — ${bestLayer.desc}`;
-  $('mg-survey-phase').textContent = bestLayer.bad ? '⚠️ VOID HIT' : '✓ SAMPLE LOCKED';
-  const attemptEl = $('mg-survey-attempt-result');
-  attemptEl.textContent = feedback;
-  attemptEl.className = 'mg-result-msg ' + (bestLayer.bad ? 'bad' : bestLayer.pts >= 35 ? 'good' : 'ok');
+  // Per-attempt feedback
+  let feedbackText, feedbackCls;
+  if (!inZone) {
+    feedbackText = '✗ MISSED — Needle was outside the zone. No sample.';
+    feedbackCls  = 'bad';
+  } else if (layer.bad) {
+    feedbackText = '💥 VOID POCKET — ' + layer.desc;
+    feedbackCls  = 'bad';
+  } else {
+    feedbackText = '✓ ' + layer.name + ' — ' + layer.desc;
+    feedbackCls  = layer.pts >= 35 ? 'good' : 'ok';
+  }
 
-  // Hide the lock button
-  $('btn-survey-lock').style.display = 'none';
+  $('mg-survey-phase').textContent = !inZone ? '✗ MISSED' : layer.bad ? '⚠ VOID HIT' : '✓ SAMPLE LOCKED';
+  const attemptEl = $('mg-survey-attempt-result');
+  attemptEl.textContent = feedbackText;
+  attemptEl.className   = 'mg-result-msg ' + feedbackCls;
 
   if (mgSurvey.attempt >= mgSurvey.maxAttempts) {
-    // All attempts done — show final results
-    endSurveyGame();
+    // All done
+    setTimeout(endSurveyGame, 600);
   } else {
-    // Pause — show NEXT ATTEMPT start button
+    // Set up next attempt after brief pause
     mgSurvey.attempt++;
     $('mg-survey-attempt').textContent = mgSurvey.attempt;
-    $('mg-survey-phase').textContent   = bestLayer.bad ? '⚠️ VOID HIT — READY FOR NEXT' : '✓ LOCKED — READY FOR NEXT';
-    const startBtn = $('btn-survey-start');
-    startBtn.textContent   = `▶ START ATTEMPT ${mgSurvey.attempt}`;
-    startBtn.style.display = 'block';
+    setTimeout(() => {
+      if (mgSurvey.phase !== 'locked') return; // guard
+      mgSurvey.phase = 'idle';
+      const btn = $('btn-survey-drill');
+      btn.textContent = '▶ START ATTEMPT ' + mgSurvey.attempt;
+      btn.disabled    = false;
+      btn.className   = 'drill-tap-btn';
+      // Reset needle to top for next round
+      mgSurvey.needleY   = 0;
+      mgSurvey.direction = 1;
+      const nd = $('gauge-needle');
+      if (nd) { nd.style.top = '0px'; nd.classList.remove('in-zone'); }
+      updateGaugeLayerDisplay(0);
+      $('mg-survey-phase').textContent = 'READY FOR NEXT';
+    }, 900);
   }
 }
-
 function addSurveyChip(layer) {
   const tray = $('survey-tray');
   if (!tray) return;
@@ -4691,13 +4744,12 @@ function addSurveyChip(layer) {
 function endSurveyGame() {
   mgSurvey.phase = 'done';
 
-  // Determine reward tier
   let powerGain = 0, moraleMod = 0, oxygenGain = 0, creditsGain = 0;
   let resultText = '';
   let resultCls  = 'ok';
 
-  const hasIce   = mgSurvey.samples.some(s => s.id === 'ice');
-  const hasVoid  = mgSurvey.samples.some(s => s.id === 'void');
+  const hasIce  = mgSurvey.samples.some(s => s.id === 'ice');
+  const hasVoid = mgSurvey.samples.some(s => s.id === 'void');
   const goodSamples = mgSurvey.samples.filter(s => s.pts >= 20).length;
 
   if (mgSurvey.score >= 70 || hasIce) {
@@ -4725,10 +4777,8 @@ function endSurveyGame() {
   $('mg-survey-result').textContent = resultText;
   $('mg-survey-result').className = 'mg-result-msg ' + resultCls;
   $('mg-survey-phase').textContent = resultCls === 'good' ? '✓ SURVEY COMPLETE' : resultCls === 'bad' ? '✗ POOR RESULTS' : '~ SURVEY DONE';
-  $('btn-survey-lock').disabled = true;
   $('btn-mg-survey-done').style.display = 'block';
 
-  // Store results for apply on CONTINUE
   mgSurvey.pendingReward = { powerGain, moraleMod, oxygenGain, creditsGain };
 }
 
@@ -5212,13 +5262,8 @@ $('rations-modal-overlay').addEventListener('click', e => {
 $('btn-death-continue').addEventListener('click', onDeathContinue);
 $('btn-memorial-continue').addEventListener('click', onMemorialContinue);
 
-// Survey game
-$('btn-survey-start').addEventListener('click', () => {
-  startSurveyAttempt();
-});
-$('btn-survey-lock').addEventListener('click', () => {
-  if (mgSurvey.phase === 'scrolling') lockSurveyLayer();
-});
+// Survey game — single drill tap button handles both start and drill
+$('btn-survey-drill').addEventListener('click', drillTap);
 $('btn-mg-survey-done').addEventListener('click', surveyGameDone);
 
 // Mini-game done buttons
