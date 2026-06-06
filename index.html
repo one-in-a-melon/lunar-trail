@@ -4,7 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Lunar Trail</title>
+<!-- Preconnect to Google Fonts so DNS + TLS is resolved before the CSS request fires -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- font-display=swap means text renders immediately in fallback font, swaps when ready -->
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- Preload the two images the player sees immediately — browser fetches in parallel with HTML parse -->
+<link rel="preload" href="images/scenes/title_screen.gif" as="image">
+<link rel="preload" href="images/scenes/traveling.png" as="image">
 <style>
 /* ─── VARIABLES ─────────────────────────────────────── */
 :root {
@@ -900,12 +907,6 @@ button { cursor: pointer; }
 }
 .tutorial-overlay.active { display: block; }
 
-/* Dark backdrop with hole cut-out effect via box-shadow */
-.tutorial-backdrop {
-  position: absolute; inset: 0;
-  background: rgba(2,4,8,.82);
-  pointer-events: all;
-}
 
 .tutorial-tooltip {
   position: absolute;
@@ -1028,6 +1029,7 @@ button { cursor: pointer; }
 .survey-results-area {
   width: 100%; max-width: 380px;
   display: flex; flex-direction: column; gap: .6rem;
+  margin-top: .25rem;
 }
 
 .death-wrap {
@@ -1204,15 +1206,16 @@ button { cursor: pointer; }
 .drill-tap-btn.fail     { background: var(--danger); }
 /* Sample tray */
 .sample-tray {
-  width: 100%; max-width: 380px; display: flex; gap: .45rem;
-  flex-wrap: wrap; min-height: 46px; padding: .45rem;
+  width: 100%; max-width: 380px; display: flex; gap: .4rem;
+  flex-wrap: wrap; padding: .45rem;
   background: var(--panel2); border: 1px solid var(--border);
+  overflow: visible; height: auto;
 }
 .sample-chip {
-  display: flex; align-items: center; gap: .3rem;
-  padding: .28rem .55rem; border-radius: 2px;
-  font-size: .78rem; font-family: var(--mono);
-  animation: chipPop .2s ease;
+  display: flex; align-items: center; gap: .25rem;
+  padding: .22rem .45rem; border-radius: 2px;
+  font-size: .72rem; font-family: var(--mono);
+  animation: chipPop .2s ease; flex-shrink: 0;
 }
 @keyframes chipPop { 0%{transform:scale(.5);opacity:0} 100%{transform:scale(1);opacity:1} }
 
@@ -1505,7 +1508,6 @@ button { cursor: pointer; }
 
 <!-- ── TUTORIAL OVERLAY (overlaid on game screen) ─────── -->
 <div class="tutorial-overlay" id="tutorial-overlay">
-  <div class="tutorial-backdrop" id="tutorial-backdrop"></div>
   <div class="tutorial-tooltip" id="tutorial-tooltip">
     <div class="tutorial-step-label" id="tut-step-label">STEP 1 OF 6</div>
     <div class="tutorial-tip-title" id="tut-title">—</div>
@@ -2056,6 +2058,7 @@ function showScreen(id) {
 
 function setImg(imgEl, labelEl, pathEl, src, label) {
   if (imgEl) {
+    imgEl.decoding = 'async';
     imgEl.src = src;
     imgEl.onload  = () => imgEl.classList.add('loaded');
     imgEl.onerror = () => imgEl.classList.remove('loaded');
@@ -3111,6 +3114,7 @@ function setGameScene(src, label) {
   const img = $('game-scene-img');
   const lbl = $('game-scene-label');
   const pth = $('game-scene-path');
+  img.decoding = 'async';
   img.src = src;
   img.onload  = () => img.classList.add('loaded');
   img.onerror = () => img.classList.remove('loaded');
@@ -5247,7 +5251,6 @@ $('btn-exp-veteran').addEventListener('click', () => {
 // Tutorial
 $('btn-tut-next').addEventListener('click', advanceTutorial);
 $('btn-tutorial-replay').addEventListener('click', () => { if (S.active) startTutorial(); });
-$('tutorial-backdrop').addEventListener('click', () => { if (tutActive) closeTutorial(); });
 
 // Rations modal
 document.querySelectorAll('.ration-option').forEach(opt => {
@@ -5283,20 +5286,19 @@ initSliderDrag('az');
 
 // Wire ALL images that have a static src in HTML — they need .loaded added
 // just like setImg() does for dynamically-set images.
-// This covers: title, victory, game-over (when src is set), traveling scene.
 (function() {
   const wireImg = (img) => {
     if (!img) return;
-    img.onload  = () => img.classList.add('loaded');
+    img.loading = 'eager'; // never lazy-load these hero images
+    img.decoding = 'async'; // decode off main thread so it doesn't block render
+    const markLoaded = () => img.classList.add('loaded');
+    img.onload  = markLoaded;
     img.onerror = () => img.classList.remove('loaded');
-    // If already cached and loaded before JS ran, add class immediately
-    if (img.complete && img.naturalWidth > 0) img.classList.add('loaded');
+    // If already cached/complete before JS ran, mark immediately
+    if (img.complete && img.naturalWidth > 0) markLoaded();
   };
-  // Title screen
   wireImg($('img-title'));
-  // Victory screen — has static src set in HTML
   wireImg($('vic-img'));
-  // Game scene — starts with empty src, but wire anyway for setGameScene calls
   wireImg($('game-scene-img'));
 })();
 
